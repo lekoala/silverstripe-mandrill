@@ -1,5 +1,7 @@
 <?php
 
+require_once "thirdarty/Mandrill.php";
+
 /*
  * MandrillMailer for Silverstripe
  * 
