@@ -1,6 +1,6 @@
 <?php
 
-require_once "thirdarty/Mandrill.php";
+require_once "thirdparty/Mandrill.php";
 
 /*
  * MandrillMailer for Silverstripe
