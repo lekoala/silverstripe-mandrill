@@ -32,22 +32,95 @@ class MandrillMailer extends Mailer {
 		self::$instance = $this;
 	}
 
+	/**
+	 * Get mandrill api
+	 * @return \Mandrill
+	 */
 	public function getMandrill() {
 		return $this->mandrill;
 	}
 
+	/**
+	 * Set mandrill api
+	 * @param Mandrill $mandrill
+	 */
 	public function setMandrill(Mandrill $mandrill) {
 		$this->mandrill = $mandrill;
 	}
 
-	public function getGlobalTags() {
-		$tags = $this->config()->get('global_tags');
+	/**
+	 * @return \MandrillMailer
+	 */
+	public static function getInstance() {
+		return self::$instance;
+	}
+
+	/**
+	 * Get default params used by all outgoing emails
+	 * @return string
+	 */
+	public static function getDefaultParams() {
+		return Config::inst()->get(__CLASS__,'default_params');
+	}
+	
+	/**
+	 * Set default params
+	 * @param string $v
+	 * @return \MandrillMailer
+	 */
+	public static function setDefaultParams(array $v) {
+		return Config::inst()->update(__CLASS__,'default_params',$v);
+	}
+	/**
+	 * Get subaccount used by all outgoing emails
+	 * @return string
+	 */
+	public static function getSubaccount() {
+		return Config::inst()->get(__CLASS__,'subaccount');
+	}
+	
+	/**
+	 * Set subaccount
+	 * @param string $v
+	 * @return \MandrillMailer
+	 */
+	public static function setSubaccount($v) {
+		return Config::inst()->update(__CLASS__,'subaccount',$v);
+	}
+	
+	/**
+	 * Get global tags applied to all outgoing emails
+	 * @return array
+	 */
+	public static function getGlobalTags() {
+		$tags = Config::inst()->get(__CLASS__,'global_tags');
 		if (!is_array($tags)) {
 			$tags = array($tags);
 		}
 		return $tags;
 	}
 
+	/**
+	 * Set global tags applied to all outgoing emails
+	 * @param array $arr
+	 * @return \MandrillMailer
+	 */
+	public static function setGlobalTags($arr) {
+		if (is_string($arr)) {
+			$arr = array($arr);
+		}
+		return Config::inst()->update(__CLASS__,'global_tags',$arr);
+	}
+
+	/**
+	 * Add file upload support to mandrill
+	 * 
+	 * @param type $file
+	 * @param type $destFileName
+	 * @param type $disposition
+	 * @param type $extraHeaders
+	 * @return type
+	 */
 	function encodeFileForEmail($file, $destFileName = false, $disposition = NULL, $extraHeaders = "") {
 		if (!$file) {
 			user_error("encodeFileForEmail: not passed a filename and/or data", E_USER_WARNING);
@@ -82,14 +155,47 @@ class MandrillMailer extends Mailer {
 		);
 	}
 
+	/**
+	 * Mandrill takes care for us to send plain and/or html emails. See send method
+	 * 
+	 * @param string|array $to
+	 * @param string $from
+	 * @param string $subject
+	 * @param string $plainContent
+	 * @param array $attachedFiles
+	 * @param array $customheaders
+	 * @return array|bool
+	 */
 	function sendPlain($to, $from, $subject, $plainContent, $attachedFiles = false, $customheaders = false) {
 		return $this->send($to, $from, $subject, false, $attachedFiles, $customheaders, $plainContent, false);
 	}
 
+	/**
+	 * Mandrill takes care for us to send plain and/or html emails. See send method
+	 * 
+	 * @param string|array $to
+	 * @param string $from
+	 * @param string $subject
+	 * @param string $plainContent
+	 * @param array $attachedFiles
+	 * @param array $customheaders
+	 * @return array|bool
+	 */
 	function sendHTML($to, $from, $subject, $htmlContent, $attachedFiles = false, $customheaders = false, $plainContent = false, $inlineImages = false) {
 		return $this->send($to, $from, $subject, $htmlContent, $attachedFiles, $customheaders, $plainContent, $inlineImages);
 	}
 
+	/**
+	 * Send the email through mandrill
+	 * 
+	 * @param string|array $to
+	 * @param string $from
+	 * @param string $subject
+	 * @param string $plainContent
+	 * @param array $attachedFiles
+	 * @param array $customheaders
+	 * @return array|bool
+	 */
 	protected function send($to, $from, $subject, $htmlContent, $attachedFiles = false, $customheaders = false, $plainContent = false, $inlineImages = false) {
 		$orginal_to = $to;
 		$tos = explode(',', $to);
@@ -105,11 +211,15 @@ class MandrillMailer extends Mailer {
 			$to = array(array('email' => $to));
 		}
 
-		$params = array(
+		$default_params = array();
+		if(self::getDefaultParams()) {
+			$default_params = self::getDefaultParams();
+		}
+		$params = array_merge($default_params,array(
 			"subject" => $subject,
 			"from_email" => $from,
 			"to" => $to
-		);
+		));
 
 		if (is_array($from)) {
 			$params['from_email'] = $from['email'];
@@ -123,8 +233,12 @@ class MandrillMailer extends Mailer {
 			$params['html'] = $htmlContent;
 		}
 
-		if ($this->global_tags) {
-			$params['tags'] = $this->global_tags;
+		if (self::getGlobalTags()) {
+			$params['tags'] = self::getGlobalTags();
+		}
+		
+		if(self::getSubaccount()) {
+			$params['subaccount'] = self::getSubaccount();
 		}
 
 		$bcc_email = Config::inst()->get('Email', 'bcc_all_emails_to');
