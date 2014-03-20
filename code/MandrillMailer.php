@@ -115,11 +115,19 @@ class MandrillMailer extends Mailer {
 	/**
 	 * Add file upload support to mandrill
 	 * 
-	 * @param type $file
-	 * @param type $destFileName
-	 * @param type $disposition
-	 * @param type $extraHeaders
-	 * @return type
+	 * A typical Silverstripe attachement looks like this :
+	 * 
+	 * array(
+	 * 'contents' => $data,
+	 * 'filename' => $filename,
+	 * 'mimetype' => $mimetype,
+	 * );
+	 * 
+	 * @param string|array $file The name of the file or a silverstripe array
+	 * @param string $destFileName
+	 * @param string $disposition
+	 * @param string $extraHeaders
+	 * @return array
 	 */
 	function encodeFileForEmail($file, $destFileName = false, $disposition = NULL, $extraHeaders = "") {
 		if (!$file) {
@@ -137,21 +145,29 @@ class MandrillMailer extends Mailer {
 				fclose($fh);
 			}
 		}
+		
+		if(!isset($file['contents'])) {
+			throw new Exception('A file should have some contents');
+		}
 
-		if (!$destFileName)
-			$base = basename($file['filename']);
-		else
-			$base = $destFileName;
+		$name = $destFileName;
+		if (!$destFileName) {
+			$name = basename($file['filename']);
+		}
 
 		$mimeType = !empty($file['mimetype']) ? $file['mimetype'] : HTTP::get_mime_type($file['filename']);
-		if (!$mimeType)
+		if (!$mimeType) {
 			$mimeType = "application/unknown";
-
+		}
+		
+		$content = $file['contents'];
+		$content = base64_encode($content);
+		
 		// Return completed packet
 		return array(
 			'type' => $mimeType,
-			'name' => $destFileName,
-			'content' => $file['contents']
+			'name' => $name,
+			'content' => $content
 		);
 	}
 
@@ -255,18 +271,19 @@ class MandrillMailer extends Mailer {
 			foreach ($attachedFiles as $file) {
 				if (isset($file['tmp_name']) && isset($file['name'])) {
 					$messageParts[] = $this->encodeFileForEmail($file['tmp_name'], $file['name']);
-				} else {
+				} 
+				else {
 					$messageParts[] = $this->encodeFileForEmail($file);
 				}
 			}
 
-			$params['attachments'] = $attachments;
+			$params['attachments'] = $messageParts;
 		}
 
 		if ($customheaders) {
 			$params['headers'] = $customheaders;
 		}
-
+		
 		$ret = $this->getMandrill()->messages->send($params);
 
 		if ($ret) {
