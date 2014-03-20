@@ -1,0 +1,20 @@
+en:
+  Mandrill:
+    ACCESS: 'Access to ''{title}'' section'
+    ACCESS_HELP: 'Allow use of Mandrill admin section'
+    Clicks: Clicks
+    DATEFROM: From
+    DATETO: To
+    DOSEARCH: Search
+    Date: Date
+    LIMIT: Limit
+    MENUTITLE: Mandrill
+    NOMESSAGESMATCH: 'No messages match your criteria'
+    Opens: Opens
+    QUERY: Query
+    Recipient: Recipient
+    Sender: Sender
+    State: State
+    Subject: Subject
+  Permission:
+    CMS_ACCESS_CATEGORY: 'CMS Access'
