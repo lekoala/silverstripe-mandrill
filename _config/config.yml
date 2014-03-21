@@ -4,4 +4,3 @@ After:
   - 'framework/*'
   - 'cms/*'
 ---
-MandrillMailer:
