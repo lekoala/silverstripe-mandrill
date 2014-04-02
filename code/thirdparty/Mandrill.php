@@ -65,7 +65,7 @@ class Mandrill {
         $this->ch = curl_init();
         curl_setopt($this->ch, CURLOPT_USERAGENT, 'Mandrill-PHP/1.0.52');
         curl_setopt($this->ch, CURLOPT_POST, true);
-        curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, true);
+//        curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($this->ch, CURLOPT_HEADER, false);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 30);
