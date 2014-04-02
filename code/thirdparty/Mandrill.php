@@ -111,7 +111,8 @@ class Mandrill {
             curl_setopt($ch, CURLOPT_STDERR, $curl_buffer);
         }
 
-        $response_body = curl_exec($ch);
+//        $response_body = curl_exec($ch);
+        $response_body = MandrillMailer::curl_exec_follow($ch);
         $info = curl_getinfo($ch);
         $time = microtime(true) - $start;
         if($this->debug) {

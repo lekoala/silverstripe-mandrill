@@ -33,6 +33,74 @@ class MandrillMailer extends Mailer {
 	}
 
 	/**
+	 * A workaround for cURL: follow locations with safe_mode enabled or open_basedir set
+	 * 
+	 * This method is used in the call method in Mandrill.php instead of the original curl_exec
+	 * 
+	 * @link http://slopjong.de/2012/03/31/curl-follow-locations-with-safe_mode-enabled-or-open_basedir-set/
+	 * @param resource $ch
+	 * @param int $maxredirect
+	 * @return boolean
+	 */
+	static function curl_exec_follow($ch, &$maxredirect = null) {
+		$mr = $maxredirect === null ? 5 : intval($maxredirect);
+
+		if (ini_get('open_basedir') == '' && ini_get('safe_mode') == 'Off') {
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, $mr > 0);
+			curl_setopt($ch, CURLOPT_MAXREDIRS, $mr);
+//			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		} else {
+
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+
+			if ($mr > 0) {
+				$original_url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+				$newurl = $original_url;
+
+				$rch = curl_copy_handle($ch);
+
+				curl_setopt($rch, CURLOPT_HEADER, true);
+				curl_setopt($rch, CURLOPT_NOBODY, true);
+				curl_setopt($rch, CURLOPT_FORBID_REUSE, false);
+				do {
+					curl_setopt($rch, CURLOPT_URL, $newurl);
+					$header = curl_exec($rch);
+					if (curl_errno($rch)) {
+						$code = 0;
+					} else {
+						$code = curl_getinfo($rch, CURLINFO_HTTP_CODE);
+						if ($code == 301 || $code == 302) {
+							preg_match('/Location:(.*?)\n/', $header, $matches);
+							$newurl = trim(array_pop($matches));
+
+							// if no scheme is present then the new url is a
+							// relative path and thus needs some extra care
+							if (!preg_match("/^https?:/i", $newurl)) {
+								$newurl = $original_url . $newurl;
+							}
+						} else {
+							$code = 0;
+						}
+					}
+				} while ($code && --$mr);
+
+				curl_close($rch);
+
+				if (!$mr) {
+					if ($maxredirect === null)
+						trigger_error('Too many redirects.', E_USER_WARNING);
+					else
+						$maxredirect = 0;
+
+					return false;
+				}
+				curl_setopt($ch, CURLOPT_URL, $newurl);
+			}
+		}
+		return curl_exec($ch);
+	}
+
+	/**
 	 * Get mandrill api
 	 * @return \Mandrill
 	 */
@@ -60,40 +128,41 @@ class MandrillMailer extends Mailer {
 	 * @return string
 	 */
 	public static function getDefaultParams() {
-		return Config::inst()->get(__CLASS__,'default_params');
+		return Config::inst()->get(__CLASS__, 'default_params');
 	}
-	
+
 	/**
 	 * Set default params
 	 * @param string $v
 	 * @return \MandrillMailer
 	 */
 	public static function setDefaultParams(array $v) {
-		return Config::inst()->update(__CLASS__,'default_params',$v);
+		return Config::inst()->update(__CLASS__, 'default_params', $v);
 	}
+
 	/**
 	 * Get subaccount used by all outgoing emails
 	 * @return string
 	 */
 	public static function getSubaccount() {
-		return Config::inst()->get(__CLASS__,'subaccount');
+		return Config::inst()->get(__CLASS__, 'subaccount');
 	}
-	
+
 	/**
 	 * Set subaccount
 	 * @param string $v
 	 * @return \MandrillMailer
 	 */
 	public static function setSubaccount($v) {
-		return Config::inst()->update(__CLASS__,'subaccount',$v);
+		return Config::inst()->update(__CLASS__, 'subaccount', $v);
 	}
-	
+
 	/**
 	 * Get global tags applied to all outgoing emails
 	 * @return array
 	 */
 	public static function getGlobalTags() {
-		$tags = Config::inst()->get(__CLASS__,'global_tags');
+		$tags = Config::inst()->get(__CLASS__, 'global_tags');
 		if (!is_array($tags)) {
 			$tags = array($tags);
 		}
@@ -109,7 +178,7 @@ class MandrillMailer extends Mailer {
 		if (is_string($arr)) {
 			$arr = array($arr);
 		}
-		return Config::inst()->update(__CLASS__,'global_tags',$arr);
+		return Config::inst()->update(__CLASS__, 'global_tags', $arr);
 	}
 
 	/**
@@ -145,8 +214,8 @@ class MandrillMailer extends Mailer {
 				fclose($fh);
 			}
 		}
-		
-		if(!isset($file['contents'])) {
+
+		if (!isset($file['contents'])) {
 			throw new Exception('A file should have some contents');
 		}
 
@@ -159,10 +228,10 @@ class MandrillMailer extends Mailer {
 		if (!$mimeType) {
 			$mimeType = "application/unknown";
 		}
-		
+
 		$content = $file['contents'];
 		$content = base64_encode($content);
-		
+
 		// Return completed packet
 		return array(
 			'type' => $mimeType,
@@ -228,10 +297,10 @@ class MandrillMailer extends Mailer {
 		}
 
 		$default_params = array();
-		if(self::getDefaultParams()) {
+		if (self::getDefaultParams()) {
 			$default_params = self::getDefaultParams();
 		}
-		$params = array_merge($default_params,array(
+		$params = array_merge($default_params, array(
 			"subject" => $subject,
 			"from_email" => $from,
 			"to" => $to
@@ -252,8 +321,8 @@ class MandrillMailer extends Mailer {
 		if (self::getGlobalTags()) {
 			$params['tags'] = self::getGlobalTags();
 		}
-		
-		if(self::getSubaccount()) {
+
+		if (self::getSubaccount()) {
 			$params['subaccount'] = self::getSubaccount();
 		}
 
@@ -271,8 +340,7 @@ class MandrillMailer extends Mailer {
 			foreach ($attachedFiles as $file) {
 				if (isset($file['tmp_name']) && isset($file['name'])) {
 					$messageParts[] = $this->encodeFileForEmail($file['tmp_name'], $file['name']);
-				} 
-				else {
+				} else {
 					$messageParts[] = $this->encodeFileForEmail($file);
 				}
 			}
@@ -283,7 +351,7 @@ class MandrillMailer extends Mailer {
 		if ($customheaders) {
 			$params['headers'] = $customheaders;
 		}
-		
+
 		$ret = $this->getMandrill()->messages->send($params);
 
 		if ($ret) {
