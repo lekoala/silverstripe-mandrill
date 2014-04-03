@@ -1,44 +1,47 @@
 <div id="pages-controller-cms-content" class="cms-content center " data-layout-type="border" data-pjax-fragment="Content">
 	<div class="cms-content-header north">
 		<div class="cms-content-header-info">
-			<h2>
-				<% include CMSBreadcrumbs %>
-			</h2>
+			<% if CurrentMessage %>
+			<a class="ss-ui-button" data-icon="back" href="/admin/mandrill" data-pjax-target="Content"><% _t('BackLink_Button_ss.Back') %></a>
+			<% end_if %>
+			<% include CMSBreadcrumbs %>
 		</div>	
 	</div>
 
 	<div class="cms-content-fields center ui-widget-content cms-panel-padded">
-		$SearchForm
-		<% if Messages %>
-		<table class="ss-gridfield-table">
-			<thead>
-				<tr class="title">
-					<td><% _t('Mandrill.Date','Date') %></td>
-					<td><% _t('Mandrill.Sender','Sender') %></td>
-					<td><% _t('Mandrill.Recipient','Recipient') %></td>
-					<td><% _t('Mandrill.Subject','Subject') %></td>
-					<td><% _t('Mandrill.State','State') %></td>
-					<td><% _t('Mandrill.Opens','Opens') %></td>
-					<td><% _t('Mandrill.Clicks','Clicks') %></td>
-				</tr>
-			</thead>
-			<tbody class="ss-gridfield-items">
-				<% loop Messages %>
-				<tr class="ss-gridfield-item state-{$State}">
-					<td>$Date</td>
-					<td>$Sender</td>
-					<td>$Recipient</td>
-					<td>$Subject</td>
-					<td>$State</td>
-					<td>$Opens</td>
-					<td>$Clicks</td>
-				</tr>
+		<% if CurrentMessage %>
+		<% with CurrentMessage %>
+		<div class="MandrillMessage">
+			<h3>$subject</h3>
+			<p class="infos">
+				<span class="state">$state</span> <%t MandrilAdmin.At "at" %> <span class="date">$DateTime</span>
+				<% loop TagsList %>
+				<span class="tag">$Title</span>
 				<% end_loop %>
-			</tbody>
-		</table>
+			</p>
+			<% if html %>
+			$html
+			<% else %>
+			<p class="message"><%t MandrilAdmin.ContentNotAvailable "The content of the email is not available anymore. Only recently sent messages are available." %></p>
+			<% end_if %>
+			<hr>
+			<h4>$opens <%t MandrilAdmin.Opens "Opens" %></h4>
+			<% loop OpensList %>
+			<div class="meta">
+				$date, $IpLink, $location, $ua
+			</div>
+			<% end_loop %>
+			<h4>$clicks <%t MandrilAdmin.Clicks "Clicks" %></h4>
+			<% loop ClicksList %>
+			<div class="meta">
+				$date, $IpLink, <a href="$url" target="_blank">$url</a>, $location, $ua
+			</div>
+			<% end_loop %>
+		</div>
+		<% end_with %>
 		<% else %>
-		<p class="message warning"><% _t('Mandrill.NOMESSAGESMATCH','No messages match your criteria') %></p>
-
+		$SearchForm
+		$ListForm
 		<% end_if %>
 	</div>
 </div>

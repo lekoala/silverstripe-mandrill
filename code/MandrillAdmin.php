@@ -12,8 +12,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider {
 
 	private static $menu_title = "Mandrill";
 	private static $url_segment = "mandrill";
-
 	private static $menu_icon = "mandrill/images/icon.png";
+	private static $url_rule = '/$Action/$ID';
 
 	public function init() {
 		parent::init();
@@ -22,12 +22,16 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider {
 	}
 
 	private static $allowed_actions = array(
-		"handlePanel",
+		"doSearch",
+		"view",
 		"SearchForm",
-		"sort",
-		"setdefault",
-		"applytoall"
+		"ListForm"
 	);
+
+	/**
+	 * @var MandrilMessage
+	 */
+	protected $currentMessage;
 
 	/**
 	 * @return MandrillMailer
@@ -48,34 +52,189 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider {
 		return $this->getMailer()->getMandrill();
 	}
 
-	public function Messages() {
-		//search(string key, string query, string date_from, string date_to, array tags, array senders, array api_keys, integer limit)
-		$messages = $this->getMandrill()->messages->search(
-		  $this->getParam('Query','*'), $this->getParam('DateFrom'), $this->getParam('DateTo'), null,null, array($this->getMandrill()->apikey), $this->getParam('Limit',100)
+	/**
+	 * @return MandrillMessage
+	 */
+	public function CurrentMessage() {
+		return $this->currentMessage;
+	}
+
+	public function view() {
+		$id = $this->getRequest()->param('ID');
+		if(!$id) {
+			return $this->httpError(404);
+		}
+		$this->currentMessage = $this->MessageInfo($id);
+		//otherwise we have the whole layout that is loaded
+		if ($this->getRequest()->isAjax()) {
+			return $this->renderWith($this->getTemplatesWithSuffix('_Content'));
+		}
+		return $this;
+	}
+
+	public function ListForm() {
+		// List all reports
+		$fields = new FieldList();
+		$gridFieldConfig = GridFieldConfig::create()->addComponents(
+				new GridFieldToolbarHeader(), new GridFieldSortableHeader(), new GridFieldDataColumns(), new GridFieldFooter()
 		);
-		
-		$list = new ArrayList();
-		foreach ($messages as $message) {
-			$m = new ArrayData(array(
-				'Date' => date('Y-m-d', $message['ts']),
-				'Sender' => $message['sender'],
-				'Subject' => $message['subject'],
-				'State' => $message['state'],
-				'Clicks' => $message['clicks'],
-				'Opens' => $message['opens'],
-				'Recipient' => $message['email']
-			));
-			$list->push($m);
+		$gridField = new GridField('SearchResults', _t('MandrillAdmin.SearchResults', 'Search Results'), $this->Messages(), $gridFieldConfig);
+		$columns = $gridField->getConfig()->getComponentByType('GridFieldDataColumns');
+		$columns->setDisplayFields(array(
+			'date' => _t('MandrillAdmin.MessageDate', 'Date'),
+			'state' => _t('MandrillAdmin.MessageStatus', 'Status'),
+			'sender' => _t('MandrillAdmin.MessageSender', 'Sender'),
+			'email' => _t('MandrillAdmin.MessageEmail', 'Email'),
+			'subject' => _t('MandrillAdmin.MessageSubject', 'Subject'),
+			'opens' => _t('MandrillAdmin.MessageOpens', 'Opens'),
+			'clicks' => _t('MandrillAdmin.MessageClicks', 'Clicks'),
+		));
+		$columns->setFieldFormatting(array(
+			'subject' => function($value, &$item) {
+		return sprintf(
+				'<a href="%s" class="cms-panel-link" data-pjax-target="Content">%s</a>', Convert::raw2xml($item->Link), $value
+		);
+	},
+		));
+		$gridField->addExtraClass('all-messages-gridfield');
+		$fields->push($gridField);
+
+		$actions = new FieldList();
+		$form = CMSForm::create(
+						$this, "ListForm", $fields, $actions
+				)->setHTMLID('Form_ListForm');
+		$form->setResponseNegotiator($this->getResponseNegotiator());
+
+		return $form;
+	}
+
+	/**
+	 * @return Zend_Cache_Frontend
+	 */
+	public function getCache() {
+		return SS_Cache::factory('MandrillAdmin');
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getCacheEnabled() {
+		return true;
+	}
+
+	/**
+	 * List of MandrillMessage
+	 * 
+	 * Messages are cached to avoid hammering the api
+	 * 
+	 * @return \ArrayList
+	 */
+	public function Messages() {
+		$data = $this->getRequest()->postVars();
+		if (isset($data['SecurityID'])) {
+			unset($data['SecurityID']);
+		}
+		$cache_enabled = $this->getCacheEnabled();
+		if ($cache_enabled) {
+			$cache = $this->getCache();
+			$cache_key = md5(serialize($data));
+			$cache_result = $cache->load($cache_key);
+		}
+		if ($cache_enabled && $cache_result) {
+			$list = unserialize($cache_result);
+		} else {
+			//search(string key, string query, string date_from, string date_to, array tags, array senders, array api_keys, integer limit)
+			$messages = $this->getMandrill()->messages->search(
+					$this->getParam('Query', '*'), $this->getParam('DateFrom'), $this->getParam('DateTo'), null, null, array($this->getMandrill()->apikey), $this->getParam('Limit', 100)
+			);
+
+			$list = new ArrayList();
+			foreach ($messages as $message) {
+				$m = new MandrillMessage($message);
+				$list->push($m);
+			}
+			//5 minutes cache
+			if ($cache_enabled) {
+				$cache->save(serialize($list), $cache_key, array('mandrill'), 60 * 5);
+			}
 		}
 		return $list;
 	}
 
+	/**
+	 * Get the detail of one message
+	 * 
+	 * @param int $id
+	 * @return MandrillMessage
+	 */
+	public function MessageInfo($id) {
+		$cache_enabled = $this->getCacheEnabled();
+		if ($cache_enabled) {
+			$cache = $this->getCache();
+			$cache_key = 'message_' . $id;
+			$cache_result = $cache->load($cache_key);
+		}
+		if ($cache_enabled && $cache_result) {
+			$message = unserialize($cache_result);
+		} else {
+			$info = $this->getMandrill()->messages->info($id);
+			$content = $this->MessageContent($id);
+			$info = array_merge($content, $info);
+			$message = new MandrillMessage($info);
+			//the detail is not going to change very often
+			if ($cache_enabled) {
+				$cache->save(serialize($message), $cache_key, array('mandrill'), 60 * 60);
+			}
+		}
+		return $message;
+	}
+	
+	/**
+	 * Get the contnet of one message
+	 * 
+	 * @param int $id
+	 * @return array
+	 */
+	public function MessageContent($id) {
+		$cache_enabled = $this->getCacheEnabled();
+		if ($cache_enabled) {
+			$cache = $this->getCache();
+			$cache_key = 'content_' . $id;
+			$cache_result = $cache->load($cache_key);
+		}
+		if ($cache_enabled && $cache_result) {
+			$content = unserialize($cache_result);
+		} else {
+			try {
+				$content = $this->getMandrill()->messages->content($id);
+			} catch (Mandrill_Unknown_Message $ex) {
+				$content = array();
+				//the content is not available anymore
+			}
+			//if we have the content, store it forever since it's not available forever in the api
+			if ($cache_enabled) {
+				$cache->save(serialize($content), $cache_key, array('mandrill'), 0);
+			}
+		}
+		return $content;
+	}
+
+	public function doSearch($data, Form $form) {
+		$values = array();
+		foreach ($form->Fields() as $field) {
+			$values[$field->getName()] = $field->datavalue();
+		}
+		Session::set('MandrilAdminSearch', $values);
+		Session::save();
+		return $this->redirectBack();
+	}
+
 	public function getParam($name, $default = null) {
-		$v = $this->getRequest()->postVar($name);
-		if (!$v) {
+		$data = Session::get('MandrilAdminSearch');
+		if (!$data) {
 			return $default;
 		}
-		return $v;
+		return (isset($data[$name]) && strlen($data[$name])) ? $data[$name] : $default;
 	}
 
 	public function SearchForm() {
@@ -89,12 +248,10 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider {
 			100 => 100,
 			500 => 500,
 			1000 => 1000
-		  ), $this->getParam('Limit', 100)));
+				), $this->getParam('Limit', 100)));
 		$actions = new FieldList();
 		$actions->push(new FormAction('doSearch', _t('Mandrill.DOSEARCH', 'Search')));
 		$form = new Form($this, 'SearchForm', $fields, $actions);
-		$form->setFormAction($this->Link());
-		$form->setFormMethod('POST');
 		return $form;
 	}
 
@@ -110,7 +267,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider {
 				'name' => _t('Mandrill.ACCESS', "Access to '{title}' section", array('title' => $title)),
 				'category' => _t('Permission.CMS_ACCESS_CATEGORY', 'CMS Access'),
 				'help' => _t(
-				  'Mandrill.ACCESS_HELP', 'Allow use of Mandrill admin section'
+						'Mandrill.ACCESS_HELP', 'Allow use of Mandrill admin section'
 				)
 			),
 		);
