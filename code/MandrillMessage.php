@@ -48,7 +48,7 @@ class MandrillMessage extends ViewableData {
 		$tags = $this->tags;
 		$list = new ArrayList();
 		foreach($tags as $t) {
-			$list->push(new ArrayObject(array(
+			$list->push(new ViewableData(array(
 				'Title' => $t
 			)));
 		}
@@ -62,7 +62,7 @@ class MandrillMessage extends ViewableData {
 		$attachments = $this->attachments;
 		$list = new ArrayList();
 		foreach($attachments as $attachment) {
-			$list->push(new ArrayObject($attachment));
+			$list->push(new ViewableData($attachment));
 		}
 		return $list;
 	}
@@ -106,6 +106,7 @@ class MandrillMessage extends ViewableData {
 	 * @return string
 	 */
 	public function getDate() {
+		require_once Director::baseFolder() . '/' . FRAMEWORK_DIR . "/thirdparty/Zend/Date.php";
 		$format = Member::currentUser()->getDateFormat();
 		$date = new Zend_Date($this->ts);
 		return Convert::raw2xml($date->toString($format));
@@ -116,6 +117,7 @@ class MandrillMessage extends ViewableData {
 	 * @return string
 	 */
 	public function getDateTime() {
+		require_once Director::baseFolder() . '/' . FRAMEWORK_DIR . "/thirdparty/Zend/Date.php";
 		$format = Member::currentUser()->getDateFormat();
 		$format2 = Member::currentUser()->getTimeFormat();
 		$date = new Zend_Date($this->ts);

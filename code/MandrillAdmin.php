@@ -24,6 +24,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider {
 	private static $allowed_actions = array(
 		"doSearch",
 		"view",
+		'view_message',
 		"SearchForm",
 		"ListForm"
 	);
@@ -70,6 +71,16 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider {
 			return $this->renderWith($this->getTemplatesWithSuffix('_Content'));
 		}
 		return $this;
+	}
+	
+	public function view_message() {
+		$id = $this->getRequest()->param('ID');
+		if(!$id) {
+			return $this->httpError(404);
+		}
+		$this->currentMessage = $this->MessageInfo($id);
+		echo $this->currentMessage->html;
+		die();
 	}
 
 	public function ListForm() {

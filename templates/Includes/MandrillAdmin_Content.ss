@@ -20,11 +20,10 @@
 				<% end_loop %>
 			</p>
 			<% if html %>
-			$html
+			<iframe src="/admin/mandrill/view_message/$_id" style="width:100%;height:400px;background:#fff;"></iframe>
 			<% else %>
 			<p class="message"><%t MandrilAdmin.ContentNotAvailable "The content of the email is not available anymore. Only recently sent messages are available." %></p>
 			<% end_if %>
-			<hr>
 			<h4>$opens <%t MandrilAdmin.Opens "Opens" %></h4>
 			<% loop OpensList %>
 			<div class="meta">
