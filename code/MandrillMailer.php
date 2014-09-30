@@ -7,7 +7,7 @@ require_once "thirdparty/Mandrill.php";
  * 
  * Features
  * - Global tag support
- * - Multiple recipient support
+ * - Multiple recipient support (use comma separated list, not array)
  * - File attachment support
  * 
  * @link https://mandrillapp.com/api/docs/messages.php.html#method-send
@@ -285,17 +285,18 @@ class MandrillMailer extends Mailer {
 		$orginal_to = $to;
 		$tos = explode(',', $to);
 
-		if (count($tos) > 1) {
-			$to = array();
-			foreach ($tos as $t) {
+		$to = array();
+		foreach ($tos as $t) {
+			if (strpos($t, '<') !== false) {
+				$to[] = array(
+					'name' => self::get_displayname_from_rfc_email($t),
+					'email' => self::get_email_from_rfc_email($t)
+				);
+			} else {
 				$to[] = array('email' => $t);
 			}
 		}
-
-		if (!is_array($to)) {
-			$to = array(array('email' => $to));
-		}
-
+		
 		$default_params = array();
 		if (self::getDefaultParams()) {
 			$default_params = self::getDefaultParams();
@@ -319,10 +320,10 @@ class MandrillMailer extends Mailer {
 		}
 
 		if (self::getGlobalTags()) {
-			if(!isset($params['tags'])) {
+			if (!isset($params['tags'])) {
 				$params['tags'] = array();
 			}
-			$params['tags'] = array_merge($params['tags'],self::getGlobalTags());
+			$params['tags'] = array_merge($params['tags'], self::getGlobalTags());
 		}
 
 		if (self::getSubaccount()) {
@@ -362,6 +363,19 @@ class MandrillMailer extends Mailer {
 		} else {
 			return false;
 		}
+	}
+
+	public static function get_displayname_from_rfc_email($rfc_email_string) {
+		// match all words and whitespace, will be terminated by '<'
+		$name = preg_match('/[\w\s]+/', $rfc_email_string, $matches);
+		$matches[0] = trim($matches[0]);
+		return $matches[0];
+	}
+
+	public static function get_email_from_rfc_email($rfc_email_string) {
+		// extract parts between the two parentheses
+		$mailAddress = preg_match('/(?:<)(.+)(?:>)$/', $rfc_email_string, $matches);
+		return $matches[1];
 	}
 
 }
