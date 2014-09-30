@@ -4,3 +4,7 @@ After:
   - 'framework/*'
   - 'cms/*'
 ---
+MandrillMailer:
+  default_params: []
+  subaccount: null
+  global_tags: []

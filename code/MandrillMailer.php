@@ -319,7 +319,10 @@ class MandrillMailer extends Mailer {
 		}
 
 		if (self::getGlobalTags()) {
-			$params['tags'] = self::getGlobalTags();
+			if(!isset($params['tags'])) {
+				$params['tags'] = array();
+			}
+			$params['tags'] = array_merge($params['tags'],self::getGlobalTags());
 		}
 
 		if (self::getSubaccount()) {
