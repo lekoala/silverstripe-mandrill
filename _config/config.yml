@@ -5,6 +5,7 @@ After:
   - 'cms/*'
 ---
 MandrillMailer:
-  default_params: []
+  default_params:
+    preserve_recipients: false
   subaccount: null
   global_tags: []
