@@ -374,7 +374,7 @@ class MandrillMailer extends Mailer {
 		if ($customheaders) {
 			$params['headers'] = $customheaders;
 		}
-		
+
 		$ret = $this->getMandrill()->messages->send($params);
 
 		if ($ret) {

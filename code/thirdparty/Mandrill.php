@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * This is a customised version of the mandrill api sdk available at
+ * @https://bitbucket.org/mailchimp/mandrill-api-php/
+ *
+ * - Fixes follow location (disable follow location in curl and replace curl_exec)
+ * - Add IDE helpers
+ */
+
 require_once 'Mandrill/Templates.php';
 require_once 'Mandrill/Exports.php';
 require_once 'Mandrill/Users.php';
@@ -17,6 +25,23 @@ require_once 'Mandrill/Senders.php';
 require_once 'Mandrill/Metadata.php';
 require_once 'Mandrill/Exceptions.php';
 
+/**
+ * @property Mandrill_Templates $templates
+ * @property Mandrill_Exports $exports
+ * @property Mandrill_Users $users
+ * @property Mandrill_Rejects $rejects
+ * @property Mandrill_Inbound $inbound
+ * @property Mandrill_Tags $tags
+ * @property Mandrill_Messages $messages
+ * @property Mandrill_Whitelists $whitelists
+ * @property Mandrill_Ips $ips
+ * @property Mandrill_Internal $internal
+ * @property Mandrill_Subaccounts $subaccounts
+ * @property Mandrill_Urls $urls
+ * @property Mandrill_Webhooks $webhooks
+ * @property Mandrill_Senders $senders
+ * @property Mandrill_Metadata $metadata
+ */
 class Mandrill {
     
     public $apikey;
@@ -111,7 +136,8 @@ class Mandrill {
             curl_setopt($ch, CURLOPT_STDERR, $curl_buffer);
         }
 
-        $response_body = curl_exec($ch);
+//        $response_body = curl_exec($ch);
+        $response_body = MandrillMailer::curl_exec_follow($ch);
         $info = curl_getinfo($ch);
         $time = microtime(true) - $start;
         if($this->debug) {
