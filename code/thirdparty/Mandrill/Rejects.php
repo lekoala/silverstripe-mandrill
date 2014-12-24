@@ -33,7 +33,7 @@ include_expired to true to include them.
      * @return array Up to 1000 rejection entries
      *     - return[] struct the information for each rejection blacklist entry
      *         - email string the email that is blocked
-     *         - reason string the type of event (hard-bounce, soft-bounce, spam, unsub) that caused this rejection
+     *         - reason string the type of event (hard-bounce, soft-bounce, spam, unsub, custom) that caused this rejection
      *         - detail string extended details about the event, such as the SMTP diagnostic for bounces or the comment for manually-created rejections
      *         - created_at string when the email was added to the blacklist
      *         - last_event_at string the timestamp of the most recent event that either created or renewed this rejection

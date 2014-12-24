@@ -10,12 +10,13 @@ class Mandrill_Whitelists {
 currently on your blacklist, that blacklist entry will be removed
 automatically.
      * @param string $email an email address to add to the whitelist
+     * @param string $comment an optional description of why the email was whitelisted
      * @return struct a status object containing the address and the result of the operation
      *     - email string the email address you provided
-     *     - whether boolean the operation succeeded
+     *     - added boolean whether the operation succeeded
      */
-    public function add($email) {
-        $_params = array("email" => $email);
+    public function add($email, $comment=null) {
+        $_params = array("email" => $email, "comment" => $comment);
         return $this->master->call('whitelists/add', $_params);
     }
 

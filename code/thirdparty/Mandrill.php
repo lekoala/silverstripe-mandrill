@@ -63,7 +63,7 @@ class Mandrill {
         $this->apikey = $apikey;
 
         $this->ch = curl_init();
-        curl_setopt($this->ch, CURLOPT_USERAGENT, 'Mandrill-PHP/1.0.52');
+        curl_setopt($this->ch, CURLOPT_USERAGENT, 'Mandrill-PHP/1.0.54');
         curl_setopt($this->ch, CURLOPT_POST, true);
 //        curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($this->ch, CURLOPT_HEADER, false);
@@ -111,8 +111,7 @@ class Mandrill {
             curl_setopt($ch, CURLOPT_STDERR, $curl_buffer);
         }
 
-//        $response_body = curl_exec($ch);
-        $response_body = MandrillMailer::curl_exec_follow($ch);
+        $response_body = curl_exec($ch);
         $info = curl_getinfo($ch);
         $time = microtime(true) - $start;
         if($this->debug) {
