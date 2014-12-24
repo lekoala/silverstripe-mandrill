@@ -1,20 +1,29 @@
 fr:
-  Mandrill:
-    ACCESS: 'Access to ''{title}'' section'
-    ACCESS_HELP: 'Allow use of Mandrill admin section'
-    Clicks: Clicks
-    DATEFROM: From
-    DATETO: To
-    DOSEARCH: Search
-    Date: Date
-    LIMIT: Limit
+  MandrillAdmin:
     MENUTITLE: Mandrill
-    NOMESSAGESMATCH: 'No messages match your criteria'
-    Opens: Opens
-    QUERY: Query
-    Recipient: Recipient
-    Sender: Sender
-    State: State
-    Subject: Subject
+    MessageClicks: Clicks
+    MessageDate: Date
+    MessageEmail: Email
+    MessageOpens: Ouvertures
+    MessageSender: Envoyeur
+    MessageStatus: Status
+    MessageSubject: Sujet
+    SearchResults: 'Résultat de la recherche'
+  MandrilAdmin:
+    At: à
+    Clicks: Clicks
+    ContentNotAvailable: 'Le contenu de cet email n’est plus disponible. Seul le contenu réçent est disponible.'
+    NotConfigured: 'The MandrillMailer is not configured. Please define a MANDRILL_API_KEY constant in your _ss_environment or initialize the mailer yourself by using MandrillMailer::setAsMailer() method '
+    Opens: Ouvertures
+  Mandrill:
+    ACCESS: 'Accès à la section ''{title}'''
+    ACCESS_HELP: 'Autoriser l’accès à la section Mandrill'
+    DATEFROM: De
+    DATETO: A
+    DOSEARCH: Recherche
+    LIMIT: Limite
+    MENUTITLE: Mandrill
+    QUERY: Requête
+    QUERYDESC: 'Pour plus d’informations à propos de la syntaxe, veuillez visiter <a target="_blank" href="http://help.mandrill.com/entries/22211902">Mandrill Support</a>'
   Permission:
     CMS_ACCESS_CATEGORY: 'CMS Access'

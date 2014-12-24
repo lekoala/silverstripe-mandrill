@@ -1,20 +1,29 @@
 en:
+  MandrillAdmin:
+    MENUTITLE: Mandrill
+    MessageClicks: Clicks
+    MessageDate: Date
+    MessageEmail: Email
+    MessageOpens: Opens
+    MessageSender: Sender
+    MessageStatus: Status
+    MessageSubject: Subject
+    SearchResults: 'Search Results'
+  MandrilAdmin:
+    At: at
+    Clicks: Clicks
+    ContentNotAvailable: 'The content of the email is not available anymore. Only recently sent messages are available.'
+    NotConfigured: 'The MandrillMailer is not configured. Please define a MANDRILL_API_KEY constant in your _ss_environment or initialize the mailer yourself by using MandrillMailer::setAsMailer() method '
+    Opens: Opens
   Mandrill:
     ACCESS: 'Access to ''{title}'' section'
     ACCESS_HELP: 'Allow use of Mandrill admin section'
-    Clicks: Clicks
     DATEFROM: From
     DATETO: To
     DOSEARCH: Search
-    Date: Date
     LIMIT: Limit
     MENUTITLE: Mandrill
-    NOMESSAGESMATCH: 'No messages match your criteria'
-    Opens: Opens
     QUERY: Query
-    Recipient: Recipient
-    Sender: Sender
-    State: State
-    Subject: Subject
+    QUERYDESC: 'For more information about query syntax, please visit <a target="_blank" href="http://help.mandrill.com/entries/22211902">Mandrill Support</a>'
   Permission:
     CMS_ACCESS_CATEGORY: 'CMS Access'

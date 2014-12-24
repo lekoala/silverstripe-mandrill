@@ -21,6 +21,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         "SearchForm",
         "ListForm"
     );
+    private static $cache_enabled   = true;
 
     /**
      * @var MandrilMessage
@@ -79,18 +80,14 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         return $this->currentMessage;
     }
 
-    public function view()
+    public function view($request)
     {
         $id = $this->getRequest()->param('ID');
         if (!$id) {
             return $this->httpError(404);
         }
         $this->currentMessage = $this->MessageInfo($id);
-        //otherwise we have the whole layout that is loaded
-        if ($this->getRequest()->isAjax()) {
-            return $this->renderWith($this->getTemplatesWithSuffix('_Content'));
-        }
-        return $this;
+        return $this->getResponseNegotiator()->respond($request);
     }
 
     public function view_message()
@@ -104,9 +101,12 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         die();
     }
 
+    /**
+     * Returns a GridField of messages
+     * @return CMSForm
+     */
     public function ListForm()
     {
-        // List all reports
         $fields          = new FieldList();
         $gridFieldConfig = GridFieldConfig::create()->addComponents(
             new GridFieldToolbarHeader(), new GridFieldSortableHeader(),
@@ -132,6 +132,10 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
                     Convert::raw2xml($item->Link), $value
                 );
             },
+            'state' => function($value, &$item) {
+                $color = MandrillMessage::getColorForState($value);
+                return sprintf('<span style="color:%s">%s</span>',$color,$value);
+            }
         ));
         $gridField->addExtraClass('all-messages-gridfield');
         $fields->push($gridField);
@@ -158,7 +162,11 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
      */
     public function getCacheEnabled()
     {
-        return true;
+        $v = $this->config()->cache_enabled;
+        if($v === null) {
+            $v = self::$cache_enabled;
+        }
+        return $v;
     }
 
     /**
@@ -294,8 +302,9 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             $this->getParam('DateFrom', date('Y-m-d', strtotime('-30 days')))));
         $fields->push(new DateField('DateTo', _t('Mandrill.DATETO', 'To'),
             $this->getParam('DateTo', date('Y-m-d'))));
-        $fields->push(new TextField('Query', _t('Mandrill.QUERY', 'Query'),
+        $fields->push($queryField = new TextField('Query', _t('Mandrill.QUERY', 'Query'),
             $this->getParam('Query')));
+        $queryField->setDescription(_t('Mandrill.QUERYDESC','For more information about query syntax, please visit <a target="_blank" href="http://help.mandrill.com/entries/22211902">Mandrill Support</a>'));
         $fields->push(new DropdownField('Limit', _t('Mandrill.LIMIT', 'Limit'),
             array(
             10 => 10,

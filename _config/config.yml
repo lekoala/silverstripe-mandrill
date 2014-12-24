@@ -9,3 +9,5 @@ MandrillMailer:
     preserve_recipients: false
   subaccount: null
   global_tags: []
+MandrillAdmin:
+  cache_enabled: true
