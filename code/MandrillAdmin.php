@@ -17,8 +17,6 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider {
 
 	public function init() {
 		parent::init();
-//		Requirements::css("mandrill/css/mandrill.css");
-//		Requirements::javascript("mandrill/javascript/mandrill.js");
 	}
 
 	private static $allowed_actions = array(

@@ -116,6 +116,25 @@ class MandrillMailer extends Mailer {
 		$this->mandrill = $mandrill;
 	}
 
+    /**
+     * Helper method to initialize the mailer
+     *
+     * @param string $apiKey
+     * @throws Exception
+     */
+    public static function setAsMailer($apiKey = null) {
+        if($apiKey === null) {
+            if(defined('MANDRILL_API_KEY')) {
+                $apiKey = MANDRILL_API_KEY;
+            }
+        }
+        if(empty($apiKey)) {
+            throw new Exception('Api key is empty');
+        }
+        $mandrillMailer = new MandrillMailer($apiKey);
+        Email::set_mailer($mandrillMailer);
+    }
+
 	/**
 	 * @return \MandrillMailer
 	 */
@@ -365,15 +384,25 @@ class MandrillMailer extends Mailer {
 		}
 	}
 
+    /**
+     * Match all words and whitespace, will be terminated by '<'
+     *
+     * @param string $rfc_email_string
+     * @return string
+     */
 	public static function get_displayname_from_rfc_email($rfc_email_string) {
-		// match all words and whitespace, will be terminated by '<'
 		$name = preg_match('/[\w\s]+/', $rfc_email_string, $matches);
 		$matches[0] = trim($matches[0]);
 		return $matches[0];
 	}
 
+    /**
+     * Extract parts between the two parentheses
+     *
+     * @param string $rfc_email_string
+     * @return string
+     */
 	public static function get_email_from_rfc_email($rfc_email_string) {
-		// extract parts between the two parentheses
 		$mailAddress = preg_match('/(?:<)(.+)(?:>)$/', $rfc_email_string, $matches);
 		return $matches[1];
 	}
