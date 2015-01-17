@@ -333,11 +333,40 @@ class MandrillMailer extends Mailer
             if (strpos($t, '<') !== false) {
                 $to[] = array(
                     'name' => self::get_displayname_from_rfc_email($t),
-                    'email' => self::get_email_from_rfc_email($t)
+                    'email' => self::get_email_from_rfc_email($t),
+                    'type' => 'to'
                 );
             } else {
-                $to[] = array('email' => $t);
+                $to[] = array('email' => $t, 'type' => 'to');
             }
+        }
+        if(isset($customheaders['Cc'])) {
+            foreach (explode(',', $customheaders['Cc']) as $t) {
+                if (strpos($t, '<') !== false) {
+                    $to[] = array(
+                        'name' => self::get_displayname_from_rfc_email($t),
+                        'email' => self::get_email_from_rfc_email($t),
+                        'type' => 'cc'
+                    );
+                } else {
+                    $to[] = array('email' => $t, 'type' => 'cc');
+                }
+            }
+            unset($customheaders['Cc']);
+        }
+        if(isset($customheaders['Bcc'])) {
+            foreach (explode(',', $customheaders['Bcc']) as $t) {
+                if (strpos($t, '<') !== false) {
+                    $to[] = array(
+                        'name' => self::get_displayname_from_rfc_email($t),
+                        'email' => self::get_email_from_rfc_email($t),
+                        'type' => 'bcc'
+                    );
+                } else {
+                    $to[] = array('email' => $t, 'type' => 'bcc');
+                }
+            }
+            unset($customheaders['Bcc']);
         }
 
         $default_params = array();
