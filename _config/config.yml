@@ -7,6 +7,7 @@ After:
 MandrillMailer:
   default_params:
     preserve_recipients: false
+    inline_css: true
   subaccount: null
   global_tags: []
 MandrillAdmin:
