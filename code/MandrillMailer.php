@@ -20,6 +20,9 @@ class MandrillMailer extends Mailer
      * @var Mandrill
      */
     protected $mandrill;
+    protected $last_error;
+    protected $last_result;
+    protected $last_is_error = false;
     protected static $instance;
 
     function __construct($apiKey)
@@ -403,11 +406,41 @@ class MandrillMailer extends Mailer
 
         $ret = $this->getMandrill()->messages->send($params);
 
-        if ($ret) {
+        $this->last_result = $ret;
+
+        if ($ret && !in_array($ret[0]['status'], array('rejected', 'invalid'))) {
+            $this->last_is_error = false;
             return array($orginal_to, $subject, $htmlContent, $customheaders);
         } else {
+            $this->last_is_error = true;
+            $this->last_error    = $ret;
+            SS_Log::log($ret[0]['reject_reason'], SS_Log::DEBUG);
             return false;
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getLastError()
+    {
+        return $this->last_error;
+    }
+
+    /**
+     * @return array
+     */
+    public function getLastResult()
+    {
+        return $this->last_result;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getLastIsError()
+    {
+        return $this->last_is_error;
     }
 
     /**

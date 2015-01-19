@@ -66,6 +66,15 @@ class MandrillEmail extends Email
         ));
     }
 
+    public static function getDefaultEmail()
+    {
+        $fulldom = Director::absoluteBaseURL();
+        $parse   = parse_url($fulldom);
+        $dom     = str_replace('www.', '', $parse['host']);
+
+        return 'default@'.$dom;
+    }
+
     public function send($messageID = null)
     {
         // Check for Subject
@@ -74,11 +83,23 @@ class MandrillEmail extends Email
         }
 
         // Use SiteConfig default from/to
-        if (empty($this->from)) {
-            $this->from = SiteConfig::current_site_config()->DefaultFromEmail;
+        $config = SiteConfig::current_site_config();
+        if (empty($this->from) && $config->DefaultFromEmail) {
+            $this->from = $config->DefaultFromEmail;
+        } else {
+            $this->from = Email::config()->admin_email;
+            if (!$this->from) {
+                $this->from = self::getDefaultEmail();
+            }
+        }
+        if(!$this->from) {
+            throw new Exception('You must set a sender');
         }
         if (empty($this->to)) {
             $this->to = SiteConfig::current_site_config()->DefaultToEmail;
+        }
+        if(!$this->to) {
+            throw new Exception('You must set a recipient');
         }
 
         // Set language according to member
