@@ -9,6 +9,7 @@
  * - Auto set template based on ClassName for subclasses
  * - Basic theme options
  * - Check for subject
+ * - Send to member
  *
  * @author lekoala
  */
@@ -19,8 +20,7 @@ class MandrillEmail extends Email
      */
     protected $template_data;
     protected $ss_template        = "emails/BasicEmail";
-    protected $to_name;
-    protected $from_name;
+    protected $locale;
     protected $callout;
     protected $image;
     protected $header_color       = '#333333';
@@ -83,7 +83,10 @@ class MandrillEmail extends Email
 
         // Set language according to member
         $restore_locale = null;
-        if ($this->to) {
+        if ($this->locale) {
+            $restore_locale = i18n::get_locale();
+            i18n::set_locale($this->locale);
+        } else if ($this->to) {
             $email  = $this->to;
             $member = false;
             if (is_array($this->to) && count($this->to) == 1) {
@@ -146,6 +149,16 @@ class MandrillEmail extends Email
         return $this;
     }
 
+    public function setLocale($val)
+    {
+        $this->locale = $val;
+    }
+
+    public function getLocale()
+    {
+        return $this->locale;
+    }
+
     public function setCallout($val)
     {
         $this->callout = $val;
@@ -206,6 +219,12 @@ class MandrillEmail extends Email
         $this->setImage(Image::get()->first());
     }
 
+    public function setToMember(Member $member)
+    {
+        $this->locale = $member->Locale;
+        return $this->setTo($member->FirstName.' '.$member->Surname.' <'.$member->Email.'>');
+    }
+
     /**
      * Bug safe absolute url
      *
@@ -226,7 +245,10 @@ class MandrillEmail extends Email
      */
     public static function rewriteURLs($html)
     {
-        $html = str_replace('$CurrentPageURL', $_SERVER['REQUEST_URI'], $html);
+        if (isset($_SERVER['REQUEST_URI'])) {
+            $html = str_replace('$CurrentPageURL', $_SERVER['REQUEST_URI'],
+                $html);
+        }
         return HTTP::urlRewriter($html,
                 function($url) {
                 //no need to rewrite, if uri has a protocol (determined here by existence of reserved URI character ":")
