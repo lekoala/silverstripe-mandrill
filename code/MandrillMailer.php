@@ -510,7 +510,7 @@ class MandrillMailer extends Mailer
         $parse   = parse_url($fulldom);
         $dom     = str_replace('www.', '', $parse['host']);
 
-        return 'postmaster'.$dom;
+        return 'postmaster@'.$dom;
     }
 
     /**
