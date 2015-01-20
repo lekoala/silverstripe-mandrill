@@ -66,14 +66,7 @@ class MandrillEmail extends Email
         ));
     }
 
-    public static function getDefaultEmail()
-    {
-        $fulldom = Director::absoluteBaseURL();
-        $parse   = parse_url($fulldom);
-        $dom     = str_replace('www.', '', $parse['host']);
 
-        return 'default@'.$dom;
-    }
 
     public function send($messageID = null)
     {
@@ -82,22 +75,11 @@ class MandrillEmail extends Email
             throw new Exception('You must set a subject');
         }
 
-        // Use SiteConfig default from/to
-        $config = SiteConfig::current_site_config();
-        if (empty($this->from) && $config->DefaultFromEmail) {
-            $this->from = $config->DefaultFromEmail;
-        } else {
-            $this->from = Email::config()->admin_email;
-            if (!$this->from) {
-                $this->from = self::getDefaultEmail();
-            }
-        }
+        $this->from = MandrillMailer::resolveDefaultFromEmail($this->from);
         if(!$this->from) {
             throw new Exception('You must set a sender');
         }
-        if (empty($this->to)) {
-            $this->to = SiteConfig::current_site_config()->DefaultToEmail;
-        }
+        $this->to = MandrillMailer::resolveDefaultToEmail($this->to);
         if(!$this->to) {
             throw new Exception('You must set a recipient');
         }

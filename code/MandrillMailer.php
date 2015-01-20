@@ -408,14 +408,14 @@ class MandrillMailer extends Mailer
 
         $this->last_result = $ret;
 
-        $sent = 0;
-        $failed = 0;
+        $sent    = 0;
+        $failed  = 0;
         $reasons = array();
-        if($ret) {
-            foreach($ret as $result) {
-                if(in_array($result['status'], array('rejected', 'invalid'))) {
+        if ($ret) {
+            foreach ($ret as $result) {
+                if (in_array($result['status'], array('rejected', 'invalid'))) {
                     $failed++;
-                    if(!empty($result['reject_reason'])) {
+                    if (!empty($result['reject_reason'])) {
                         $reasons[] = $result['reject_reason'];
                     }
                     continue;
@@ -431,7 +431,7 @@ class MandrillMailer extends Mailer
             $this->last_is_error = true;
             $this->last_error    = $ret;
             SS_Log::log("Failed to send $failed emails", SS_Log::DEBUG);
-            foreach($reasons as $reason) {
+            foreach ($reasons as $reason) {
                 SS_Log::log("Failed to send because: $reason", SS_Log::DEBUG);
             }
             return false;
@@ -460,6 +460,57 @@ class MandrillMailer extends Mailer
     public function getLastIsError()
     {
         return $this->last_is_error;
+    }
+
+    /**
+     * Resolve default send from address
+     * @param string $from
+     * @return string
+     */
+    public static function resolveDefaultFromEmail($from = null)
+    {
+        if (!empty($from) && filter_var($from, FILTER_VALIDATE_EMAIL)) {
+            return $from;
+        }
+        $config = SiteConfig::current_site_config();
+        if (!empty($config->DefaultFromEmail)) {
+            return $config->DefaultFromEmail;
+        }
+        $from = Email::config()->admin_email;
+        if (!empty($from)) {
+            return $from;
+        }
+        return self::createDefaultEmail();
+    }
+
+    /**
+     * Resolve default send to address
+     * @param string $to
+     * @return string
+     */
+    public static function resolveDefaultToEmail($to = null)
+    {
+        if (!empty($to) && filter_var($to, FILTER_VALIDATE_EMAIL)) {
+            return $to;
+        }
+        $config = SiteConfig::current_site_config();
+        if (!empty($config->DefaultToEmail)) {
+            return $config->DefaultToEmail;
+        }
+        return false;
+    }
+
+    /**
+     * Create a sensible default address based on domain name
+     * @return string
+     */
+    public static function createDefaultEmail()
+    {
+        $fulldom = Director::absoluteBaseURL();
+        $parse   = parse_url($fulldom);
+        $dom     = str_replace('www.', '', $parse['host']);
+
+        return 'postmaster'.$dom;
     }
 
     /**
