@@ -408,13 +408,32 @@ class MandrillMailer extends Mailer
 
         $this->last_result = $ret;
 
-        if ($ret && !in_array($ret[0]['status'], array('rejected', 'invalid'))) {
+        $sent = 0;
+        $failed = 0;
+        $reasons = array();
+        if($ret) {
+            foreach($ret as $result) {
+                if(in_array($result['status'], array('rejected', 'invalid'))) {
+                    $failed++;
+                    if(!empty($result['reject_reason'])) {
+                        $reasons[] = $result['reject_reason'];
+                    }
+                    continue;
+                }
+                $sent++;
+            }
+        }
+
+        if ($sent) {
             $this->last_is_error = false;
             return array($orginal_to, $subject, $htmlContent, $customheaders);
         } else {
             $this->last_is_error = true;
             $this->last_error    = $ret;
-            SS_Log::log($ret[0]['reject_reason'], SS_Log::DEBUG);
+            SS_Log::log("Failed to send $failed emails", SS_Log::DEBUG);
+            foreach($reasons as $reason) {
+                SS_Log::log("Failed to send because: $reason", SS_Log::DEBUG);
+            }
             return false;
         }
     }
