@@ -219,7 +219,10 @@ class MandrillEmail extends Email
         $val = 'Phasellus dictum sapien a neque luctus cursus. Pellentesque sem dolor, fringilla et pharetra vitae. <a href="#">Click it! »</a>';
         $this->setCallout($val);
 
-        $this->setImage(Image::get()->first());
+        $image = Image::get()->first();
+        if($image->ID) {
+            $this->setImage($image);
+        }
     }
 
     public function setToMember(Member $member)
