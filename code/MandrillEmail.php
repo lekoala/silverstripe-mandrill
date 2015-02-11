@@ -19,17 +19,24 @@ class MandrillEmail extends Email
      * @var ViewableData
      */
     protected $template_data;
-    protected $ss_template        = "emails/BasicEmail";
+    protected $ss_template = "emails/BasicEmail";
     protected $locale;
     protected $callout;
     protected $image;
-    protected $header_color       = '#333333';
-    protected $header_font_color  = '#ffffff';
-    protected $footer_color       = '#ebebeb';
-    protected $footer_font_color  = '#333333';
-    protected $panel_color        = '#ECF8FF';
-    protected $panel_border_color = '#b9e5ff';
-    protected $panel_font_color   = '#000000';
+
+    /**
+     *
+     * @var Member
+     */
+    protected $to_member;
+    protected $theme = null;
+    protected $header_color;
+    protected $header_font_color;
+    protected $footer_color;
+    protected $footer_font_color;
+    protected $panel_color;
+    protected $panel_border_color;
+    protected $panel_font_color;
 
     public function __construct($from = null, $to = null, $subject = null,
                                 $body = null, $bounceHandlerURL = null,
@@ -45,7 +52,7 @@ class MandrillEmail extends Email
         }
 
         // Allow theming
-        if ($theme = self::config()->theme) {
+        if ($theme = self::config()->default_theme) {
             $this->setTheme($theme);
         }
 
@@ -66,8 +73,16 @@ class MandrillEmail extends Email
         ));
     }
 
-
-
+    /**
+     * Send an email with HTML content.
+     *
+     * @see sendPlain() for sending plaintext emails only.
+     * @uses Mailer->sendHTML()
+     *
+     * @param string $messageID Optional message ID so the message can be identified in bounces etc.
+     * @return bool Success of the sending operation from an MTA perspective.
+     * Doesn't actually give any indication if the mail has been delivered to the recipient properly)
+     */
     public function send($messageID = null)
     {
         // Check for Subject
@@ -76,11 +91,11 @@ class MandrillEmail extends Email
         }
 
         $this->from = MandrillMailer::resolveDefaultFromEmail($this->from);
-        if(!$this->from) {
+        if (!$this->from) {
             throw new Exception('You must set a sender');
         }
         $this->to = MandrillMailer::resolveDefaultToEmail($this->to);
-        if(!$this->to) {
+        if (!$this->to) {
             throw new Exception('You must set a recipient');
         }
 
@@ -152,26 +167,52 @@ class MandrillEmail extends Email
         return $this;
     }
 
+    /**
+     *  Set locale to set before email is sent
+     *
+     * @param string $val
+     */
     public function setLocale($val)
     {
         $this->locale = $val;
     }
 
+    /**
+     * Get locale set before email is sent
+     *
+     * @return string
+     */
     public function getLocale()
     {
         return $this->locale;
     }
 
+    /**
+     * Set callout - displayed in a box in BasicEmail.ss
+     *
+     * @param string $val
+     */
     public function setCallout($val)
     {
         $this->callout = $val;
     }
 
+    /**
+     * Get callout
+     *
+     * @return string
+     */
     public function getCallout()
     {
         return $this->callout;
     }
 
+    /**
+     * Set image in the body of the message - see BasicEmail.ss
+     * 
+     * @param Image|int $image Image or ImageID
+     * @param int $size
+     */
     public function setImage($image, $size = 580)
     {
         if (is_int($image)) {
@@ -180,21 +221,57 @@ class MandrillEmail extends Email
         $this->image = $image->SetWidth($size)->Link();
     }
 
+    /**
+     * The url of the image
+     *
+     * @return string
+     */
     public function getImage()
     {
         return $this->image;
     }
 
-    public function setTheme($vars)
-    {
-        foreach ($vars as $k => $v) {
-            if ($v) {
-                $this->$k = $v;
-            }
-        }
+    /**
+     * Get available themes
+     *
+     * @return array
+     */
+    public function getAvailableThemes() {
+        return array_keys(self::config()->get('themes'));
     }
 
+    /**
+     * 
+     * @return string
+     */
     public function getTheme()
+    {
+        return $this->theme;
+    }
+
+    /**
+     *
+     * @param type $val
+     * @return type
+     * @throws Exception
+     */
+    public function setTheme($val)
+    {
+        $availableThemes = $this->getAvailableThemes();
+        if(!in_array($val, $availableThemes)) {
+            throw new Exception("Invalid theme, must be one of " . implode(',', $availableThemes));
+        }
+        $conf = self::config()->themes[$val];
+        $this->theme = $val;
+        return $this->setThemeOptions($conf);
+    }
+
+    /**
+     * Get current theme options
+     *
+     * @return array
+     */
+    public function getThemeOptions()
     {
         return array(
             'header_color' => $this->header_color,
@@ -207,6 +284,23 @@ class MandrillEmail extends Email
         );
     }
 
+    /**
+     * Set theme variables - see getTheme for available options
+     * 
+     * @param array $vars
+     */
+    public function setThemeOptions($vars)
+    {
+        foreach ($vars as $k => $v) {
+            if ($v) {
+                $this->$k = $v;
+            }
+        }
+    }
+
+    /**
+     * Set some sample content for demo purposes
+     */
     public function setSampleContent()
     {
         $member = Member::currentUserID() ? Member::currentUser()->getTitle() : 'Anonymous Member';
@@ -220,14 +314,35 @@ class MandrillEmail extends Email
         $this->setCallout($val);
 
         $image = Image::get()->first();
-        if($image->ID) {
+        if ($image->ID) {
             $this->setImage($image);
         }
     }
 
+    /**
+     * Get recipient as member
+     * 
+     * @return Member
+     */
+    public function getToMember()
+    {
+        if (!$this->to_member && $this->to) {
+            $email           = MandrillMailer::get_email_from_rfc_email($this->to);
+            $this->to_member = Member::get()->filter(array('Email' => $email))->first();
+        }
+        return $this->to_member;
+    }
+
+    /**
+     * Set a member as a recipient
+     *
+     * @param Member $member
+     * @return MandrillEmail
+     */
     public function setToMember(Member $member)
     {
-        $this->locale = $member->Locale;
+        $this->locale    = $member->Locale;
+        $this->to_member = $member;
         return $this->setTo($member->FirstName.' '.$member->Surname.' <'.$member->Email.'>');
     }
 
