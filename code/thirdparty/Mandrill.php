@@ -6,6 +6,7 @@
  *
  * - Fixes follow location (disable follow location in curl and replace curl_exec)
  * - Add IDE helpers
+ * - Fix ca_cert.pem if not available
  */
 
 require_once 'Mandrill/Templates.php';
@@ -96,6 +97,12 @@ class Mandrill {
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 30);
         curl_setopt($this->ch, CURLOPT_TIMEOUT, 600);
 
+        //fix ca cert permissions
+        if (strlen(ini_get('curl.cainfo')) === 0) {
+            curl_setopt($this->ch, CURLOPT_CAINFO,
+                __DIR__."/cacert.pem");
+        }
+
         $this->root = rtrim($this->root, '/') . '/';
 
         $this->templates = new Mandrill_Templates($this);
@@ -113,6 +120,73 @@ class Mandrill {
         $this->webhooks = new Mandrill_Webhooks($this);
         $this->senders = new Mandrill_Senders($this);
         $this->metadata = new Mandrill_Metadata($this);
+    }
+
+     /**
+     * A workaround for cURL: follow locations with safe_mode enabled or open_basedir set
+     *
+     * This method is used in the call method in Mandrill.php instead of the original curl_exec
+     *
+     * @link http://slopjong.de/2012/03/31/curl-follow-locations-with-safe_mode-enabled-or-open_basedir-set/
+     * @param resource $ch
+     * @param int $maxredirect
+     * @return boolean
+     */
+    static function curl_exec_follow($ch, &$maxredirect = null)
+    {
+        $mr = $maxredirect === null ? 5 : intval($maxredirect);
+
+        if (ini_get('open_basedir') == '' && ini_get('safe_mode') == 'Off') {
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, $mr > 0);
+            curl_setopt($ch, CURLOPT_MAXREDIRS, $mr);
+//			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        } else {
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+
+            if ($mr > 0) {
+                $original_url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+                $newurl       = $original_url;
+
+                $rch = curl_copy_handle($ch);
+
+                curl_setopt($rch, CURLOPT_HEADER, true);
+                curl_setopt($rch, CURLOPT_NOBODY, true);
+                curl_setopt($rch, CURLOPT_FORBID_REUSE, false);
+                do {
+                    curl_setopt($rch, CURLOPT_URL, $newurl);
+                    $header = curl_exec($rch);
+                    if (curl_errno($rch)) {
+                        $code = 0;
+                    } else {
+                        $code = curl_getinfo($rch, CURLINFO_HTTP_CODE);
+                        if ($code == 301 || $code == 302) {
+                            preg_match('/Location:(.*?)\n/', $header, $matches);
+                            $newurl = trim(array_pop($matches));
+
+                            // if no scheme is present then the new url is a
+                            // relative path and thus needs some extra care
+                            if (!preg_match("/^https?:/i", $newurl)) {
+                                $newurl = $original_url.$newurl;
+                            }
+                        } else {
+                            $code = 0;
+                        }
+                    }
+                } while ($code && --$mr);
+
+                curl_close($rch);
+
+                if (!$mr) {
+                    if ($maxredirect === null)
+                            trigger_error('Too many redirects.', E_USER_WARNING);
+                    else $maxredirect = 0;
+
+                    return false;
+                }
+                curl_setopt($ch, CURLOPT_URL, $newurl);
+            }
+        }
+        return curl_exec($ch);
     }
 
     public function __destruct() {
@@ -137,7 +211,7 @@ class Mandrill {
         }
 
 //        $response_body = curl_exec($ch);
-        $response_body = MandrillMailer::curl_exec_follow($ch);
+        $response_body = self::curl_exec_follow($ch);
         $info = curl_getinfo($ch);
         $time = microtime(true) - $start;
         if($this->debug) {
