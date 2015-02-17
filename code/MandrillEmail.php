@@ -52,14 +52,18 @@ class MandrillEmail extends Email
         }
 
         // Allow theming
-        if ($theme = self::config()->default_theme) {
+        $config = SiteConfig::current_site_config();
+        if ($config->EmailTheme) {
+            $this->setTheme($config->EmailTheme);
+            
+        } else if ($theme = self::config()->default_theme) {
             $this->setTheme($theme);
         }
 
         // Set base data
         $this->populateTemplate(array(
             'CurrentMember' => Member::currentUser(),
-            'SiteConfig' => SiteConfig::current_site_config(),
+            'SiteConfig' => $config,
             'Controller' => Controller::curr(),
             'Image' => $this->image,
             'Callout' => $this->callout,
@@ -236,7 +240,8 @@ class MandrillEmail extends Email
      *
      * @return array
      */
-    public function getAvailableThemes() {
+    public static function getAvailableThemes()
+    {
         return array_keys(self::config()->get('themes'));
     }
 
@@ -257,11 +262,12 @@ class MandrillEmail extends Email
      */
     public function setTheme($val)
     {
-        $availableThemes = $this->getAvailableThemes();
-        if(!in_array($val, $availableThemes)) {
-            throw new Exception("Invalid theme, must be one of " . implode(',', $availableThemes));
+        $availableThemes = self::getAvailableThemes();
+        if (!in_array($val, $availableThemes)) {
+            throw new Exception("Invalid theme, must be one of ".implode(',',
+                $availableThemes));
         }
-        $conf = self::config()->themes[$val];
+        $conf        = self::config()->themes[$val];
         $this->theme = $val;
         return $this->setThemeOptions($conf);
     }

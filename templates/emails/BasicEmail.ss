@@ -238,8 +238,8 @@
 													<table class="twelve columns">
 														<tr>
 															<td class="six sub-columns">
-																<% if SiteConfig.Logo %>
-																$SiteConfig.Logo.SetHeight(50)
+																<% if SiteConfig.EmailLogoTemplate %>
+																$SiteConfig.EmailLogoTemplate.SetHeight(50)
 																<% end_if %>
 															</td>
 															<td class="six sub-columns last" style="text-align:right; vertical-align:middle;">
