@@ -1,7 +1,4 @@
 <?php
-
-require_once 'Zend/Date.php';
-
 /*
  * Mandrill message to be displayed in a gridfield
  * 
@@ -138,9 +135,9 @@ class MandrillMessage extends ViewableData
      */
     public function getDate()
     {
-        $format = Member::currentUser()->getDateFormat();
-        $date   = new Zend_Date($this->ts);
-        return Convert::raw2xml($date->toString($format));
+        $date = new Date();
+        $date->setValue($this->ts);
+        return Convert::raw2xml($date->FormatFromSettings());
     }
 
     /**
@@ -149,10 +146,9 @@ class MandrillMessage extends ViewableData
      */
     public function getDateTime()
     {
-        $format  = Member::currentUser()->getDateFormat();
-        $format2 = Member::currentUser()->getTimeFormat();
-        $date    = new Zend_Date($this->ts);
-        return Convert::raw2xml($date->toString($format.' '.$format2));
+        $date = new SS_DateTime();
+        $date->setValue($this->ts);
+        return Convert::raw2xml($date->FormatFromSettings());
     }
 
     /**
