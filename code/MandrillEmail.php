@@ -55,7 +55,6 @@ class MandrillEmail extends Email
         $config = SiteConfig::current_site_config();
         if ($config->EmailTheme) {
             $this->setTheme($config->EmailTheme);
-            
         } else if ($theme = self::config()->default_theme) {
             $this->setTheme($theme);
         }
@@ -108,19 +107,13 @@ class MandrillEmail extends Email
         if ($this->locale) {
             $restore_locale = i18n::get_locale();
             i18n::set_locale($this->locale);
-        } else if ($this->to) {
-            $email  = $this->to;
-            $member = false;
-            if (is_array($this->to) && count($this->to) == 1) {
-                $email = $this->to[0]['email'];
-            }
-            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $member = Member::get()->filter(array('Email' => $email))->first();
-            }
-            if ($member) {
+        }
+        if ($this->to_member) {
+            if ($this->to_member->Locale) {
                 $restore_locale = i18n::get_locale();
-                i18n::set_locale($member->Locale);
+                i18n::set_locale($this->to_member->Locale);
             }
+            $this->to = $this->to_member->FirstName.' '.$this->to_member->Surname.' <'.$this->to_member->Email.'>';
         }
 
         $res = parent::send($messageID);
@@ -340,6 +333,19 @@ class MandrillEmail extends Email
     }
 
     /**
+     *
+     * @param string $val
+     * @return Email
+     */
+    public function setTo($val)
+    {
+        if ($this->to_member && $val !== $this->to_member->Email) {
+            $this->to_member = false;
+        }
+        return parent::setTo($val);
+    }
+
+    /**
      * Set a member as a recipient
      *
      * @param Member $member
@@ -349,7 +355,7 @@ class MandrillEmail extends Email
     {
         $this->locale    = $member->Locale;
         $this->to_member = $member;
-        return $this->setTo($member->FirstName.' '.$member->Surname.' <'.$member->Email.'>');
+        return $this->setTo($member->Email);
     }
 
     /**

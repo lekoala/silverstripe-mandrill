@@ -471,6 +471,9 @@ class MandrillMailer extends Mailer
     {
         $mailAddress = preg_match('/(?:<)(.+)(?:>)$/', $rfc_email_string,
             $matches);
+        if(empty($matches)) {
+            return $rfc_email_string;
+        }
         return $matches[1];
     }
 }
