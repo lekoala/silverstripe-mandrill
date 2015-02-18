@@ -47,10 +47,10 @@ class MandrillSiteConfig extends DataExtension
     public function EmailLogoTemplate()
     {
         if ($this->owner->EmailLogoID) {
-            return $this->EmailLogo();
+            return $this->owner->EmailLogo();
         }
         if ($this->owner->LogoID) {
-            return $this->Logo();
+            return $this->owner->Logo();
         }
     }
 }
