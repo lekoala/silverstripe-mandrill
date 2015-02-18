@@ -249,6 +249,7 @@ class MandrillMailer extends Mailer
      * @param string $plainContent
      * @param array $attachedFiles
      * @param array $customheaders
+     * @param bool $inlineImages
      * @return array|bool
      */
     protected function send($to, $from, $subject, $htmlContent,
@@ -317,21 +318,25 @@ class MandrillMailer extends Mailer
             // Include any specified attachments as additional parts
             foreach ($attachedFiles as $file) {
                 if (isset($file['tmp_name']) && isset($file['name'])) {
-                    $messageParts[] = $this->encodeFileForEmail($file['tmp_name'],
+                    $attachments[] = $this->encodeFileForEmail($file['tmp_name'],
                         $file['name']);
                 } else {
-                    $messageParts[] = $this->encodeFileForEmail($file);
+                    $attachments[] = $this->encodeFileForEmail($file);
                 }
             }
 
-            $params['attachments'] = $messageParts;
+            $params['attachments'] = $attachments;
         }
 
         if ($customheaders) {
             $params['headers'] = $customheaders;
         }
 
-        $ret = $this->getMandrill()->messages->send($params);
+        try {
+            $ret = $this->getMandrill()->messages->send($params);
+        } catch (Exception $ex) {
+            $ret = array(array('status' => 'rejected', 'reject_reason' => $ex->getMessage()));
+        }
 
         $this->last_result = $ret;
 
