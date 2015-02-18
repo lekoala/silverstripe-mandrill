@@ -377,7 +377,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     /**
      * Check if webhook is installed
      *
-     * @return boolean
+     * @return array
      */
     public function WebhookInstalled()
     {
@@ -406,7 +406,24 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         if (empty($list)) {
             return false;
         }
-        return true;
+        $url = $this->WebhookUrl();
+        foreach($list as $el) {
+            if($el['url'] === $url) {
+                return $el;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Hook details for template
+     * @return \ArrayData
+     */
+    public function WebhookDetails() {
+        $el = $this->WebhookInstalled();
+        if($el) {
+            return new ArrayData($el);
+        }
     }
 
     /**
@@ -426,8 +443,9 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     {
         $fields  = new FieldList();
         $fields->push(new LiteralField('Info',
-            _t('MandrillAdmin.HookNotInstalled',
-                '<div class="message info">'.'Hook is not installed'.'</div>')));
+            '<div class="message info">'. _t('MandrillAdmin.HookNotInstalled',
+                'Hook is not installed. Url of the webhook is: {url}. This url must be publicly visible to be used as a hook.',
+                array('url' => $this->WebhookUrl())).'</div>'));
         $actions = new FieldList();
         $actions->push(new FormAction('doInstallHook',
             _t('Mandrill.DOINSTALL', 'Install hook')));
@@ -460,11 +478,12 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     {
         $fields  = new FieldList();
         $fields->push(new LiteralField('Info',
-            _t('MandrillAdmin.HookInstalled',
-                '<div class="message info">'.'Hook is installed'.'</div>')));
+            '<div class="message info">'._t('MandrillAdmin.HookInstalled',
+                'Hook is installed. Url of the webhook is: {url}.',
+                array('url' => $this->WebhookUrl())).'</div>'));
         $actions = new FieldList();
         $actions->push(new FormAction('doUninstallHook',
-            _t('Mandrill.DOINSTALL', 'Install hook')));
+            _t('Mandrill.DOUNINSTALL', 'Uninstall hook')));
         $form    = new Form($this, 'InstallHookForm', $fields, $actions);
         return $form;
     }
@@ -477,7 +496,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         $description = SiteConfig::current_site_config()->Title;
 
         try {
-            $mandrill->webhooks->delete($id);
+            $el = $this->WebhookInstalled();
+            $mandrill->webhooks->delete($el['id']);
         } catch (Exception $ex) {
             SS_Log::log($ex->getMessage(), SS_Log::DEBUG);
         }

@@ -53,6 +53,43 @@
 			<div id="tab-hooks">
 				<% if WebhookInstalled %>
 				$UninstallHookForm
+
+				<% with WebhookDetails %>
+				<h3><%t MandrillAdmin.HooksDetailsTitle "Hooks details" %></h3>
+				<table class="ss-gridfield-table">
+					<tbody class="ss-gridfield-items">
+						<tr class="ss-gridfield-item even">
+							<td>id</td>
+							<td>$id</td>
+						</tr>
+						<tr class="ss-gridfield-item odd">
+							<td>url</td>
+							<td>$url</td>
+						</tr>
+						<tr class="ss-gridfield-item even">
+							<td>description</td>
+							<td>$description</td>
+						</tr>
+						<tr class="ss-gridfield-item odd">
+							<td>created_at</td>
+							<td>$created_at</td>
+						</tr>
+						<tr class="ss-gridfield-item even">
+							<td>batches_sent</td>
+							<td>$batches_sent</td>
+						</tr>
+						<tr class="ss-gridfield-item odd">
+							<td>events_sent</td>
+							<td>$events_sent</td>
+						</tr>
+						<tr class="ss-gridfield-item even">
+							<td>auth_key</td>
+							<td>$auth_key</td>
+						</tr>
+					</tbody>
+				</table>
+				<% end_with %>
+
 				<% else %>
 				$InstallHookForm
 				<% end_if %>
