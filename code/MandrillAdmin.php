@@ -15,11 +15,15 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     private static $menu_icon       = "mandrill/images/icon.png";
     private static $url_rule        = '/$Action/$ID';
     private static $allowed_actions = array(
-        "doSearch",
         "view",
         'view_message',
+        "ListForm",
         "SearchForm",
-        "ListForm"
+        "doSearch",
+        "InstallHookForm",
+        "doInstallHook",
+        "UninstallHookForm",
+        "doUninstallHook"
     );
     private static $cache_enabled   = true;
 
@@ -241,11 +245,10 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
                     $cache->save(serialize($message), $cache_key,
                         array('mandrill'), 60 * 60);
                 }
-            } 
-            catch (Exception $ex) {
+            } catch (Exception $ex) {
                 $message = new MandrillMessage();
                 $this->getCache()->clean();
-                SS_Log::log(get_class($ex) . ': ' . $ex->getMessage());
+                SS_Log::log(get_class($ex).': '.$ex->getMessage());
             }
         }
         return $message;
@@ -369,5 +372,116 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     public function canView($member = null)
     {
         return Permission::check("CMS_ACCESS_Mandrill");
+    }
+
+    /**
+     * Check if webhook is installed
+     *
+     * @return boolean
+     */
+    public function WebhookInstalled()
+    {
+        $mandrill = $this->getMandrill();
+
+        $cache_enabled = $this->getCacheEnabled();
+        if ($cache_enabled) {
+            $cache        = $this->getCache();
+            $cache_key    = 'webooks';
+            $cache_result = $cache->load($cache_key);
+        }
+        if ($cache_enabled && $cache_result) {
+            $list = unserialize($cache_result);
+        } else {
+            try {
+                $list = $mandrill->webhooks->getList();
+                if ($cache_enabled) {
+                    $cache->save(serialize($list), $cache_key,
+                        array('mandrill'), 0);
+                }
+            } catch (Exception $ex) {
+                $list = array();
+                SS_Log::log($ex->getMessage(), SS_Log::DEBUG);
+            }
+        }
+        if (empty($list)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @return string
+     */
+    public function WebhookUrl()
+    {
+        return Director::absoluteURL('/mandrill/incoming');
+    }
+
+    /**
+     * Install hook form
+     * 
+     * @return \Form
+     */
+    public function InstallHookForm()
+    {
+        $fields  = new FieldList();
+        $fields->push(new LiteralField('Info',
+            _t('MandrillAdmin.HookNotInstalled',
+                '<div class="message info">'.'Hook is not installed'.'</div>')));
+        $actions = new FieldList();
+        $actions->push(new FormAction('doInstallHook',
+            _t('Mandrill.DOINSTALL', 'Install hook')));
+        $form    = new Form($this, 'InstallHookForm', $fields, $actions);
+        return $form;
+    }
+
+    public function doInstallHook($data, Form $form)
+    {
+        $mandrill = $this->getMandrill();
+
+        $url         = $this->WebhookUrl();
+        $description = SiteConfig::current_site_config()->Title;
+
+        try {
+            $mandrill->webhooks->add($url, $description);
+        } catch (Exception $ex) {
+            SS_Log::log($ex->getMessage(), SS_Log::DEBUG);
+        }
+
+        return $this->redirectBack();
+    }
+
+    /**
+     * Uninstall hook form
+     *
+     * @return \Form
+     */
+    public function UninstallHookForm()
+    {
+        $fields  = new FieldList();
+        $fields->push(new LiteralField('Info',
+            _t('MandrillAdmin.HookInstalled',
+                '<div class="message info">'.'Hook is installed'.'</div>')));
+        $actions = new FieldList();
+        $actions->push(new FormAction('doUninstallHook',
+            _t('Mandrill.DOINSTALL', 'Install hook')));
+        $form    = new Form($this, 'InstallHookForm', $fields, $actions);
+        return $form;
+    }
+
+    public function doUninstallHook($data, Form $form)
+    {
+        $mandrill = $this->getMandrill();
+
+        $url         = $this->WebhookUrl();
+        $description = SiteConfig::current_site_config()->Title;
+
+        try {
+            $mandrill->webhooks->delete($id);
+        } catch (Exception $ex) {
+            SS_Log::log($ex->getMessage(), SS_Log::DEBUG);
+        }
+
+        return $this->redirectBack();
     }
 }

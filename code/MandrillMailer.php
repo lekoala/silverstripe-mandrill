@@ -408,8 +408,7 @@ class MandrillMailer extends Mailer
         if (!empty($config->DefaultFromEmail)) {
             return $config->DefaultFromEmail;
         }
-        $from = Email::config()->admin_email;
-        if (!empty($from)) {
+        if ($from = Email::config()->admin_email) {
             return $from;
         }
         return self::createDefaultEmail();
@@ -422,12 +421,16 @@ class MandrillMailer extends Mailer
      */
     public static function resolveDefaultToEmail($to = null)
     {
+        $to = MandrillMailer::get_email_from_rfc_email($to);
         if (!empty($to) && filter_var($to, FILTER_VALIDATE_EMAIL)) {
             return $to;
         }
         $config = SiteConfig::current_site_config();
         if (!empty($config->DefaultToEmail)) {
             return $config->DefaultToEmail;
+        }
+        if ($admin = Email::config()->admin_email) {
+            return $admin;
         }
         return false;
     }

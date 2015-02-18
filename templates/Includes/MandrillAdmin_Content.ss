@@ -39,8 +39,28 @@
 		</div>
 		<% end_with %>
 		<% else %>
-		$SearchForm
-		$ListForm
+
+		<div class="ss-tabset">
+			<ul>
+				<li><a href="#tab-messages"><%t MandrillAdmin.MessagesTab "Messages" %></a></li>
+				<li><a href="#tab-hooks"><%t MandrillAdmin.HooksTab "Webhooks" %></a></li>
+				<li><a href="#tab-templates"><%t MandrillAdmin.TemplatesTab "Templates" %></a></li>
+			</ul>
+			<div id="tab-messages">
+				$SearchForm
+				$ListForm
+			</div>
+			<div id="tab-hooks">
+				<% if WebhookInstalled %>
+				$UninstallHookForm
+				<% else %>
+				$InstallHookForm
+				<% end_if %>
+			</div>
+			<div id="tab-templates">
+				templates
+			</div>
+		</div>
 		<% end_if %>
 	</div>
 </div>

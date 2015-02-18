@@ -4,6 +4,9 @@ After:
   - 'framework/*'
   - 'cms/*'
 ---
+Director:
+  rules:
+    'mandrill//$Action/$ID/$Name': 'MandrillController'
 MandrillMailer:
   default_params:
     preserve_recipients: false
