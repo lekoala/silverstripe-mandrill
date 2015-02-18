@@ -257,7 +257,12 @@ class MandrillMailer extends Mailer
                             $plainContent = false, $inlineImages = false)
     {
         $orginal_to = $to;
-        $tos        = explode(',', $to);
+
+        if (is_array($to)) {
+            $tos = $to;
+        } else {
+            $tos = explode(',', $to);
+        }
 
         $to = array();
         foreach ($tos as $t) {
@@ -421,9 +426,12 @@ class MandrillMailer extends Mailer
      */
     public static function resolveDefaultToEmail($to = null)
     {
-        $to = MandrillMailer::get_email_from_rfc_email($to);
+        $original_to = $to;
+        if (strpos($to, '<') !== false) {
+            $to = MandrillMailer::get_email_from_rfc_email($to);
+        }
         if (!empty($to) && filter_var($to, FILTER_VALIDATE_EMAIL)) {
-            return $to;
+            return $original_to;
         }
         $config = SiteConfig::current_site_config();
         if (!empty($config->DefaultToEmail)) {
@@ -471,7 +479,7 @@ class MandrillMailer extends Mailer
     {
         $mailAddress = preg_match('/(?:<)(.+)(?:>)$/', $rfc_email_string,
             $matches);
-        if(empty($matches)) {
+        if (empty($matches)) {
             return $rfc_email_string;
         }
         return $matches[1];

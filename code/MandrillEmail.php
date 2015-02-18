@@ -102,17 +102,19 @@ class MandrillEmail extends Email
             throw new Exception('You must set a recipient');
         }
 
-        // Set language according to member
+        // Set language to use for the email
         $restore_locale = null;
         if ($this->locale) {
             $restore_locale = i18n::get_locale();
             i18n::set_locale($this->locale);
         }
         if ($this->to_member) {
-            if ($this->to_member->Locale) {
+            // If no locale is defined, use Member locale
+            if ($this->to_member->Locale && !$this->locale) {
                 $restore_locale = i18n::get_locale();
                 i18n::set_locale($this->to_member->Locale);
             }
+            // Include name in to as standard rfc
             $this->to = $this->to_member->FirstName.' '.$this->to_member->Surname.' <'.$this->to_member->Email.'>';
         }
 
