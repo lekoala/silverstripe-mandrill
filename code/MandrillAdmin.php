@@ -10,6 +10,11 @@
  */
 class MandrillAdmin extends LeftAndMain implements PermissionProvider
 {
+    const MESSAGE_TAG           = 'message';
+    const MESSAGE_CACHE_MINUTES = 5;
+    const WEBHOOK_TAG           = 'webhook';
+    const WEBHOOK_CACHE_MINUTES = 1440; // 1 day
+
     private static $menu_title      = "Mandrill";
     private static $url_segment     = "mandrill";
     private static $menu_icon       = "mandrill/images/icon.png";
@@ -211,8 +216,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             }
             //5 minutes cache
             if ($cache_enabled) {
-                $cache->save(serialize($list), $cache_key, array('mandrill'),
-                    60 * 5);
+                $cache->save(serialize($list), $cache_key,
+                    array(self::MESSAGE_TAG), 60 * self::MESSAGE_CACHE_MINUTES);
             }
         }
         return $list;
@@ -243,11 +248,11 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
                 //the detail is not going to change very often
                 if ($cache_enabled) {
                     $cache->save(serialize($message), $cache_key,
-                        array('mandrill'), 60 * 60);
+                        array('message'), 60 * 60);
                 }
             } catch (Exception $ex) {
                 $message = new MandrillMessage();
-                $this->getCache()->clean();
+                $this->getCache()->clean('matchingTag', array(self::MESSAGE_TAG));
                 SS_Log::log(get_class($ex).': '.$ex->getMessage());
             }
         }
@@ -279,8 +284,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             }
             //if we have the content, store it forever since it's not available forever in the api
             if ($cache_enabled) {
-                $cache->save(serialize($content), $cache_key, array('mandrill'),
-                    0);
+                $cache->save(serialize($content), $cache_key,
+                    array(self::MESSAGE_TAG), 0);
             }
         }
         return $content;
@@ -395,8 +400,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             try {
                 $list = $mandrill->webhooks->getList();
                 if ($cache_enabled) {
-                    $cache->save(serialize($list), $cache_key,
-                        array('mandrill'), 0);
+                    $cache->save(serialize($list), $cache_key, array(self::WEBHOOK_TAG),
+                        60 * self::WEBHOOK_CACHE_MINUTES);
                 }
             } catch (Exception $ex) {
                 $list = array();
@@ -407,8 +412,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             return false;
         }
         $url = $this->WebhookUrl();
-        foreach($list as $el) {
-            if($el['url'] === $url) {
+        foreach ($list as $el) {
+            if ($el['url'] === $url) {
                 return $el;
             }
         }
@@ -419,9 +424,10 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
      * Hook details for template
      * @return \ArrayData
      */
-    public function WebhookDetails() {
+    public function WebhookDetails()
+    {
         $el = $this->WebhookInstalled();
-        if($el) {
+        if ($el) {
             return new ArrayData($el);
         }
     }
@@ -443,7 +449,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     {
         $fields  = new FieldList();
         $fields->push(new LiteralField('Info',
-            '<div class="message info">'. _t('MandrillAdmin.HookNotInstalled',
+            '<div class="message info">'._t('MandrillAdmin.HookNotInstalled',
                 'Hook is not installed. Url of the webhook is: {url}. This url must be publicly visible to be used as a hook.',
                 array('url' => $this->WebhookUrl())).'</div>'));
         $actions = new FieldList();
@@ -462,6 +468,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
 
         try {
             $mandrill->webhooks->add($url, $description);
+            $this->getCache()->clean('matchingTag', array(self::WEBHOOK_TAG));
         } catch (Exception $ex) {
             SS_Log::log($ex->getMessage(), SS_Log::DEBUG);
         }
@@ -498,6 +505,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         try {
             $el = $this->WebhookInstalled();
             $mandrill->webhooks->delete($el['id']);
+            $this->getCache()->clean('matchingTag', array(self::WEBHOOK_TAG));
         } catch (Exception $ex) {
             SS_Log::log($ex->getMessage(), SS_Log::DEBUG);
         }
