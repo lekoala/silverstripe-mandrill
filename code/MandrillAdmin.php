@@ -134,7 +134,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             },
             'state' => function($value, &$item) {
                 $color = MandrillMessage::getColorForState($value);
-                return sprintf('<span style="color:%s">%s</span>',$color,$value);
+                return sprintf('<span style="color:%s">%s</span>', $color,
+                    $value);
             }
         ));
         $gridField->addExtraClass('all-messages-gridfield');
@@ -163,7 +164,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     public function getCacheEnabled()
     {
         $v = $this->config()->cache_enabled;
-        if($v === null) {
+        if ($v === null) {
             $v = self::$cache_enabled;
         }
         return $v;
@@ -230,14 +231,21 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         if ($cache_enabled && $cache_result) {
             $message = unserialize($cache_result);
         } else {
-            $info    = $this->getMandrill()->messages->info($id);
-            $content = $this->MessageContent($id);
-            $info    = array_merge($content, $info);
-            $message = new MandrillMessage($info);
-            //the detail is not going to change very often
-            if ($cache_enabled) {
-                $cache->save(serialize($message), $cache_key, array('mandrill'),
-                    60 * 60);
+            try {
+                $info    = $this->getMandrill()->messages->info($id);
+                $content = $this->MessageContent($id);
+                $info    = array_merge($content, $info);
+                $message = new MandrillMessage($info);
+                //the detail is not going to change very often
+                if ($cache_enabled) {
+                    $cache->save(serialize($message), $cache_key,
+                        array('mandrill'), 60 * 60);
+                }
+            } 
+            catch (Exception $ex) {
+                $message = new MandrillMessage();
+                $this->getCache()->clean();
+                SS_Log::log(get_class($ex) . ': ' . $ex->getMessage());
             }
         }
         return $message;
@@ -297,14 +305,15 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
 
     public function SearchForm()
     {
-        $fields  = new FieldList();
+        $fields     = new FieldList();
         $fields->push(new DateField('DateFrom', _t('Mandrill.DATEFROM', 'From'),
             $this->getParam('DateFrom', date('Y-m-d', strtotime('-30 days')))));
         $fields->push(new DateField('DateTo', _t('Mandrill.DATETO', 'To'),
             $this->getParam('DateTo', date('Y-m-d'))));
-        $fields->push($queryField = new TextField('Query', _t('Mandrill.QUERY', 'Query'),
-            $this->getParam('Query')));
-        $queryField->setDescription(_t('Mandrill.QUERYDESC','For more information about query syntax, please visit <a target="_blank" href="http://help.mandrill.com/entries/22211902">Mandrill Support</a>'));
+        $fields->push($queryField = new TextField('Query',
+            _t('Mandrill.QUERY', 'Query'), $this->getParam('Query')));
+        $queryField->setDescription(_t('Mandrill.QUERYDESC',
+                'For more information about query syntax, please visit <a target="_blank" href="http://help.mandrill.com/entries/22211902">Mandrill Support</a>'));
         $fields->push(new DropdownField('Limit', _t('Mandrill.LIMIT', 'Limit'),
             array(
             10 => 10,
@@ -313,10 +322,10 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             500 => 500,
             1000 => 1000
             ), $this->getParam('Limit', 100)));
-        $actions = new FieldList();
+        $actions    = new FieldList();
         $actions->push(new FormAction('doSearch',
             _t('Mandrill.DOSEARCH', 'Search')));
-        $form    = new Form($this, 'SearchForm', $fields, $actions);
+        $form       = new Form($this, 'SearchForm', $fields, $actions);
         return $form;
     }
 
