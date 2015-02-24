@@ -40,6 +40,26 @@ apply on your SiteConfig with the following yml config:
 	  extensions: 
 		- MandrillSiteConfig
 
+Also, it might be useful to set the email theme, logo and footer for your emails.
+All this is setupable through the CMS in the Settings section.
+
+Webhooks
+==================
+
+From the Mandrill Admin, you can setup a webhook for your website. This webhook
+will be called and MandrillController will take care of handling all events
+for you.
+
+By default, MandrillController will do nothing. Feel free to add your own
+extensions to MandrillController to define your own rules, like "Send an
+email to the admin when a receive a spam complaint".
+
+MandrillController provides 4 extensions points:
+- updateHandleAnyEvent
+- updateHandleSyncEvent
+- updateHandleInboundEvent
+- updateHandleMessageEvent
+
 Compatibility
 ==================
 Tested with 3.1
