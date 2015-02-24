@@ -60,6 +60,20 @@ MandrillController provides 4 extensions points:
 - updateHandleInboundEvent
 - updateHandleMessageEvent
 
+Emails templates
+==================
+
+Although Mandrill provides an API for email templates, it is mainly useful to save
+bandwith for your main email template (in our case, our BasicEmail.ss file).
+
+But this doesn't help you to create User editable emails, like Confirmation emails, etc.
+And then, there is also the problem of the variables that should be merged on the email (like $CurrentMember.FirstName).
+
+A basic solution is to simply create the HTML on your page and create your email from that content, but it doesn't
+provide you with one central place to manage all your email content.
+
+This is why this module comes with one easy to use EmailTemplateAdmin based on ModelAdmin.
+
 Compatibility
 ==================
 Tested with 3.1
