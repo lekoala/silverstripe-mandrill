@@ -1,14 +1,4 @@
 en:
-  MandrillAdmin:
-    MENUTITLE: Mandrill
-    MessageClicks: Clicks
-    MessageDate: Date
-    MessageEmail: Email
-    MessageOpens: Opens
-    MessageSender: Sender
-    MessageStatus: Status
-    MessageSubject: Subject
-    SearchResults: 'Search Results'
   MandrilAdmin:
     At: at
     Clicks: Clicks
@@ -20,10 +10,34 @@ en:
     ACCESS_HELP: 'Allow use of Mandrill admin section'
     DATEFROM: From
     DATETO: To
+    DOINSTALL: 'Install hook'
     DOSEARCH: Search
+    DOUNINSTALL: 'Uninstall hook'
     LIMIT: Limit
     MENUTITLE: Mandrill
     QUERY: Query
     QUERYDESC: 'For more information about query syntax, please visit <a target="_blank" href="http://help.mandrill.com/entries/22211902">Mandrill Support</a>'
+  MandrillAdmin:
+    HookInstalled: 'Hook is installed. Url of the webhook is: {url}.'
+    HookNotInstalled: 'Hook is not installed. Url of the webhook is: {url}. This url must be publicly visible to be used as a hook.'
+    HooksDetailsTitle: 'Hooks details'
+    HooksTab: Webhooks
+    MessageClicks: Clicks
+    MessageDate: Date
+    MessageEmail: Email
+    MessageOpens: Opens
+    MessageSender: Sender
+    MessageStatus: Status
+    MessageSubject: Subject
+    MessagesTab: Messages
+    SearchResults: 'Search Results'
+    MENUTITLE: Mandrill
+  MandrillSiteConfig:
+    DefaultFromEmail: 'Default From Email'
+    DefaultToEmail: 'Default To Email'
+    EmailFooter: 'Email Footer'
+    EmailLogo: 'Email Logo'
+    EmailLogoDesc: 'Will default to Logo if none defined'
+    EmailTheme: 'Email Theme'
   Permission:
     CMS_ACCESS_CATEGORY: 'CMS Access'

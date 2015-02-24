@@ -1,6 +1,27 @@
 fr:
-  MandrillAdmin:
+  MandrilAdmin:
+    At: 'à'
+    Clicks: Clicks
+    ContentNotAvailable: 'Le contenu de cet email n’est plus disponible. Seul le contenu réçent est disponible.'
+    NotConfigured: 'MandrillMailer n’est pas configuré. Veuillez définir la constante MANDRILL_API_KE dans votre _ss_environment ou initialisez le mailer avec la méthode MandrillMailer::setAsMailer()'
+    Opens: Ouvertures
+  Mandrill:
+    ACCESS: 'Accès à la section ''{title}'''
+    ACCESS_HELP: 'Autoriser l’accès à la section Mandrill'
+    DATEFROM: De
+    DATETO: A
+    DOINSTALL: 'Installez le hook'
+    DOSEARCH: Recherche
+    DOUNINSTALL: 'Désinstallez le hook'
+    LIMIT: Limite
     MENUTITLE: Mandrill
+    QUERY: Requête
+    QUERYDESC: 'Pour plus d’informations à propos de la syntaxe, veuillez visiter <a target="_blank" href="http://help.mandrill.com/entries/22211902">Mandrill Support</a>'
+  MandrillAdmin:
+    HookInstalled: 'Le hook est installé. L’url du webhook est: {url}.'
+    HookNotInstalled: 'Le hook n’est pas installé. L’url du webhook est: {url}. Cette url doit être visible publiquement.'
+    HooksDetailsTitle: 'Details du hook'
+    HooksTab: Webhooks
     MessageClicks: Clicks
     MessageDate: Date
     MessageEmail: Email
@@ -8,22 +29,15 @@ fr:
     MessageSender: Envoyeur
     MessageStatus: Status
     MessageSubject: Sujet
+    MessagesTab: Messages
     SearchResults: 'Résultat de la recherche'
-  MandrilAdmin:
-    At: à
-    Clicks: Clicks
-    ContentNotAvailable: 'Le contenu de cet email n’est plus disponible. Seul le contenu réçent est disponible.'
-    NotConfigured: 'The MandrillMailer is not configured. Please define a MANDRILL_API_KEY constant in your _ss_environment or initialize the mailer yourself by using MandrillMailer::setAsMailer() method '
-    Opens: Ouvertures
-  Mandrill:
-    ACCESS: 'Accès à la section ''{title}'''
-    ACCESS_HELP: 'Autoriser l’accès à la section Mandrill'
-    DATEFROM: De
-    DATETO: A
-    DOSEARCH: Recherche
-    LIMIT: Limite
     MENUTITLE: Mandrill
-    QUERY: Requête
-    QUERYDESC: 'Pour plus d’informations à propos de la syntaxe, veuillez visiter <a target="_blank" href="http://help.mandrill.com/entries/22211902">Mandrill Support</a>'
+  MandrillSiteConfig:
+    DefaultFromEmail: 'Envoyeur par défaut'
+    DefaultToEmail: 'Destinataire par défaut'
+    EmailFooter: 'Footer de l’email'
+    EmailLogo: 'Logo de l’email'
+    EmailLogoDesc: 'Logo sera utilisé si ce champ est vide'
+    EmailTheme: 'Thème de l’email'
   Permission:
     CMS_ACCESS_CATEGORY: 'CMS Access'
