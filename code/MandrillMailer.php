@@ -280,18 +280,29 @@ class MandrillMailer extends Mailer
         if (self::getDefaultParams()) {
             $default_params = self::getDefaultParams();
         }
+        if (is_array($from)) {
+            $fromEmail = $from['email'];
+            $fromName  = $from['name'];
+        }
+        else if(strpos($from, '<') !== false) {
+            $fromEmail = self::get_email_from_rfc_email($from);
+            $fromName = self::get_displayname_from_rfc_email($from);
+        }
+        else {
+            $fromEmail = $from;
+            $fromName = null;
+        }
+
         $params = array_merge($default_params,
             array(
             "subject" => $subject,
-            "from_email" => $from,
-            "to" => $to_array
+            "from_email" => $fromEmail,
+            "to" => $to
         ));
 
-        if (is_array($from)) {
-            $params['from_email'] = $from['email'];
-            $params['from_name']  = $from['name'];
+        if($fromName) {
+            $params['from_name'] = $fromName;
         }
-
         if ($plainContent) {
             $params['text'] = $plainContent;
         }
