@@ -256,26 +256,26 @@ class MandrillMailer extends Mailer
                             $attachedFiles = false, $customheaders = false,
                             $plainContent = false, $inlineImages = false)
     {
-        $orginal_to = $to;
-
+        // Handle multiple recipients
         if (is_array($to)) {
             $tos = $to;
         } else {
             $tos = explode(',', $to);
         }
 
-        $to = array();
+        $to_array = array();
         foreach ($tos as $t) {
             if (strpos($t, '<') !== false) {
-                $to[] = array(
+                $to_array[] = array(
                     'name' => self::get_displayname_from_rfc_email($t),
                     'email' => self::get_email_from_rfc_email($t)
                 );
             } else {
-                $to[] = array('email' => $t);
+                $to_array[] = array('email' => $t);
             }
         }
 
+        // Create params to send to mandrill message api
         $default_params = array();
         if (self::getDefaultParams()) {
             $default_params = self::getDefaultParams();
@@ -284,7 +284,7 @@ class MandrillMailer extends Mailer
             array(
             "subject" => $subject,
             "from_email" => $from,
-            "to" => $to
+            "to" => $to_array
         ));
 
         if (is_array($from)) {
@@ -299,6 +299,7 @@ class MandrillMailer extends Mailer
             $params['html'] = $htmlContent;
         }
 
+        // Attach tags to params
         if (self::getGlobalTags()) {
             if (!isset($params['tags'])) {
                 $params['tags'] = array();
@@ -306,6 +307,7 @@ class MandrillMailer extends Mailer
             $params['tags'] = array_merge($params['tags'], self::getGlobalTags());
         }
 
+        // Attach subaccount to params
         if (self::getSubaccount()) {
             $params['subaccount'] = self::getSubaccount();
         }
@@ -317,6 +319,7 @@ class MandrillMailer extends Mailer
             }
         }
 
+        // Handle files attachments
         if ($attachedFiles) {
             $attachments = array();
 
@@ -459,12 +462,14 @@ class MandrillMailer extends Mailer
     /**
      * Match all words and whitespace, will be terminated by '<'
      *
+     * Note: use /u to support utf8 strings
+     *
      * @param string $rfc_email_string
      * @return string
      */
     public static function get_displayname_from_rfc_email($rfc_email_string)
     {
-        $name       = preg_match('/[\w\s]+/', $rfc_email_string, $matches);
+        $name       = preg_match('/[\w\s]+/u', $rfc_email_string, $matches);
         $matches[0] = trim($matches[0]);
         return $matches[0];
     }
