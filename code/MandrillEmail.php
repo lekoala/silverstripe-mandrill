@@ -361,6 +361,109 @@ class MandrillEmail extends Email
     }
 
     /**
+     * Get custom api params for this message.
+     * 
+     * @return array
+     */
+    public function getApiParams()
+    {
+        if (isset($this->customHeaders['X-MandrillMailer'])) {
+            return $this->customHeaders['X-MandrillMailer'];
+        }
+        return array();
+    }
+
+    /**
+     * Set api parameters for this message.
+     *
+     * @param array $params
+     */
+    public function setApiParams(array $params)
+    {
+        $this->customHeaders['X-MandrillMailer'] = $params;
+    }
+
+    /**
+     * Set api parameter
+     *
+     * @param string $key
+     * @param mixed $value
+     */
+    public function setApiParam($key, $value)
+    {
+        $params       = $this->getApiParams();
+        $params[$key] = $value;
+        $this->setApiParams($params);
+    }
+
+    /**
+     * Set google analytics campaign
+     *
+     * @param string $value
+     */
+    public function setGoogleAnalyticsCampaign($value)
+    {
+        $this->setApiParam('google_analytics_campaign', $value);
+    }
+
+    /**
+     * Set metadata
+     *
+     * @param string $key
+     * @param string $value
+     */
+    public function setMetadata($key, $value)
+    {
+        $params = $this->getApiParams();
+        if (!isset($params['metadata'])) {
+            $params['metadata'] = array();
+        }
+        $params['metadata'][$key] = $value;
+        $this->setApiParams($params);
+    }
+
+    /**
+     * Set metadatas
+     *
+     * @param array $values
+     */
+    public function setMetadatas($values)
+    {
+        $params             = $this->getApiParams();
+        $params['metadata'] = $values;
+        $this->setApiParams($params);
+    }
+
+    /**
+     * Set recipient metadatas
+     *
+     * @param string $recipient Email of the recipient
+     * @param array $values
+     */
+    public function setRecipientMetadatas($recipient, $values)
+    {
+        $params = $this->getApiParams();
+        if (!isset($params['recipient_metadata'])) {
+            $params['recipient_metadata'] = array();
+        }
+        // Look for recipient
+        $found = false;
+        foreach ($params['recipient_metadata'] as &$rcp) {
+            if ($rcp['rcpt'] == $recipient) {
+                $found         = true;
+                $rcp['values'] = $values;
+            }
+        }
+        if (!$found) {
+            $params['recipient_metadata'][] = array(
+                'rcpt' => $recipient,
+                'values' => $values
+            );
+        }
+        $this->setApiParams($params);
+    }
+
+    /**
      * Bug safe absolute url
      *
      * @param string $url

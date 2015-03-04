@@ -309,6 +309,12 @@ class MandrillMailer extends Mailer
             "to" => $to_array
         ));
 
+        // Inject additional params into message
+        if(isset($customheaders['X-MandrillMailer'])) {
+            $params = array_merge($params, $customheaders['X-MandrillMailer']);
+            unset($customheaders['X-MandrillMailer']);
+        }
+
         if (is_array($from)) {
             $params['from_email'] = $from['email'];
             $params['from_name']  = $from['name'];
