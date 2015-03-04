@@ -93,7 +93,8 @@ class MandrillMailer extends Mailer
      */
     public static function setDefaultParams(array $v)
     {
-        return Config::inst()->update(__CLASS__, 'default_params', $v);
+        Config::inst()->update(__CLASS__, 'default_params', $v);
+        return $this;
     }
 
     /**
@@ -112,7 +113,28 @@ class MandrillMailer extends Mailer
      */
     public static function setSubaccount($v)
     {
-        return Config::inst()->update(__CLASS__, 'subaccount', $v);
+        Config::inst()->update(__CLASS__, 'subaccount', $v);
+        return $this;
+    }
+
+    /**
+     * Get use_google_analytics
+     * @return string
+     */
+    public static function getUseGoogleAnalytics()
+    {
+        return Config::inst()->get(__CLASS__, 'use_google_analytics');
+    }
+
+    /**
+     * Set use_google_analytics
+     * @param string $v
+     * @return \MandrillMailer
+     */
+    public static function setUseGoogleAnalytics($v)
+    {
+        Config::inst()->update(__CLASS__, 'use_google_analytics', $v);
+        return $this;
     }
 
     /**
@@ -316,6 +338,20 @@ class MandrillMailer extends Mailer
         if ($bcc_email) {
             if (is_string($bcc_email)) {
                 $params['bcc_address'] = $bcc_email;
+            }
+        }
+
+        // Google analytics domains
+        if (self::getUseGoogleAnalytics()) {
+            if (!isset($params['google_analytics_domains'])) {
+                // Compute host
+                $host = str_replace(Director::protocol(), '',
+                    Director::protocolAndHost());
+
+                // Define in params
+                $params['google_analytics_domains'] = array(
+                    $host
+                );
             }
         }
 
