@@ -216,7 +216,15 @@
 
 			.footer .footer-content {
 				padding-top:10px;
-				font-size:10px;
+				padding-left:10px;
+				padding-right:10px;
+				font-size:11px;
+				text-align:center;
+			}
+			.footer p {
+				color: $FooterFontColor;
+				font-size:11px;
+				text-align:center;
 			}
 		</style>
 	</head>
@@ -309,7 +317,7 @@
 
 												<table class="twelve columns">
 													<tr>
-														<td align="center" calss="footer-content">
+														<td align="center" class="footer-content">
 															<center>
 																$SiteConfig.EmailFooter
 															</center>

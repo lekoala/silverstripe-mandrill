@@ -139,6 +139,10 @@ class MandrillEmail extends Email
         $origState = Config::inst()->get('SSViewer', 'source_file_comments');
         Config::inst()->update('SSViewer', 'source_file_comments', false);
 
+        // Workaround to avoid clutter in our rendered html
+        $backend = Requirements::backend();
+        Requirements::set_backend(new MandrillRequirementsBackend);
+
         if (!$this->parseVariables_done) {
             $this->parseVariables_done = true;
 
@@ -162,6 +166,7 @@ class MandrillEmail extends Email
             $this->body = self::rewriteURLs($fullBody);
         }
         Config::inst()->update('SSViewer', 'source_file_comments', $origState);
+        Requirements::set_backend($backend);
 
         return $this;
     }
@@ -204,6 +209,16 @@ class MandrillEmail extends Email
     public function getCallout()
     {
         return $this->callout;
+    }
+
+    /**
+     * Get rendered body
+     * 
+     * @return string
+     */
+    public function getRenderedBody() {
+        $this->parseVariables();
+        return $this->body;
     }
 
     /**
@@ -262,7 +277,7 @@ class MandrillEmail extends Email
      * @return string
      */
     public static function getPathForTemplate($templateName) {
-        return 'emails/' . $templateName . '.ss';
+        return 'emails/' . $templateName;
     }
 
     /**

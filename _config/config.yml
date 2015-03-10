@@ -38,3 +38,10 @@ MandrillEmail:
       panel_color: '#ECF8FF'
       panel_border_color: '#b9e5ff'
       panel_font_color: '#000000'
+---
+Only:
+  classexists: 'Fluent'
+---
+EmailTemplate:
+  extensions:
+    - FluentExtension
