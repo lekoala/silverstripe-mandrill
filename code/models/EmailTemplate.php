@@ -179,10 +179,22 @@ class EmailTemplate extends DataObject
     {
         $tab = new Tab('Preview');
 
+        // Preview iframe
         $previewLink = '/admin/emails/EmailTemplate/PreviewEmail/?id='.$this->ID;
         $iframe      = new LiteralField('iframe',
             '<iframe src="'.$previewLink.'" style="width:600px;background:#fff;min-height:500px;vertical-align:top"></iframe>');
         $tab->push($iframe);
+
+        if (class_exists('CmsInlineFormAction')) {
+            // Test emails
+            $compo  = new FieldGroup(
+                new HeaderField('SendTestEmailHeader','Send test email'),
+                new HiddenField('EmailTemplateID', null, $this->ID),
+                new TextField('SendTestEmail', 'Recipient'),
+                $action = new CmsInlineFormAction('doSendTestEmail', 'Send')
+            );
+            $tab->push($compo);
+        }
 
         return $tab;
     }

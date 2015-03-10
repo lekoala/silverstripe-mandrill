@@ -278,6 +278,8 @@ class MandrillMailer extends Mailer
                             $attachedFiles = false, $customheaders = false,
                             $plainContent = false, $inlineImages = false)
     {
+        $original_to = $to;
+        
         // Handle multiple recipients
         if (is_array($to)) {
             $tos = $to;
@@ -408,7 +410,7 @@ class MandrillMailer extends Mailer
 
         if ($sent) {
             $this->last_is_error = false;
-            return array($orginal_to, $subject, $htmlContent, $customheaders);
+            return array($original_to, $subject, $htmlContent, $customheaders);
         } else {
             $this->last_is_error = true;
             $this->last_error    = $ret;
