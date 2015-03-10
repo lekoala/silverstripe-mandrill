@@ -241,6 +241,31 @@ class MandrillEmail extends Email
     }
 
     /**
+     * Get available templates
+     *
+     * @return array
+     */
+    public static function getAvailablesTemplates()
+    {
+        $templates = self::config()->get('templates');
+        $arr = array();
+        foreach($templates as $t) {
+            $arr[self::getPathForTemplate($t)] = $t;
+        }
+        return $arr;
+    }
+
+    /**
+     * Helper method to get path to a template
+     *
+     * @param string $templateName
+     * @return string
+     */
+    public static function getPathForTemplate($templateName) {
+        return 'emails/' . $templateName . '.ss';
+    }
+
+    /**
      * 
      * @return string
      */

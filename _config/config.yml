@@ -18,6 +18,9 @@ MandrillAdmin:
   cache_enabled: true
 MandrillEmail:
   default_theme: 'dark'
+  templates:
+    - BasicEmail
+    - BoilerplateEmail
   themes:
     dark:
       header_color: '#333333'
