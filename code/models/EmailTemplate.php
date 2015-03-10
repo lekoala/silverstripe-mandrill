@@ -37,15 +37,24 @@ class EmailTemplate extends DataObject
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
+        $config = EmailTemplate::config();
 
-        $templates = MandrillEmail::getAvailablesTemplates();
-        $fields->replaceField('Template',
-            new DropdownField('Template', 'Template', $templates));
+        if ($config->allow_configure_template || Permission::check('ADMIN')) {
+            $templates = MandrillEmail::getAvailablesTemplates();
+            $fields->replaceField('Template',
+                new DropdownField('Template', 'Template', $templates));
+        } else {
+            $fields->removeByName('Template');
+        }
 
-        $themes = MandrillEmail::getAvailableThemes();
-        $fields->replaceField('Theme',
-            new DropdownField('Theme', 'Theme', array_combine($themes, $themes)));
-
+        if ($config->allow_configure_theme || Permission::check('ADMIN')) {
+            $themes = MandrillEmail::getAvailableThemes();
+            $fields->replaceField('Theme',
+                new DropdownField('Theme', 'Theme',
+                array_combine($themes, $themes)));
+        } else {
+            $fields->removeByName('Theme');
+        }
         $objectsSource = array();
         $dataobjects   = ClassInfo::subclassesFor('DataObject');
         foreach ($dataobjects as $dataobject) {
@@ -80,7 +89,16 @@ class EmailTemplate extends DataObject
             _t('EmailTemplate.AVAILABLEMERGEFIELDSTITLE',
                 'Available merge fields')));
         $content = '';
-        $models  = $this->getAvailableModels();
+
+        $baseFields = array(
+            'To', 'Cc', 'Bcc', 'From', 'Subject', 'Body', 'BaseURL', 'Controller'
+        );
+        foreach ($baseFields as $baseField) {
+            $content .= $baseField.', ';
+        }
+        $content = trim($content, ', ').'<br/><br/>';
+
+        $models = $this->getAvailableModels();
         foreach ($models as $name => $model) {
             $content .= '<strong>'.$name.' ('.$model.') :</strong><br/>';
             $props = Config::inst()->get($model, 'db');
@@ -101,16 +119,17 @@ class EmailTemplate extends DataObject
 
     /**
      * Base models always available
+     *
+     * These models are defined in MandrillEmail::templateData()
      * 
      * @return array
      */
     public function getBaseModels()
     {
         return array(
+            'CurrentMember' => 'Member',
             'Recipient' => 'Member',
             'Sender' => 'Member',
-            // SiteConfig could be overidden is some context, so store config
-            // under another name
             'Config' => 'SiteConfig'
         );
     }
@@ -184,19 +203,27 @@ class EmailTemplate extends DataObject
         }
         $email->setSubject($this->Title);
         $email->setBody($this->Content);
+        if ($this->Callout) {
+            $email->setCallout($this->Callout);
+        }
+        if ($this->ExtraModels) {
+            $models = explode(',', $this->ExtraModels);
+            $email->setRequiredObjects(array_combine($models, $models));
+        }
+        $email->setParseBody(true);
         return $email;
     }
 
     /**
-     * Get rendered body from Email
+     * Get rendered body from Email without parsing variables
      *
      * @return string
      */
     public function renderTemplate()
     {
         $email = $this->getEmail();
-
-        $html = $email->getRenderedBody();
+//        $email->setParseBody(false);
+        $html  = $email->getRenderedBody();
 
         return (string) $html;
     }

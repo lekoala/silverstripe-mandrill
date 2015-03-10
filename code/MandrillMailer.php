@@ -310,7 +310,7 @@ class MandrillMailer extends Mailer
         ));
 
         // Inject additional params into message
-        if(isset($customheaders['X-MandrillMailer'])) {
+        if (isset($customheaders['X-MandrillMailer'])) {
             $params = array_merge($params, $customheaders['X-MandrillMailer']);
             unset($customheaders['X-MandrillMailer']);
         }
@@ -472,9 +472,7 @@ class MandrillMailer extends Mailer
     public static function resolveDefaultToEmail($to = null)
     {
         $original_to = $to;
-        if (strpos($to, '<') !== false) {
-            $to = MandrillMailer::get_email_from_rfc_email($to);
-        }
+        $to          = MandrillMailer::get_email_from_rfc_email($to);
         if (!empty($to) && filter_var($to, FILTER_VALIDATE_EMAIL)) {
             return $original_to;
         }
@@ -517,13 +515,16 @@ class MandrillMailer extends Mailer
     }
 
     /**
-     * Extract parts between the two parentheses
+     * Extract parts between brackets
      *
      * @param string $rfc_email_string
      * @return string
      */
     public static function get_email_from_rfc_email($rfc_email_string)
     {
+        if (strpos($rfc_email_string, '<') === false) {
+            return $rfc_email_string;
+        }
         $mailAddress = preg_match('/(?:<)(.+)(?:>)$/', $rfc_email_string,
             $matches);
         if (empty($matches)) {

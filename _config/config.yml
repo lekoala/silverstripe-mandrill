@@ -38,6 +38,9 @@ MandrillEmail:
       panel_color: '#ECF8FF'
       panel_border_color: '#b9e5ff'
       panel_font_color: '#000000'
+EmailTemplate:
+  allow_configure_theme: false
+  allow_configure_template: false
 ---
 Only:
   classexists: 'Fluent'

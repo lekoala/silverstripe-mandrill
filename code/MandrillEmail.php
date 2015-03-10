@@ -20,6 +20,7 @@ class MandrillEmail extends Email
      */
     protected $template_data;
     protected $ss_template = "emails/BasicEmail";
+    protected $original_body;
     protected $locale;
     protected $callout;
     protected $image;
@@ -29,7 +30,16 @@ class MandrillEmail extends Email
      * @var Member
      */
     protected $to_member;
-    protected $theme = null;
+
+    /**
+     *
+     * @var Member
+     */
+    protected $from_member;
+    protected $parse_body       = false;
+    protected $merge_objects    = array();
+    protected $required_objects = array();
+    protected $theme            = null;
     protected $header_color;
     protected $header_font_color;
     protected $footer_color;
@@ -58,22 +68,6 @@ class MandrillEmail extends Email
         } else if ($theme = self::config()->default_theme) {
             $this->setTheme($theme);
         }
-
-        // Set base data
-        $this->populateTemplate(array(
-            'CurrentMember' => Member::currentUser(),
-            'SiteConfig' => $config,
-            'Controller' => Controller::curr(),
-            'Image' => $this->image,
-            'Callout' => $this->callout,
-            'HeaderColor' => $this->header_color,
-            'HeaderFontColor' => $this->header_font_color,
-            'FooterColor' => $this->footer_color,
-            'FooterFontColor' => $this->footer_font_color,
-            'PanelColor' => $this->panel_color,
-            'PanelBorderColor' => $this->panel_border_color,
-            'PanelFontColor' => $this->panel_font_color,
-        ));
     }
 
     /**
@@ -88,6 +82,15 @@ class MandrillEmail extends Email
      */
     public function send($messageID = null)
     {
+        // Check required objects
+        if ($this->required_objects) {
+            foreach ($this->required_objects as $reqName => $reqClass) {
+                if (!isset($this->merge_objects[$reqName])) {
+                    throw new Exception('Required object '.$reqName.' of class '.$reqClass.' is not defined in merge objects');
+                }
+            }
+        }
+
         // Check for Subject
         if (!$this->subject) {
             throw new Exception('You must set a subject');
@@ -127,12 +130,101 @@ class MandrillEmail extends Email
     }
 
     /**
+     * Is body parsed or not?
+     *
+     * @return bool
+     */
+    public function getParseBody()
+    {
+        return $this->parse_body;
+    }
+
+    /**
+     * Set if body should be parsed or not
+     * 
+     * @param bool $v
+     * @return \MandrillEmail
+     */
+    public function setParseBody($v = true)
+    {
+        $this->parse_body = (bool) $v;
+        return $this;
+    }
+
+    protected function templateData()
+    {
+        // If no data is defined, set some default
+        if (!$this->template_data) {
+            $this->template_data = $this->customise(array('IsEmail' => true));
+        }
+
+        // Infos set by Silverstripe
+        $originalInfos = array(
+            "To" => $this->to,
+            "Cc" => $this->cc,
+            "Bcc" => $this->bcc,
+            "From" => $this->from,
+            "Subject" => $this->subject,
+            "Body" => $this->body,
+            "BaseURL" => $this->BaseURL(),
+            "IsEmail" => true,
+        );
+
+        // Infos injected from the models
+        $modelsInfos = array(
+            'CurrentMember' => Member::currentUser(),
+            // SiteConfig could be overidden is some context, so use another name
+            'Config' => SiteConfig::current_site_config(),
+            'Controller' => Controller::curr(),
+        );
+        if ($this->to_member) {
+            $modelsInfos['Recipient'] = $this->to_member;
+        } else {
+            $member                   = new Member();
+            $member->Email            = $this->to;
+            $modelsInfos['Recipient'] = $member;
+        }
+        if ($this->from_member) {
+            $modelsInfos['Sender'] = $this->from_member;
+        } else {
+            $member                = new Member();
+            $member->Email         = $this->from;
+            $modelsInfos['Sender'] = $member;
+        }
+        $modelsInfos = array_merge($modelsInfos, $this->merge_objects);
+
+        // Template specific variables
+        $templatesInfos = array(
+            'Image' => $this->image,
+            'Callout' => $this->callout,
+        );
+
+        // Theme options
+        $themesInfos = array(
+            'HeaderColor' => $this->header_color,
+            'HeaderFontColor' => $this->header_font_color,
+            'FooterColor' => $this->footer_color,
+            'FooterFontColor' => $this->footer_font_color,
+            'PanelColor' => $this->panel_color,
+            'PanelBorderColor' => $this->panel_border_color,
+            'PanelFontColor' => $this->panel_font_color,
+        );
+
+        $allInfos = array_merge(
+            $modelsInfos, $templatesInfos, $themesInfos, $originalInfos
+        );
+
+        return $this->template_data->customise($allInfos);
+    }
+
+    /**
      * Load all the template variables into the internal variables, including
      * the template into body.	Called before send() or debugSend()
      * $isPlain=true will cause the template to be ignored, otherwise the GenericEmail template will be used
      * and it won't be plain email :)
      *
-     * This function is updated to rewrite urls in a safely manner and inline css
+     * This function is updated to rewrite urls in a safely manner and inline css.
+     * It will also changed the requirements backend to avoid requiring stuff in the html.
      */
     protected function parseVariables($isPlain = false)
     {
@@ -145,12 +237,21 @@ class MandrillEmail extends Email
 
         if (!$this->parseVariables_done) {
             $this->parseVariables_done = true;
+            if (!$this->original_body) {
+                $this->original_body = $this->body;
+            }
 
             // Parse $ variables in the base parameters
             $data = $this->templateData();
 
             // Process a .SS template file
-            $fullBody = $this->body;
+            $fullBody = $this->original_body;
+
+            if ($this->parse_body) {
+                $viewer = new SSViewer_FromString($fullBody);
+                $fullBody = $viewer->process($data);
+            }
+
             if ($this->ss_template && !$isPlain) {
                 // Requery data so that updated versions of To, From, Subject, etc are included
                 $data = $this->templateData();
@@ -168,6 +269,65 @@ class MandrillEmail extends Email
         Config::inst()->update('SSViewer', 'source_file_comments', $origState);
         Requirements::set_backend($backend);
 
+        return $this;
+    }
+
+    /**
+     * Array of required objects
+     *
+     * @return array
+     */
+    public function getRequiredObjects()
+    {
+        return $this->required_objects;
+    }
+
+    /**
+     * Set required objects
+     *
+     * @param array $arr
+     * @return \MandrillEmail
+     */
+    public function setRequiredObjects($arr)
+    {
+        $this->required_objects = $arr;
+        return $this;
+    }
+
+    /**
+     * Array of merge objects
+     *
+     * @return array
+     */
+    public function getMergeObjects()
+    {
+        return $this->merge_objects;
+    }
+
+    /**
+     * Set merge objects
+     *
+     * @param array $arr
+     * @return \MandrillEmail
+     */
+    public function setMergeObjects($arr)
+    {
+        $this->merge_objects       = $arr;
+        $this->parseVariables_done = false;
+        return $this;
+    }
+
+    /**
+     * Set a merge object by name
+     *
+     * @param string $name
+     * @param DataObject $obj
+     * @return \MandrillEmail
+     */
+    public function setMergeObject($name, $obj)
+    {
+        $this->merge_objects[$name] = $obj;
+        $this->parseVariables_done  = false;
         return $this;
     }
 
@@ -216,7 +376,8 @@ class MandrillEmail extends Email
      * 
      * @return string
      */
-    public function getRenderedBody() {
+    public function getRenderedBody()
+    {
         $this->parseVariables();
         return $this->body;
     }
@@ -263,8 +424,8 @@ class MandrillEmail extends Email
     public static function getAvailablesTemplates()
     {
         $templates = self::config()->get('templates');
-        $arr = array();
-        foreach($templates as $t) {
+        $arr       = array();
+        foreach ($templates as $t) {
             $arr[self::getPathForTemplate($t)] = $t;
         }
         return $arr;
@@ -276,8 +437,9 @@ class MandrillEmail extends Email
      * @param string $templateName
      * @return string
      */
-    public static function getPathForTemplate($templateName) {
-        return 'emails/' . $templateName;
+    public static function getPathForTemplate($templateName)
+    {
+        return 'emails/'.$templateName;
     }
 
     /**
@@ -337,6 +499,7 @@ class MandrillEmail extends Email
                 $this->$k = $v;
             }
         }
+        $this->parseVariables_done = false;
     }
 
     /**
@@ -358,6 +521,7 @@ class MandrillEmail extends Email
         if ($image->ID) {
             $this->setImage($image);
         }
+        $this->parseVariables_done = false;
     }
 
     /**
@@ -368,8 +532,11 @@ class MandrillEmail extends Email
     public function getToMember()
     {
         if (!$this->to_member && $this->to) {
-            $email           = MandrillMailer::get_email_from_rfc_email($this->to);
-            $this->to_member = Member::get()->filter(array('Email' => $email))->first();
+            $email  = MandrillMailer::get_email_from_rfc_email($this->to);
+            $member = Member::get()->filter(array('Email' => $email))->first();
+            if ($member) {
+                $this->setToMember($member);
+            }
         }
         return $this->to_member;
     }
@@ -395,9 +562,40 @@ class MandrillEmail extends Email
      */
     public function setToMember(Member $member)
     {
-        $this->locale    = $member->Locale;
-        $this->to_member = $member;
+        $this->locale              = $member->Locale;
+        $this->to_member           = $member;
+        $this->parseVariables_done = false;
         return $this->setTo($member->Email);
+    }
+
+    /**
+     * Get sender as member
+     *
+     * @return Member
+     */
+    public function getFromMember()
+    {
+        if (!$this->from_member && $this->from) {
+            $email  = MandrillMailer::get_email_from_rfc_email($this->from);
+            $member = Member::get()->filter(array('Email' => $email))->first();
+            if ($member) {
+                $this->setFromMember($member);
+            }
+        }
+        return $this->from_member;
+    }
+
+    /**
+     * Set From Member
+     * 
+     * @param Member $member
+     * @return MandrillEmail
+     */
+    public function setFromMember(Member $member)
+    {
+        $this->from_member         = $member;
+        $this->parseVariables_done = false;
+        return $this->setFrom($member->Email);
     }
 
     /**
