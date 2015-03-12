@@ -16,6 +16,7 @@ MandrillMailer:
   use_google_analytics: true
 MandrillAdmin:
   cache_enabled: true
+  private_mode: false
 MandrillEmail:
   default_theme: 'dark'
   templates:
