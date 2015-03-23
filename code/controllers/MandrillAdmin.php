@@ -2,7 +2,7 @@
 
 /**
  * Mandrill admin section
- * 
+ *
  * Allow you to see messages sent through the api key used to send messages
  *
  * @package Mandrill
@@ -31,6 +31,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         "doUninstallHook"
     );
     private static $cache_enabled   = true;
+
+    private static $private_mode   = false;
 
     /**
      * @var MandrilMessage
@@ -180,6 +182,18 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     }
 
     /**
+     * @return boolean
+     */
+    public function getPrivateMode()
+    {
+        $v = $this->config()->private_mode;
+        if ($v === null) {
+            $v = self::$private_mode;
+        }
+        return $v;
+    }
+
+    /**
      * List of MandrillMessage
      *
      * Messages are cached to avoid hammering the api
@@ -202,8 +216,20 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             $list = unserialize($cache_result);
         } else {
             //search(string key, string query, string date_from, string date_to, array tags, array senders, array api_keys, integer limit)
+
+            $private_mode = $this->getPrivateMode();
+            $subaccount = $this->getMailer()->getSubaccount();
+
+            // check if in private mode or not
+            // if in private mode no search query should be possible
+            if($private_mode && $subaccount){
+              $query = 'subaccount:' . $subaccount;
+            }else{
+              $query = $this->getParam('Query', '*');
+            }
+
             $messages = $this->getMandrill()->messages->search(
-                $this->getParam('Query', '*'), $this->getParam('DateFrom'),
+                $query, $this->getParam('DateFrom'),
                 $this->getParam('DateTo'), null, null,
                 array($this->getMandrill()->apikey),
                 $this->getParam('Limit', 100)
@@ -318,10 +344,15 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             $this->getParam('DateFrom', date('Y-m-d', strtotime('-30 days')))));
         $fields->push(new DateField('DateTo', _t('Mandrill.DATETO', 'To'),
             $this->getParam('DateTo', date('Y-m-d'))));
-        $fields->push($queryField = new TextField('Query',
-            _t('Mandrill.QUERY', 'Query'), $this->getParam('Query')));
-        $queryField->setDescription(_t('Mandrill.QUERYDESC',
-                'For more information about query syntax, please visit <a target="_blank" href="http://help.mandrill.com/entries/22211902">Mandrill Support</a>'));
+
+        // do not display query field if private_mode is set to true.
+        if(!$this->getPrivateMode()){
+          $fields->push($queryField = new TextField('Query',
+              _t('Mandrill.QUERY', 'Query'), $this->getParam('Query')));
+          $queryField->setDescription(_t('Mandrill.QUERYDESC',
+              'For more information about query syntax, please visit <a target="_blank" href="http://help.mandrill.com/entries/22211902">Mandrill Support</a>'));
+        }
+
         $fields->push(new DropdownField('Limit', _t('Mandrill.LIMIT', 'Limit'),
             array(
             10 => 10,
@@ -442,7 +473,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
 
     /**
      * Install hook form
-     * 
+     *
      * @return \Form
      */
     public function InstallHookForm()
