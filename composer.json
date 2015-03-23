@@ -1,13 +1,13 @@
 {
-	"name": "mediabeast/silverstripe-mandrill",
+	"name": "lekoala/silverstripe-mandrill",
 	"description": "Adds mandrill in the SilverStripe CMS",
 	"type": "silverstripe-module",
-	"keywords": ["silverstripe", "mandrill", "module", "cms", "email", "api"],
+	"keywords": ["silverstripe", "mandrill", "module", "cms"],
 	"license": "BSD-3-Clause",
 	"authors": [
 		{
-			"name": "Myles Beardsmore",
-      "email": "mediabeastnz@gmail.com"
+			"name": "LeKoala",
+			"email": "thomas@lekoala.be"
 		}
 	],
 	"require":
