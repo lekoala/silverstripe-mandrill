@@ -36,11 +36,11 @@ class MandrillSiteConfig extends DataExtension
             new TextField('DefaultToEmail',
             _t('MandrillSiteConfig.DefaultToEmail', 'Default To Email')));
         $fields->addFieldToTab('Root.Email',
-            $emailLogo = new ImageUploadField('EmailLogo',
+            $emailLogo = new UploadField('EmailLogo',
             _t('MandrillSiteConfig.EmailLogo', 'Email Logo')));
         $emailLogo->setDescription(_t('MandrillSiteConfig.EmailLogoDesc',
                 'Will default to Logo if none defined'));
-        
+
         return $fields;
     }
 
