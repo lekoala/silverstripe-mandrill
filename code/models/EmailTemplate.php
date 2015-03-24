@@ -61,13 +61,17 @@ class EmailTemplate extends DataObject
             if ($dataobject == 'DataObject') {
                 continue;
             }
-            $singl                      = singleton($dataobject);
             $objectsSource[$dataobject] = $dataobject;
         }
-        $fields->replaceField('ExtraModels',
-            $extraModels = new ListboxField('ExtraModels', 'Extra Models',
-            $objectsSource));
-        $extraModels->setMultiple(true);
+
+        // form-extras integration
+        if (class_exists('TableField')) {
+            $fields->replaceField('ExtraModels',
+                $extraModels = new TableField('ExtraModels', 'Extra Models'));
+            $extraModels->setHeaders(array('Name', 'Model'));
+            $extraModels->setColumnValues('Model', $objectsSource);
+        }
+
 
         // form-extras integration
         if (class_exists('ComboField')) {
@@ -138,18 +142,33 @@ class EmailTemplate extends DataObject
     }
 
     /**
+     * A map of Name => Class
+     * 
+     * @return array
+     */
+    public function getExtraModelsAsArray()
+    {
+        $extraModels = $this->ExtraModels ? json_decode($this->ExtraModels) : array();
+        $arr         = $this->getBaseModels();
+        foreach ($extraModels as $extraModel) {
+            if (!class_exists($extraModel->Model)) {
+                continue;
+            }
+            $arr[$extraModel->Name] = $extraModel->Model;
+        }
+        return $arr;
+    }
+
+    /**
      * An map of Name => Class
      *
      * @return array
      */
     public function getAvailableModels()
     {
-        $extraModels = explode(',', $this->ExtraModels);
+        $extraModels = $this->getExtraModelsAsArray();
         $arr         = $this->getBaseModels();
-        foreach ($extraModels as $extraModel) {
-            $arr[$extraModel] = $extraModel;
-        }
-        return $arr;
+        return array_merge($arr, $extraModels);
     }
 
     /**
@@ -222,8 +241,8 @@ class EmailTemplate extends DataObject
             $email->setCallout($this->Callout);
         }
         if ($this->ExtraModels) {
-            $models = explode(',', $this->ExtraModels);
-            $email->setRequiredObjects(array_combine($models, $models));
+            $models = $this->getExtraModelsAsArray();
+            $email->setRequiredObjects($models);
         }
         $email->setParseBody(true);
         return $email;
