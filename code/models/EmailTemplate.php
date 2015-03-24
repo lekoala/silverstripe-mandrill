@@ -100,8 +100,11 @@ class EmailTemplate extends DataObject
 
         $models = $this->getAvailableModels();
         foreach ($models as $name => $model) {
-            $content .= '<strong>'.$name.' ('.$model.') :</strong><br/>';
             $props = Config::inst()->get($model, 'db');
+            if (!$props) {
+                continue;
+            }
+            $content .= '<strong>'.$name.' ('.$model.') :</strong><br/>';
             foreach ($props as $fieldName => $fieldType) {
                 $content .= $fieldName.', ';
             }
@@ -188,7 +191,7 @@ class EmailTemplate extends DataObject
         if (class_exists('CmsInlineFormAction')) {
             // Test emails
             $compo  = new FieldGroup(
-                new HeaderField('SendTestEmailHeader','Send test email'),
+                new HeaderField('SendTestEmailHeader', 'Send test email'),
                 new HiddenField('EmailTemplateID', null, $this->ID),
                 new TextField('SendTestEmail', 'Recipient'),
                 $action = new CmsInlineFormAction('doSendTestEmail', 'Send')
