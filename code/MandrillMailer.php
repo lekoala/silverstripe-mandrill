@@ -279,7 +279,7 @@ class MandrillMailer extends Mailer
                             $plainContent = false, $inlineImages = false)
     {
         $original_to = $to;
-        
+
         // Handle multiple recipients
         if (is_array($to)) {
             $tos = $to;
@@ -292,11 +292,40 @@ class MandrillMailer extends Mailer
             if (strpos($t, '<') !== false) {
                 $to_array[] = array(
                     'name' => self::get_displayname_from_rfc_email($t),
-                    'email' => self::get_email_from_rfc_email($t)
+                    'email' => self::get_email_from_rfc_email($t),
+                    'type' => 'to'
                 );
             } else {
-                $to_array[] = array('email' => $t);
+                $to_array[] = array('email' => $t, 'type' => 'to');
             }
+        }
+        if (isset($customheaders['Cc'])) {
+            foreach (explode(',', $customheaders['Cc']) as $t) {
+                if (strpos($t, '<') !== false) {
+                    $to_array[] = array(
+                        'name' => self::get_displayname_from_rfc_email($t),
+                        'email' => self::get_email_from_rfc_email($t),
+                        'type' => 'cc'
+                    );
+                } else {
+                    $to_array[] = array('email' => $t, 'type' => 'cc');
+                }
+            }
+            unset($customheaders['Cc']);
+        }
+        if (isset($customheaders['Bcc'])) {
+            foreach (explode(',', $customheaders['Bcc']) as $t) {
+                if (strpos($t, '<') !== false) {
+                    $to_array[] = array(
+                        'name' => self::get_displayname_from_rfc_email($t),
+                        'email' => self::get_email_from_rfc_email($t),
+                        'type' => 'bcc'
+                    );
+                } else {
+                    $to_array[] = array('email' => $t, 'type' => 'bcc');
+                }
+            }
+            unset($customheaders['Bcc']);
         }
 
         // Create params to send to mandrill message api
