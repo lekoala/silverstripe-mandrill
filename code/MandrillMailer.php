@@ -263,6 +263,39 @@ class MandrillMailer extends Mailer
     }
 
     /**
+     * A helper method to process a list of recipients
+     *
+     * @param array $arr
+     * @param string|array $recipients
+     * @param string $type to - cc - bcc
+     * @return array
+     */
+    protected function appendTo($arr, $recipients, $type = 'to')
+    {
+        if (!is_array($recipients)) {
+            $recipients = explode(',', $recipients);
+        }
+        foreach ($recipients as $recipient) {
+            if (is_array($recipient)) {
+                $toEmail = $recipient['email'];
+                $toName  = $recipient['name'];
+            } else if (strpos($recipient, '<') !== false) {
+                $toEmail = self::get_displayname_from_rfc_email($recipient);
+                $toName  = self::get_email_from_rfc_email($recipient);
+            } else {
+                $toEmail = $recipient;
+                $toName  = null;
+            }
+            $arr[] = array(
+                'email' => $toEmail,
+                'name' => $toName,
+                'type' => $type
+            );
+        }
+        return $arr;
+    }
+
+    /**
      * Send the email through mandrill
      * 
      * @param string|array $to
@@ -280,52 +313,28 @@ class MandrillMailer extends Mailer
     {
         $original_to = $to;
 
-        // Handle multiple recipients
-        if (is_array($to)) {
-            $tos = $to;
-        } else {
-            $tos = explode(',', $to);
-        }
-
+        // Process recipients
         $to_array = array();
-        foreach ($tos as $t) {
-            if (strpos($t, '<') !== false) {
-                $to_array[] = array(
-                    'name' => self::get_displayname_from_rfc_email($t),
-                    'email' => self::get_email_from_rfc_email($t),
-                    'type' => 'to'
-                );
-            } else {
-                $to_array[] = array('email' => $t, 'type' => 'to');
-            }
-        }
+        $to_array = $this->appendTo($to_array, $to, 'to');
         if (isset($customheaders['Cc'])) {
-            foreach (explode(',', $customheaders['Cc']) as $t) {
-                if (strpos($t, '<') !== false) {
-                    $to_array[] = array(
-                        'name' => self::get_displayname_from_rfc_email($t),
-                        'email' => self::get_email_from_rfc_email($t),
-                        'type' => 'cc'
-                    );
-                } else {
-                    $to_array[] = array('email' => $t, 'type' => 'cc');
-                }
-            }
+            $to_array = $this->appendTo($to_array, $customheaders['Cc'], 'cc');
             unset($customheaders['Cc']);
         }
         if (isset($customheaders['Bcc'])) {
-            foreach (explode(',', $customheaders['Bcc']) as $t) {
-                if (strpos($t, '<') !== false) {
-                    $to_array[] = array(
-                        'name' => self::get_displayname_from_rfc_email($t),
-                        'email' => self::get_email_from_rfc_email($t),
-                        'type' => 'bcc'
-                    );
-                } else {
-                    $to_array[] = array('email' => $t, 'type' => 'bcc');
-                }
-            }
+            $to_array = $this->appendTo($to_array, $customheaders['Bcc'], 'bcc');
             unset($customheaders['Bcc']);
+        }
+
+        // Process sender
+        if (is_array($from)) {
+            $fromEmail = $from['email'];
+            $fromName  = $from['name'];
+        } else if (strpos($from, '<') !== false) {
+            $fromEmail = self::get_displayname_from_rfc_email($from);
+            $fromName  = self::get_email_from_rfc_email($from);
+        } else {
+            $fromEmail = $from;
+            $fromName  = null;
         }
 
         // Create params to send to mandrill message api
@@ -336,19 +345,17 @@ class MandrillMailer extends Mailer
         $params = array_merge($default_params,
             array(
             "subject" => $subject,
-            "from_email" => $from,
+            "from_email" => $fromEmail,
             "to" => $to_array
         ));
+        if ($fromName) {
+            $params['from_name'] = $fromName;
+        }
 
         // Inject additional params into message
         if (isset($customheaders['X-MandrillMailer'])) {
             $params = array_merge($params, $customheaders['X-MandrillMailer']);
             unset($customheaders['X-MandrillMailer']);
-        }
-
-        if (is_array($from)) {
-            $params['from_email'] = $from['email'];
-            $params['from_name']  = $from['name'];
         }
 
         if ($plainContent) {
