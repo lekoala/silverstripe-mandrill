@@ -279,24 +279,29 @@ class MandrillMailer extends Mailer
                             $plainContent = false, $inlineImages = false)
     {
         $original_to = $to;
-        
-        // Handle multiple recipients
-        if (is_array($to)) {
-            $tos = $to;
-        } else {
-            $tos = explode(',', $to);
-        }
 
-        $to_array = array();
-        foreach ($tos as $t) {
-            if (strpos($t, '<') !== false) {
-                $to_array[] = array(
-                    'name' => self::get_displayname_from_rfc_email($t),
-                    'email' => self::get_email_from_rfc_email($t)
-                );
+        $grouped_recipients['to'] = $to;
+        if (isset($customheaders['Cc'])) $grouped_recipients['cc'] = $customheaders['Cc'];
+        if (isset($customheaders['Bcc'])) $grouped_recipients['bcc'] = $customheaders['Bcc'];
+
+        $prepared_recipients = [];
+        foreach($grouped_recipients as $recipient_type => $recipients) {
+          if(!is_array($recipients)) $recipients = explode(',', $recipients);
+
+          foreach ($recipients as $recipient) {
+            if (strpos($recipient, '<') !== false) {
+              $prepared_recipients[] = array(
+                  'name' => self::get_displayname_from_rfc_email($recipient),
+                  'email' => self::get_email_from_rfc_email($recipient),
+                  'type' => $recipient_type
+              );
             } else {
-                $to_array[] = array('email' => $t);
+              $prepared_recipients[] = array(
+                'email' => $recipient,
+                'type' => $recipient_type
+              );
             }
+          }
         }
 
         // Create params to send to mandrill message api
@@ -308,7 +313,7 @@ class MandrillMailer extends Mailer
             array(
             "subject" => $subject,
             "from_email" => $from,
-            "to" => $to_array
+            "to" => $prepared_recipients
         ));
 
         // Inject additional params into message
