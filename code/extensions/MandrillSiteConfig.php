@@ -37,6 +37,7 @@ class MandrillSiteConfig extends DataExtension
             _t('MandrillSiteConfig.DefaultToEmail', 'Default To Email')));
 
 
+        // form-extras integration
         $uploadClass = 'UploadField';
         if(class_exists('ImageUploadField')) {
             $uploadClass = 'ImageUploadField';
