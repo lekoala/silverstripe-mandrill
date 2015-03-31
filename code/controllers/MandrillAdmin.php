@@ -201,10 +201,19 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         if ($cache_enabled && $cache_result) {
             $list = unserialize($cache_result);
         } else {
+            $defaultQuery = '*';
+            // If we have a subaccount defined, we need to restrict the query to this subaccount
+            if($subaccount = MandrillMailer::getSubaccount()) {
+                $defaultQuery = 'subaccount:' . $subaccount;
+            }
+
             //search(string key, string query, string date_from, string date_to, array tags, array senders, array api_keys, integer limit)
             $messages = $this->getMandrill()->messages->search(
-                $this->getParam('Query', '*'), $this->getParam('DateFrom'),
-                $this->getParam('DateTo'), null, null,
+                $this->getParam('Query', $defaultQuery),
+                $this->getParam('DateFrom'),
+                $this->getParam('DateTo'),
+                null,
+                null,
                 array($this->getMandrill()->apikey),
                 $this->getParam('Limit', 100)
             );
@@ -296,6 +305,15 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         $values = array();
         foreach ($form->Fields() as $field) {
             $values[$field->getName()] = $field->datavalue();
+        }
+        // If we have a subaccount defined, we need to restrict the query to this subaccount
+        if($subaccount = MandrillMailer::getSubaccount()) {
+            if(empty($values['Query'])) {
+                $values['Query'] = 'subaccount:' . $subaccount;
+            }
+            else {
+                $values['Query'] = $values['Query'] . ' AND subaccount:' . $subaccount;
+            }
         }
         Session::set('MandrilAdminSearch', $values);
         Session::save();
