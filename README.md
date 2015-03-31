@@ -4,9 +4,13 @@ Use Mandrill in Silverstripe
 
 Define in your \_ss\_environment.php file the following constant
 
-define('MANDRILL\_API\_KEY','YOUR_API_KEY_HERE');
+	define('MANDRILL\_API\_KEY','YOUR_API_KEY_HERE');
 
-This module uses the official php sdk version 1.0.54 with a few tweaks
+You can also manually initialize the module by calling the following method in \_config.php
+
+	MandrillMailer::setAsMailer(MANDRILL_API_KEY);
+
+This module uses the official php sdk version 1.0.54 with a few tweaks.
 
 Mandrillapp integration
 ==================
@@ -26,6 +30,8 @@ It comes with the following features:
 - The base template contains a few elements that are themable and/or configurable (logo, colors, sections...)
 - Send email according to Member locale
 - Rewrite urls in a safe fashion (no errors on empty links)
+
+Emails templates use the Ink css framework.
 
 Site Config extensions
 ==================
@@ -73,6 +79,9 @@ A basic solution is to simply create the HTML on your page and create your email
 provide you with one central place to manage all your email content.
 
 This is why this module comes with one easy to use EmailTemplateAdmin based on ModelAdmin.
+
+NOTE: email templates could be split in a separate module in the near future once I've
+determined if it's possible to make it standalone.
 
 Compatibility
 ==================
