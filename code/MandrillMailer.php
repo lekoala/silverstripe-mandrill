@@ -263,6 +263,36 @@ class MandrillMailer extends Mailer
     }
 
     /**
+     * Normalize a recipient to an array of email and name
+     * 
+     * @param string|array $recipient
+     * @return array
+     */
+    protected function processRecipient($recipient)
+    {
+        if (is_array($recipient)) {
+            $email = $recipient['email'];
+            $name  = $recipient['name'];
+        } else if (strpos($recipient, '<') !== false) {
+            $email = self::get_displayname_from_rfc_email($recipient);
+            $name  = self::get_email_from_rfc_email($recipient);
+        } else {
+            $email = $recipient;
+            // As a fallback, extract the first part of the email as the name
+            if(self::config()->name_fallback) {
+                $name = substr($email, 0, strpos($email, '@'));
+            }
+            else {
+                $name = null;
+            }
+        }
+        return array(
+            'email' => $email,
+            'name' => $name
+        );
+    }
+
+    /**
      * A helper method to process a list of recipients
      *
      * @param array $arr
@@ -276,19 +306,10 @@ class MandrillMailer extends Mailer
             $recipients = explode(',', $recipients);
         }
         foreach ($recipients as $recipient) {
-            if (is_array($recipient)) {
-                $toEmail = $recipient['email'];
-                $toName  = $recipient['name'];
-            } else if (strpos($recipient, '<') !== false) {
-                $toEmail = self::get_displayname_from_rfc_email($recipient);
-                $toName  = self::get_email_from_rfc_email($recipient);
-            } else {
-                $toEmail = $recipient;
-                $toName  = null;
-            }
+            $r     = $this->processRecipient($recipient);
             $arr[] = array(
-                'email' => $toEmail,
-                'name' => $toName,
+                'email' => $r['email'],
+                'name' => $r['name'],
                 'type' => $type
             );
         }
@@ -326,16 +347,9 @@ class MandrillMailer extends Mailer
         }
 
         // Process sender
-        if (is_array($from)) {
-            $fromEmail = $from['email'];
-            $fromName  = $from['name'];
-        } else if (strpos($from, '<') !== false) {
-            $fromEmail = self::get_displayname_from_rfc_email($from);
-            $fromName  = self::get_email_from_rfc_email($from);
-        } else {
-            $fromEmail = $from;
-            $fromName  = null;
-        }
+        $fromArray = $this->processRecipient($from);
+        $fromEmail = $fromArray['email'];
+        $fromName  = $fromArray['name'];
 
         // Create params to send to mandrill message api
         $default_params = array();

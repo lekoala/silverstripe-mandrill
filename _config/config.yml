@@ -14,6 +14,7 @@ MandrillMailer:
   subaccount: null
   global_tags: []
   use_google_analytics: true
+  name_fallback: true
 MandrillAdmin:
   cache_enabled: true
 MandrillEmail:
