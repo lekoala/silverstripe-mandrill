@@ -274,8 +274,8 @@ class MandrillMailer extends Mailer
             $email = $recipient['email'];
             $name  = $recipient['name'];
         } else if (strpos($recipient, '<') !== false) {
-            $email = self::get_displayname_from_rfc_email($recipient);
-            $name  = self::get_email_from_rfc_email($recipient);
+            $email = self::get_email_from_rfc_email($recipient);
+            $name  = self::get_displayname_from_rfc_email($recipient);
         } else {
             $email = $recipient;
             // As a fallback, extract the first part of the email as the name
