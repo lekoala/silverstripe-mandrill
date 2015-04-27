@@ -54,7 +54,7 @@ class EmailTemplatesAdmin extends ModelAdmin
         $email = $template->getEmail();
 
         $email->setTo($emailAddr);
-
+		
         $res = $email->send();
 
         if ($res) {

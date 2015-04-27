@@ -280,7 +280,7 @@ class MandrillMailer extends Mailer
             $email = $recipient;
             // As a fallback, extract the first part of the email as the name
             if(self::config()->name_fallback) {
-                $name = substr($email, 0, strpos($email, '@'));
+                $name = trim(ucwords(str_replace(array('.','-','_'),' ',substr($email, 0, strpos($email, '@')))));
             }
             else {
                 $name = null;
@@ -400,7 +400,7 @@ class MandrillMailer extends Mailer
         }
 
         // Google analytics domains
-        if (self::getUseGoogleAnalytics()) {
+        if (self::getUseGoogleAnalytics() && !Director::isDev()) {
             if (!isset($params['google_analytics_domains'])) {
                 // Compute host
                 $host = str_replace(Director::protocol(), '',
