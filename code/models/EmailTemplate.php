@@ -33,6 +33,9 @@ class EmailTemplate extends DataObject
             'value' => 'Code'
         )
     );
+    private static $translate = array(
+        'Title', 'Content', 'Callout'
+    );
 
     public function getCMSFields()
     {
