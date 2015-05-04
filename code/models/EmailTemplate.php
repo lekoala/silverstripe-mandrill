@@ -215,11 +215,12 @@ class EmailTemplate extends DataObject
         if (class_exists('CmsInlineFormAction')) {
             // Test emails
             $compo  = new FieldGroup(
-                new HeaderField('SendTestEmailHeader', 'Send test email'),
-                new HiddenField('EmailTemplateID', null, $this->ID),
-                new TextField('SendTestEmail', 'Recipient'),
+                $recipient = new TextField('SendTestEmail', ''),
                 $action = new CmsInlineFormAction('doSendTestEmail', 'Send')
             );
+			$recipient->setAttribute('placeholder', 'my@email.test');
+            $tab->push(new HiddenField('EmailTemplateID', '', $this->ID));
+            $tab->push(new HeaderField('SendTestEmailHeader', 'Send test email'));
             $tab->push($compo);
         }
 
