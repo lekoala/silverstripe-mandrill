@@ -117,6 +117,8 @@ class EmailTemplate extends DataObject
             }
             $content = trim($content, ', ').'<br/>';
         }
+		$content .= "<div class='message info'>" . _t('EmailTemplate.ENCLOSEFIELD','To escape a field from surrounding text, you can enclose it between brackets, eg: {$CurrentMember.FirstName}.') . '</div>';
+		
         $fields->addFieldToTab('Root.Main',
             new LiteralField('MergeFieldsHelper', $content));
 
@@ -252,14 +254,15 @@ class EmailTemplate extends DataObject
     }
 
     /**
-     * Get rendered body from Email without parsing variables
+     * Get rendered body
      *
+	 * @param bool $parse Should we parse variables or not?
      * @return string
      */
-    public function renderTemplate()
+    public function renderTemplate($parse = false)
     {
         $email = $this->getEmail();
-//        $email->setParseBody(false);
+        $email->setParseBody($parse);
         $html  = $email->getRenderedBody();
 
         return (string) $html;

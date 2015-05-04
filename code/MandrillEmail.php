@@ -151,6 +151,9 @@ class MandrillEmail extends Email
         return $this;
     }
 
+	/**
+	 * @return ViewableData_Customised
+	 */
     protected function templateData()
     {
         // If no data is defined, set some default
@@ -259,6 +262,8 @@ class MandrillEmail extends Email
                 $template = new SSViewer($this->ss_template);
 
                 if ($template->exists()) {
+					// Make sure we included the parsed body into layout
+					$data->setField('Body',$fullBody);
                     $fullBody = $template->process($data);
                 }
             }
