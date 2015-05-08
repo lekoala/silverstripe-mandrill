@@ -184,7 +184,15 @@ class EmailTemplate extends DataObject
      */
     public static function getByCode($code)
     {
-        return EmailTemplate::get()->filter('Code', $code)->first();
+        $template = EmailTemplate::get()->filter('Code', $code)->first();
+        if(!$template) {
+            $template = new EmailTemplate();
+            $template->Title = $code;
+            $template->Code = $code;
+            $template->Content = 'Please replace the content of this email';
+            $template->write();
+        }
+        return $template;
     }
 
     public function onBeforeWrite()
