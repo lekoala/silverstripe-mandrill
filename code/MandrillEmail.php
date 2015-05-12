@@ -19,7 +19,7 @@ class MandrillEmail extends Email
      * @var ViewableData
      */
     protected $template_data;
-    protected $ss_template = "emails/BasicEmail";
+    protected $ss_template = "email/BasicEmail";
     protected $original_body;
     protected $locale;
     protected $callout;
