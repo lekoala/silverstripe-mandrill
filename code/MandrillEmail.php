@@ -37,7 +37,6 @@ class MandrillEmail extends Email
      */
     protected $from_member;
     protected $parse_body       = false;
-    protected $merge_objects    = array();
     protected $required_objects = array();
     protected $theme            = null;
     protected $header_color;
@@ -85,8 +84,8 @@ class MandrillEmail extends Email
         // Check required objects
         if ($this->required_objects) {
             foreach ($this->required_objects as $reqName => $reqClass) {
-                if (!isset($this->merge_objects[$reqName])) {
-                    throw new Exception('Required object '.$reqName.' of class '.$reqClass.' is not defined in merge objects');
+                if (!$this->template_data->$reqName) {
+                    throw new Exception('Required object '.$reqName.' of class '.$reqClass.' is not defined in template data');
                 }
             }
         }
@@ -179,6 +178,7 @@ class MandrillEmail extends Email
             // SiteConfig could be overidden is some context, so use another name
             'Config' => SiteConfig::current_site_config(),
             'Controller' => Controller::curr(),
+            'CurrentController' => Controller::curr(),
         );
         if ($this->to_member) {
             $modelsInfos['Recipient'] = $this->to_member;
@@ -194,7 +194,6 @@ class MandrillEmail extends Email
             $member->Email         = $this->from;
             $modelsInfos['Sender'] = $member;
         }
-        $modelsInfos = array_merge($modelsInfos, $this->merge_objects);
 
         // Template specific variables
         $templatesInfos = array(
@@ -296,43 +295,6 @@ class MandrillEmail extends Email
     public function setRequiredObjects($arr)
     {
         $this->required_objects = $arr;
-        return $this;
-    }
-
-    /**
-     * Array of merge objects
-     *
-     * @return array
-     */
-    public function getMergeObjects()
-    {
-        return $this->merge_objects;
-    }
-
-    /**
-     * Set merge objects
-     *
-     * @param array $arr
-     * @return \MandrillEmail
-     */
-    public function setMergeObjects($arr)
-    {
-        $this->merge_objects       = $arr;
-        $this->parseVariables_done = false;
-        return $this;
-    }
-
-    /**
-     * Set a merge object by name
-     *
-     * @param string $name
-     * @param DataObject $obj
-     * @return \MandrillEmail
-     */
-    public function setMergeObject($name, $obj)
-    {
-        $this->merge_objects[$name] = $obj;
-        $this->parseVariables_done  = false;
         return $this;
     }
 
