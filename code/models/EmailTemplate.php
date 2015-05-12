@@ -16,6 +16,7 @@ class EmailTemplate extends DataObject
         'Code' => 'Varchar(255)',
         'Content' => 'HTMLText',
         'Callout' => 'HTMLText',
+        'SideBar' => 'HTMLText',
     );
     private static $summary_fields    = array(
         'Title',

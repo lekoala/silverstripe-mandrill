@@ -272,16 +272,57 @@
 
 									<table class="row">
 										<tr>
+											<% if Sidebar %>
+											<td class="wrapper">
+
+												<table class="eight columns">
+													<tr>
+														<td>
+															$Body
+														</td>
+														<td class="expander"></td>
+													</tr>
+												</table>
+
+											</td>
+											<td class="wrapper last">
+
+												<table class="four columns">
+													<tr>
+														<td class="panel">
+															$Sidebar
+														</td>
+														<td class="expander"></td>
+													</tr>
+												</table>
+
+											</td>
+											<% else %>
 											<td class="wrapper last">
 
 												<table class="twelve columns">
 													<tr>
 														<td>
 															$Body
+														</td>
+														<td class="expander"></td>
+													</tr>
+												</table>
 
-															<% if Image %>
+											</td>
+											<% end_if %>
+										</tr>
+									</table>
+
+									<% if Image %>
+									<table class="row">
+										<tr>
+											<td>
+
+												<table class="twelve columns">
+													<tr>
+														<td>
 															<img src="$Image" alt="$Image" />
-															<% end_if %>
 														</td>
 														<td class="expander"></td>
 													</tr>
@@ -290,6 +331,7 @@
 											</td>
 										</tr>
 									</table>
+									<% end_if %>
 
 									<% if Callout %>
 									<table class="row callout">
