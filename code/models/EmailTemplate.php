@@ -67,6 +67,7 @@ class EmailTemplate extends DataObject
             }
             $objectsSource[$dataobject] = $dataobject;
         }
+        asort($objectsSource);
 
         // form-extras integration
         if (class_exists('TableField')) {
