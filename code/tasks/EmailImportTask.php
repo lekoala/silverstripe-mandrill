@@ -94,6 +94,26 @@ class EmailImportTask extends BuildTask
             // Get content of the email
             $content = file_get_contents($filePath);
 
+            // Analyze content to find incompatibilities
+            $errors = array();
+            if(strpos($content, '<% with') !== false) {
+                $errors[] = 'Replace "with" blocks by plain calls to the variable';
+            }
+            if(strpos($content, '<% if') !== false) {
+                $errors[] = 'If/else logic is not supported. Please create one template by use case or abstract logic into the model';
+            }
+            if(strpos($content, '<% loop') !== false) {
+                $errors[] = 'Loops are not supported. Please create a helper method on the model to render the loop';
+            }
+            if(!empty($errors)) {
+                echo "<div style='color:red'>Invalid syntax was found in '$relativeFilePath'. Please fix these errors before importing the template<ul>";
+                foreach($errors as $error) {
+                    echo '<li>' . $error . '</li>';
+                }
+                echo '</ul></div>';
+                continue;
+            }
+
             // Parse language
             $collector = new i18nTextCollector;
             $entities = $collector->collectFromTemplate($content, $fileName, $module);
@@ -130,9 +150,15 @@ class EmailImportTask extends BuildTask
                     if(!$translation) {
                         $translation = $baseTranslation;
                     }
-                    $contentLocale[$locale] = preg_replace("/<% _t\('".$escapedEntity."'.*?%>/ms", $translation, $contentLocale[$locale]);
+                    // This regex should match old and new style
+                    $contentLocale[$locale] = preg_replace("/<%(t | _t\(')".$escapedEntity.".*?%>/ms", $translation, $contentLocale[$locale]);
                 }
             }
+
+            // Clean content
+            $contentLocale = array_map(function($item) {
+                return strip_tags($item,'p,br,div,img,a,span');
+            }, $contentLocale);
 
             if (!$emailTemplate) {
                 $emailTemplate = new EmailTemplate;
