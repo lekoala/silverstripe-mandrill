@@ -30,7 +30,10 @@ class EmailImportTask extends BuildTask
 
         $o = singleton('EmailTemplate');
 
-        $ignoredModules = array('cms', 'framework');
+        $ignoredModules = self::config()->ignored_modules;
+        if(!is_array($ignoredModules)) {
+            $ignoredModules = array();
+        }
 
         $locales = null;
         if(class_exists('Fluent') && Fluent::locale_names()) {
@@ -67,6 +70,8 @@ class EmailImportTask extends BuildTask
             array_shift($relativeFilePathParts); // remove /templates part
             $templateName = str_replace('.ss', '',
                 implode('/', $relativeFilePathParts));
+
+            $templateTitle = basename($templateName);
 
             // Create a default code from template name
             $code = strtolower(preg_replace('/([a-zA-Z])(?=[A-Z])/', '$1-',
@@ -143,6 +148,23 @@ class EmailImportTask extends BuildTask
                 }
             }
             $emailTemplate->Title    = $title;
+            if(!empty($locales)) {
+                // By convention, we store the translation under NameOfTheTemplateEmail.SUBJECT
+                foreach($locales as $locale) {
+                    i18n::set_locale($locale);
+                    $field = 'Title_' . $locale;
+                    $entity = $templateTitle . '.SUBJECT';
+                    $translation = i18n::_t($entity);
+                    if(!$translation) {
+                        $translation = $title;
+                    }
+                    $emailTemplate->$field = $translation;
+                    if($locale == $defaultLocale) {
+                        $emailTemplate->Title = $translation;
+                    }
+                }
+                 i18n::set_locale($defaultLocale);
+            }
             $emailTemplate->Code     = $code;
             $emailTemplate->Category = $module;
 

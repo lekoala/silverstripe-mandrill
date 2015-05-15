@@ -42,6 +42,8 @@ MandrillEmail:
 EmailTemplate:
   allow_configure_theme: false
   allow_configure_template: false
+EmailImportTask:
+  ignored_modules: ['framework','cms','mandrill']
 ---
 Only:
   classexists: 'Fluent'
