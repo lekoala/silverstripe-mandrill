@@ -2,8 +2,7 @@
 
 /**
  * A simple task to test if your emails are sending properly
-
- * @author LeKoala
+ * @author lekoala
  */
 class SendTestEmailTask extends BuildTask
 {
@@ -32,14 +31,13 @@ class SendTestEmailTask extends BuildTask
 
         $res = $email->send();
 
-        foreach($res as $v) {
-            if(!is_string($v)) {
+        foreach ($res as $v) {
+            if (!is_string($v)) {
                 echo "<pre>";
                 var_dump($v);
                 echo "</pre>";
-            }
-            else {
-                echo $v . '<br/>';
+            } else {
+                echo $v.'<br/>';
             }
         }
     }
