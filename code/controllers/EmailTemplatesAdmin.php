@@ -48,7 +48,10 @@ class EmailTemplatesAdmin extends ModelAdmin
 
     public function doSendTestEmail()
     {
-        $template  = EmailTemplate::get()->byID($this->getRequest()->postVar('EmailTemplateID'));
+        $template  = EmailTemplate::get()->byID(filter_input(INPUT_POST,'EmailTemplateID'));
+        if(!$template) {
+            throw new Exception("Template is not found");
+        }
         $emailAddr = $this->getRequest()->postVar('SendTestEmail');
 
         $email = $template->getEmail();

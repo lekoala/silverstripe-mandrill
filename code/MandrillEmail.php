@@ -540,7 +540,11 @@ class MandrillEmail extends Email
     public function setSampleRequiredObjects() {
         $data = array();
         foreach($this->required_objects as $name => $class) {
-            $data[$name] = $class::get()->sort('RAND()')->first();
+            $o = $class::get()->sort('RAND()')->first();
+            if(!$o) {
+                $o = new $class;
+            }
+            $data[$name] = $o;
         }
         $this->populateTemplate($data);
     }
