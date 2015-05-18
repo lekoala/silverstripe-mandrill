@@ -517,7 +517,7 @@ class MandrillEmail extends Email
 
         if ($image) {
             $rimage = Image::get()->sort('RAND()')->first();
-            if ($image && $image->ID) {
+            if ($rimage && $rimage->ID) {
                 $this->setImage($rimage);
             }
         }
