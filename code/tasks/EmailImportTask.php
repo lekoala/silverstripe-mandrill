@@ -254,7 +254,7 @@ class EmailImportTask extends BuildTask
 
     protected function cleanContent($content)
     {
-        return utf8_decode(strip_tags($content, 'p,br,div,img,a,span'));
+        return utf8_decode(strip_tags($content, '<p><br><br/><div><img><a><span>'));
     }
 
     protected function getInnerHtml(DOMElement $node)
