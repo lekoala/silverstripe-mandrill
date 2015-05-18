@@ -23,6 +23,7 @@ class MandrillEmail extends Email
     protected $original_body;
     protected $locale;
     protected $callout;
+    protected $sidebar;
     protected $image;
 
     /**
@@ -84,7 +85,7 @@ class MandrillEmail extends Email
         // Check required objects
         if ($this->required_objects) {
             foreach ($this->required_objects as $reqName => $reqClass) {
-                if (!$this->template_data->$reqName) {
+                if (!$this->templateData()->$reqName) {
                     throw new Exception('Required object '.$reqName.' of class '.$reqClass.' is not defined in template data');
                 }
             }
@@ -150,9 +151,9 @@ class MandrillEmail extends Email
         return $this;
     }
 
-	/**
-	 * @return ViewableData_Customised
-	 */
+    /**
+     * @return ViewableData_Customised
+     */
     protected function templateData()
     {
         // If no data is defined, set some default
@@ -174,6 +175,7 @@ class MandrillEmail extends Email
 
         // Infos injected from the models
         $modelsInfos = array(
+            'Member' => Member::currentUser(),
             'CurrentMember' => Member::currentUser(),
             // SiteConfig could be overidden is some context, so use another name
             'Config' => SiteConfig::current_site_config(),
@@ -199,6 +201,7 @@ class MandrillEmail extends Email
         $templatesInfos = array(
             'Image' => $this->image,
             'Callout' => $this->callout,
+            'Sidebar' => $this->sidebar
         );
 
         // Theme options
@@ -250,7 +253,7 @@ class MandrillEmail extends Email
             $fullBody = $this->original_body;
 
             if ($this->parse_body) {
-                $viewer = new SSViewer_FromString($fullBody);
+                $viewer   = new SSViewer_FromString($fullBody);
                 $fullBody = $viewer->process($data);
             }
 
@@ -261,8 +264,8 @@ class MandrillEmail extends Email
                 $template = new SSViewer($this->ss_template);
 
                 if ($template->exists()) {
-					// Make sure we included the parsed body into layout
-					$data->setField('Body',$fullBody);
+                    // Make sure we included the parsed body into layout
+                    $data->setField('Body', $fullBody);
                     $fullBody = $template->process($data);
                 }
             }
@@ -336,6 +339,26 @@ class MandrillEmail extends Email
     public function getCallout()
     {
         return $this->callout;
+    }
+
+    /**
+     * Set sidebar
+     *
+     * @param string $val
+     */
+    public function setSidebar($val)
+    {
+        $this->sidebar = $val;
+    }
+
+    /**
+     * Get sidebar
+     *
+     * @return string
+     */
+    public function getSidebar()
+    {
+        return $this->sidebar;
     }
 
     /**
@@ -471,8 +494,13 @@ class MandrillEmail extends Email
 
     /**
      * Set some sample content for demo purposes
+     *
+     * @param bool $callout
+     * @param bool $image
+     * @param bool $sidebar
      */
-    public function setSampleContent()
+    public function setSampleContent($callout = true, $image = true,
+                                     $sidebar = true)
     {
         $member = Member::currentUserID() ? Member::currentUser()->getTitle() : 'Anonymous Member';
         $val    = '<h1>Hi, '.$member.'</h1>
@@ -481,14 +509,39 @@ class MandrillEmail extends Email
                        ';
         $this->setBody($val);
 
-        $val = 'Phasellus dictum sapien a neque luctus cursus. Pellentesque sem dolor, fringilla et pharetra vitae. <a href="#">Click it! »</a>';
-        $this->setCallout($val);
-
-        $image = Image::get()->first();
-        if ($image->ID) {
-            $this->setImage($image);
+        if ($callout) {
+            $val = 'Phasellus dictum sapien a neque luctus cursus. Pellentesque sem dolor, fringilla et pharetra vitae. <a href="#">Click it! »</a>';
+            $this->setCallout($val);
         }
+
+        if ($image) {
+            $rimage = Image::get()->sort('RAND()')->first();
+            if ($image->ID) {
+                $this->setImage($rimage);
+            }
+        }
+
+        if ($sidebar) {
+            $val = 'Phasellus dictum sapien a neque luctus cursus. Pellentesque sem dolor, fringilla et pharetra vitae. <a href="#">Click it! »</a>';
+            $this->setSidebar($val);
+        }
+
+        if($this->required_objects) {
+            $this->setSampleRequiredObjects();
+        }
+
         $this->parseVariables_done = false;
+    }
+
+    /**
+     * Populate template with sample required objects
+     */
+    public function setSampleRequiredObjects() {
+        $data = array();
+        foreach($this->required_objects as $name => $class) {
+            $data[$name] = $class::get()->sort('RAND()')->first();
+        }
+        $this->populateTemplate($data);
     }
 
     /**
