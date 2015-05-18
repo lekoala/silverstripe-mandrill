@@ -175,11 +175,8 @@ class MandrillEmail extends Email
 
         // Infos injected from the models
         $modelsInfos = array(
-            'Member' => Member::currentUser(),
             'CurrentMember' => Member::currentUser(),
-            // SiteConfig could be overidden is some context, so use another name
-            'Config' => SiteConfig::current_site_config(),
-            'Controller' => Controller::curr(),
+            'CurrentSiteConfig' => SiteConfig::current_site_config(),
             'CurrentController' => Controller::curr(),
         );
         if ($this->to_member) {

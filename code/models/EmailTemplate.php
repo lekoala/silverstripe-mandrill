@@ -144,7 +144,7 @@ class EmailTemplate extends DataObject
             'CurrentMember' => 'Member',
             'Recipient' => 'Member',
             'Sender' => 'Member',
-            'Config' => 'SiteConfig'
+            'CurrentSiteConfig' => 'SiteConfig'
         );
     }
 
@@ -164,6 +164,21 @@ class EmailTemplate extends DataObject
             $arr[$extraModel->Name] = $extraModel->Model;
         }
         return $arr;
+    }
+
+    public function setExtraModelsAsArray($models) {
+        $baseModels = array_keys($this->getBaseModels());
+        $val = array();
+        foreach($models as $name => $class) {
+            if(in_array($name, $baseModels)) {
+                continue;
+            }
+            $val[] = array(
+                'Name' => $name,
+                'Model' => $class
+            );
+        }
+        $this->ExtraModels = json_encode($val);
     }
 
     /**
