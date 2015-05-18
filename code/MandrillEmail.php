@@ -252,6 +252,10 @@ class MandrillEmail extends Email
             if ($this->parse_body) {
                 $viewer   = new SSViewer_FromString($fullBody);
                 $fullBody = $viewer->process($data);
+
+                // Also parse the email title
+                $subjectViewer = neW SSViewer_FromString($this->subject);
+                $this->subject = $subjectViewer->process($data);
             }
 
             if ($this->ss_template && !$isPlain) {
@@ -513,7 +517,7 @@ class MandrillEmail extends Email
 
         if ($image) {
             $rimage = Image::get()->sort('RAND()')->first();
-            if ($image->ID) {
+            if ($image && $image->ID) {
                 $this->setImage($rimage);
             }
         }
@@ -583,6 +587,18 @@ class MandrillEmail extends Email
         $this->to_member           = $member;
         $this->parseVariables_done = false;
         return $this->setTo($member->Email);
+    }
+
+    /**
+     * Set current member as recipient
+     * 
+     * @return MandrillEmail
+     */
+    public function setToCurrentMember() {
+        if(!Member::currentUserID()) {
+            throw new Exception("There is no current user");
+        }
+        return $this->setToMember(Member::currentUser());
     }
 
     /**

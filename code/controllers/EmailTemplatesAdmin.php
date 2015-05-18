@@ -52,7 +52,7 @@ class EmailTemplatesAdmin extends ModelAdmin
         $emailAddr = $this->getRequest()->postVar('SendTestEmail');
 
         $email = $template->getEmail();
-
+        $email->setSampleRequiredObjects();
         $email->setTo($emailAddr);
 		
         $res = $email->send();
