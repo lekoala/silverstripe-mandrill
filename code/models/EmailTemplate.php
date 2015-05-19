@@ -291,6 +291,9 @@ class EmailTemplate extends DataObject
         if ($this->Callout) {
             $email->setCallout($this->Callout);
         }
+        if($this->SideBar) {
+            $email->setSidebar($this->SideBar);
+        }
         if ($this->ExtraModels) {
             $models = $this->getExtraModelsAsArray();
             $email->setRequiredObjects($models);

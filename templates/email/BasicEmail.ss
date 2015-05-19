@@ -111,12 +111,12 @@
 			.show-for-small,.hide-for-desktop{display:none}
 			body,table.body,h1,h2,h3,h4,h5,h6,p,td{color:#222;font-family:"Helvetica","Arial",sans-serif;font-weight:400;padding:0;margin:0;text-align:left;line-height:1.3}
 			h1,h2,h3,h4,h5,h6{word-break:normal}
-			h1{font-size:40px}
-			h2{font-size:36px}
-			h3{font-size:32px}
-			h4{font-size:28px}
-			h5{font-size:24px}
-			h6{font-size:20px}
+			h1{font-size:30px}
+			h2{font-size:26px}
+			h3{font-size:20px}
+			h4{font-size:18px}
+			h5{font-size:16px}
+			h6{font-size:14px}
 			body,table.body,p,td{font-size:14px;line-height:19px}
 			p.lead,p.lede,p.leed{font-size:18px;line-height:21px}
 			p{margin-bottom:10px}
@@ -202,6 +202,12 @@
 				background: $PanelColor;
 				border-color: $PanelBorderColor;
 				color: $PanelFontColor;
+			}
+			
+			.sidebar img {
+				float:none;
+				display:block;
+				margin:0 auto;
 			}
 			
 			.btn {
@@ -296,7 +302,7 @@
 												</table>
 
 											</td>
-											<td class="wrapper last">
+											<td class="wrapper last sidebar">
 
 												<table class="four columns">
 													<tr>
