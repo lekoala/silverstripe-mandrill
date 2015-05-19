@@ -203,7 +203,18 @@
 				border-color: $PanelBorderColor;
 				color: $PanelFontColor;
 			}
-
+			
+			.btn {
+				display:block;width:auto!important;text-align:center;background:#2ba6cb;
+				border:1px solid #2284a1;color:#fff;padding:8px 0;
+				-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;
+				margin-bottom:8px;
+			}
+			.btn:hover, .btn:active, .btn:visited {
+				color:#fff !important;
+				background:#2795b6!important;
+			}
+			
 			.header {
 				background: $HeaderColor;
 				color: $HeaderFontColor;
