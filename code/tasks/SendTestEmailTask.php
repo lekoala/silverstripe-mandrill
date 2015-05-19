@@ -18,6 +18,11 @@ class SendTestEmailTask extends BuildTask
         $member         = Member::currentUser();
         $to             = $request->getVar('email');
         $template       = $request->getVar('template');
+        $disabled       = $request->getVar('disabled');
+
+        if($disabled) {
+            MandrillMailer::setSendingDisabled();
+        }
 
         if ($default) {
             echo "Default email address is $default<br/>";
@@ -29,6 +34,7 @@ class SendTestEmailTask extends BuildTask
         }
         echo "The email will be sent to admin email, current member or an email passed in the url, like ?email=myemail@test.com<br/>";
         echo "A default email is used by default. You can use a preset template by setting ?template=mytemplate<br/>";
+        echo "To prevent email from being sent, you can pass ?disabled=1<br/>";
         echo '<hr/>';
 
         if (!$default && $default_config) {

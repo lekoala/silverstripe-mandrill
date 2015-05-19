@@ -22,8 +22,9 @@ class MandrillMailer extends Mailer
     protected $mandrill;
     protected $last_error;
     protected $last_result;
-    protected $last_is_error = false;
+    protected $last_is_error          = false;
     protected static $instance;
+    protected static $disable_sending = false;
 
     function __construct($apiKey)
     {
@@ -75,6 +76,16 @@ class MandrillMailer extends Mailer
     public static function getInstance()
     {
         return self::$instance;
+    }
+
+    public static function getSendingDisabled()
+    {
+        return self::$disable_sending;
+    }
+
+    public static function setSendingDisabled($v = true)
+    {
+        self::$disable_sending = $v;
     }
 
     /**
@@ -279,10 +290,10 @@ class MandrillMailer extends Mailer
         } else {
             $email = $recipient;
             // As a fallback, extract the first part of the email as the name
-            if(self::config()->name_fallback) {
-                $name = trim(ucwords(str_replace(array('.','-','_'),' ',substr($email, 0, strpos($email, '@')))));
-            }
-            else {
+            if (self::config()->name_fallback) {
+                $name = trim(ucwords(str_replace(array('.', '-', '_'), ' ',
+                            substr($email, 0, strpos($email, '@')))));
+            } else {
                 $name = null;
             }
         }
@@ -432,6 +443,11 @@ class MandrillMailer extends Mailer
 
         if ($customheaders) {
             $params['headers'] = $customheaders;
+        }
+
+        if (self::getSendingDisabled()) {
+            $customheaders['X-SendingDisabled'] = true;
+            return array($original_to, $subject, $htmlContent, $customheaders);
         }
 
         try {
