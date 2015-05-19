@@ -34,7 +34,7 @@ class EmailTemplate extends DataObject
             'value' => 'Code'
         )
     );
-    private static $translate = array(
+    private static $translate         = array(
         'Title', 'Content', 'Callout'
     );
 
@@ -119,8 +119,9 @@ class EmailTemplate extends DataObject
             }
             $content = trim($content, ', ').'<br/>';
         }
-		$content .= "<div class='message info'>" . _t('EmailTemplate.ENCLOSEFIELD','To escape a field from surrounding text, you can enclose it between brackets, eg: {$CurrentMember.FirstName}.') . '</div>';
-		
+        $content .= "<div class='message info'>"._t('EmailTemplate.ENCLOSEFIELD',
+                'To escape a field from surrounding text, you can enclose it between brackets, eg: {$CurrentMember.FirstName}.').'</div>';
+
         $fields->addFieldToTab('Root.Main',
             new LiteralField('MergeFieldsHelper', $content));
 
@@ -150,13 +151,17 @@ class EmailTemplate extends DataObject
 
     /**
      * A map of Name => Class
-     * 
+     *
+     * @param $withBaseModels
      * @return array
      */
-    public function getExtraModelsAsArray()
+    public function getExtraModelsAsArray($withBaseModels = false)
     {
         $extraModels = $this->ExtraModels ? json_decode($this->ExtraModels) : array();
-        $arr         = $this->getBaseModels();
+        $arr         = array();
+        if ($withBaseModels) {
+            $arr = $this->getBaseModels();
+        }
         foreach ($extraModels as $extraModel) {
             if (!class_exists($extraModel->Model)) {
                 continue;
@@ -166,11 +171,12 @@ class EmailTemplate extends DataObject
         return $arr;
     }
 
-    public function setExtraModelsAsArray($models) {
+    public function setExtraModelsAsArray($models)
+    {
         $baseModels = array_keys($this->getBaseModels());
-        $val = array();
-        foreach($models as $name => $class) {
-            if(in_array($name, $baseModels)) {
+        $val        = array();
+        foreach ($models as $name => $class) {
+            if (in_array($name, $baseModels)) {
                 continue;
             }
             $val[] = array(
@@ -202,10 +208,10 @@ class EmailTemplate extends DataObject
     public static function getByCode($code)
     {
         $template = EmailTemplate::get()->filter('Code', $code)->first();
-        if(!$template) {
-            $template = new EmailTemplate();
-            $template->Title = $code;
-            $template->Code = $code;
+        if (!$template) {
+            $template          = new EmailTemplate();
+            $template->Title   = $code;
+            $template->Code    = $code;
             $template->Content = 'Please replace the content of this email';
             $template->write();
         }
@@ -239,11 +245,11 @@ class EmailTemplate extends DataObject
 
         if (class_exists('CmsInlineFormAction')) {
             // Test emails
-            $compo  = new FieldGroup(
+            $compo     = new FieldGroup(
                 $recipient = new TextField('SendTestEmail', ''),
-                $action = new CmsInlineFormAction('doSendTestEmail', 'Send')
+                $action    = new CmsInlineFormAction('doSendTestEmail', 'Send')
             );
-			$recipient->setAttribute('placeholder', 'my@email.test');
+            $recipient->setAttribute('placeholder', 'my@email.test');
             $tab->push(new HiddenField('EmailTemplateID', '', $this->ID));
             $tab->push(new HeaderField('SendTestEmailHeader', 'Send test email'));
             $tab->push($compo);
@@ -282,7 +288,7 @@ class EmailTemplate extends DataObject
     /**
      * Get rendered body
      *
-	 * @param bool $parse Should we parse variables or not?
+     * @param bool $parse Should we parse variables or not?
      * @return string
      */
     public function renderTemplate($parse = false)

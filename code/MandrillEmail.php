@@ -150,7 +150,7 @@ class MandrillEmail extends Email
         $this->parse_body = (bool) $v;
         return $this;
     }
-
+    
     /**
      * @return ViewableData_Customised
      */
