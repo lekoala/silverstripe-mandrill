@@ -150,7 +150,7 @@ class MandrillEmail extends Email
         $this->parse_body = (bool) $v;
         return $this;
     }
-    
+
     /**
      * @return ViewableData_Customised
      */
@@ -254,8 +254,17 @@ class MandrillEmail extends Email
                 $fullBody = $viewer->process($data);
 
                 // Also parse the email title
-                $subjectViewer = neW SSViewer_FromString($this->subject);
-                $this->subject = $subjectViewer->process($data);
+                $viewer        = neW SSViewer_FromString($this->subject);
+                $this->subject = $viewer->process($data);
+
+                if ($this->callout) {
+                    $viewer        = neW SSViewer_FromString($this->callout);
+                    $this->callout = $viewer->process($data);
+                }
+                if ($this->sidebar) {
+                    $viewer        = neW SSViewer_FromString($this->sidebar);
+                    $this->sidebar = $viewer->process($data);
+                }
             }
 
             if ($this->ss_template && !$isPlain) {
@@ -527,7 +536,7 @@ class MandrillEmail extends Email
             $this->setSidebar($val);
         }
 
-        if($this->required_objects) {
+        if ($this->required_objects) {
             $this->setSampleRequiredObjects();
         }
 
@@ -537,11 +546,12 @@ class MandrillEmail extends Email
     /**
      * Populate template with sample required objects
      */
-    public function setSampleRequiredObjects() {
+    public function setSampleRequiredObjects()
+    {
         $data = array();
-        foreach($this->required_objects as $name => $class) {
+        foreach ($this->required_objects as $name => $class) {
             $o = $class::get()->sort('RAND()')->first();
-            if(!$o) {
+            if (!$o) {
                 $o = new $class;
             }
             $data[$name] = $o;
@@ -598,8 +608,9 @@ class MandrillEmail extends Email
      * 
      * @return MandrillEmail
      */
-    public function setToCurrentMember() {
-        if(!Member::currentUserID()) {
+    public function setToCurrentMember()
+    {
+        if (!Member::currentUserID()) {
             throw new Exception("There is no current user");
         }
         return $this->setToMember(Member::currentUser());
