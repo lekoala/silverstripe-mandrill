@@ -599,7 +599,9 @@ class MandrillEmail extends Email
     {
         $this->locale              = $member->Locale;
         $this->to_member           = $member;
-        $this->parseVariables_done = false;
+        
+        $this->populateTemplate(array('Member' => $member));
+
         return $this->setTo($member->Email);
     }
 
