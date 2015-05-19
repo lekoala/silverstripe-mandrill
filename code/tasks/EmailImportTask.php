@@ -205,6 +205,11 @@ class EmailImportTask extends BuildTask
                         $translation = $title;
                     }
                     $emailTemplate->$localeField = $translation;
+
+                    if(strpos($translation, '%s') !== false) {
+                        echo '<div style="color:red">There is a %s that should be replaced!</div>';
+                    }
+
                     if ($locale == $defaultLocale) {
                         $emailTemplate->Title = $translation;
                     }
