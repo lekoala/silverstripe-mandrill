@@ -108,14 +108,31 @@ class EmailTemplate extends DataObject
         $content = trim($content, ', ').'<br/><br/>';
 
         $models = $this->getAvailableModels();
-        foreach ($models as $name => $model) {
-            $props = Config::inst()->get($model, 'db');
-            if (!$props) {
+        $modelsByClass = array();
+        $classes = array();
+        foreach($models as $name => $model) {
+            $classes[] = $model;
+            if(!isset($modelsByClass[$model])) {
+                $modelsByClass[$model] = array();
+            }
+            $modelsByClass[$model][] = $name;
+        }
+        $classes = array_unique($classes);
+        foreach ($classes as $model) {
+            if(!class_exists($model)) {
                 continue;
             }
-            $content .= '<strong>'.$name.' ('.$model.') :</strong><br/>';
+            $props = Config::inst()->get($model, 'db');
+            $o = singleton($model);
+            $methods = array_diff($o->allMethodNames(true), $o->allMethodNames());
+            $content .= '<strong>'.$model . ' (' .implode(',', $modelsByClass[$model]) .') :</strong><br/>';
             foreach ($props as $fieldName => $fieldType) {
                 $content .= $fieldName.', ';
+            }
+            foreach($methods as $method) {
+                if(strpos($method, 'get') === 0) {
+                    $content .= $method . ', ';
+                }
             }
             $content = trim($content, ', ').'<br/>';
         }
