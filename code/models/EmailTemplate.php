@@ -35,7 +35,7 @@ class EmailTemplate extends DataObject
         )
     );
     private static $translate         = array(
-        'Title', 'Content', 'Callout'
+        'Title', 'Content', 'Callout', 'SideBar'
     );
 
     public function getCMSFields()
@@ -152,16 +152,12 @@ class EmailTemplate extends DataObject
     /**
      * A map of Name => Class
      *
-     * @param $withBaseModels
      * @return array
      */
-    public function getExtraModelsAsArray($withBaseModels = false)
+    public function getExtraModelsAsArray()
     {
         $extraModels = $this->ExtraModels ? json_decode($this->ExtraModels) : array();
         $arr         = array();
-        if ($withBaseModels) {
-            $arr = $this->getBaseModels();
-        }
         foreach ($extraModels as $extraModel) {
             if (!class_exists($extraModel->Model)) {
                 continue;
@@ -176,6 +172,7 @@ class EmailTemplate extends DataObject
         $baseModels = array_keys($this->getBaseModels());
         $val        = array();
         foreach ($models as $name => $class) {
+            // Ignore base models
             if (in_array($name, $baseModels)) {
                 continue;
             }
