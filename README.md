@@ -80,6 +80,10 @@ provide you with one central place to manage all your email content.
 
 This is why this module comes with one easy to use EmailTemplateAdmin based on ModelAdmin.
 
+To help you migrate from existing setups, you have an ImportEmailTask thats imports all *.ss templates in the /email folder that 
+end with Email in the name, like /email/myTestEmail.ss. 
+The content is imported in the "Content" area, except if you specify ids for specific zones, like <div id="SideBar">My side bar content</div>
+
 NOTE: email templates could be split in a separate module in the near future once I've
 determined if it's possible to make it standalone.
 
