@@ -210,7 +210,7 @@ class EmailImportTask extends BuildTask
                     $emailTemplate->$localeField = $translation;
 
                     if(strpos($translation, '%s') !== false) {
-                        echo '<div style="color:red">There is a %s that should be replaced!</div>';
+                        echo '<div style="color:red">There is a %s in the title that should be replaced in locale '.$locale.'!</div>';
                     }
 
                     if ($locale == $defaultLocale) {
@@ -228,9 +228,9 @@ class EmailImportTask extends BuildTask
             $emailTemplate->write();
 
             if ($isOverwritten) {
-                echo "<div style='color:orange'>Overwrote {$emailTemplate->Title}</div>";
+                echo "<div style='color:orange'>Overwrote {$emailTemplate->Code}</div>";
             } else {
-                echo "<div style='color:green'>Imported {$emailTemplate->Title}</div>";
+                echo "<div style='color:green'>Imported {$emailTemplate->Code}</div>";
             }
         }
     }
