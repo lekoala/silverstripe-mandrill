@@ -250,20 +250,39 @@ class MandrillEmail extends Email
             $fullBody = $this->original_body;
 
             if ($this->parse_body) {
-                $viewer   = new SSViewer_FromString($fullBody);
-                $fullBody = $viewer->process($data);
+
+                try {
+                    $viewer   = new SSViewer_FromString($fullBody);
+                    $fullBody = $viewer->process($data);
+                } catch (Exception $ex) {
+                    SS_Log::log($ex->getMessage(), SS_Log::DEBUG);
+                }
+
 
                 // Also parse the email title
-                $viewer        = neW SSViewer_FromString($this->subject);
-                $this->subject = $viewer->process($data);
+                try {
+                    $viewer        = new SSViewer_FromString($this->subject);
+                    $this->subject = $viewer->process($data);
+                } catch (Exception $ex) {
+                    SS_Log::log($ex->getMessage(), SS_Log::DEBUG);
+                }
+
 
                 if ($this->callout) {
-                    $viewer        = neW SSViewer_FromString($this->callout);
-                    $this->callout = $viewer->process($data);
+                    try {
+                        $viewer        = new SSViewer_FromString($this->callout);
+                        $this->callout = $viewer->process($data);
+                    } catch (Exception $ex) {
+                        SS_Log::log($ex->getMessage(), SS_Log::DEBUG);
+                    }
                 }
                 if ($this->sidebar) {
-                    $viewer        = neW SSViewer_FromString($this->sidebar);
-                    $this->sidebar = $viewer->process($data);
+                    try {
+                        $viewer        = new SSViewer_FromString($this->sidebar);
+                        $this->sidebar = $viewer->process($data);
+                    } catch (Exception $ex) {
+                        SS_Log::log($ex->getMessage(), SS_Log::DEBUG);
+                    }
                 }
             }
 
@@ -276,7 +295,12 @@ class MandrillEmail extends Email
                 if ($template->exists()) {
                     // Make sure we included the parsed body into layout
                     $data->setField('Body', $fullBody);
-                    $fullBody = $template->process($data);
+
+                    try {
+                        $fullBody = $template->process($data);
+                    } catch (Exception $ex) {
+                        SS_Log::log($ex->getMessage(), SS_Log::DEBUG);
+                    }
                 }
             }
 
@@ -597,9 +621,9 @@ class MandrillEmail extends Email
      */
     public function setToMember(Member $member)
     {
-        $this->locale              = $member->Locale;
-        $this->to_member           = $member;
-        
+        $this->locale    = $member->Locale;
+        $this->to_member = $member;
+
         $this->populateTemplate(array('Member' => $member));
 
         return $this->setTo($member->Email);
