@@ -459,6 +459,14 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     }
 
     /**
+     *
+     * @return bool
+     */
+    public function CanConfigureWebhooks() {
+        return Permission::check('ADMIN') || Director::isDev();
+    }
+
+    /**
      * Install hook form
      * 
      * @return \Form
