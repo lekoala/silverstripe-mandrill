@@ -48,6 +48,11 @@ class EmailImportTask extends BuildTask
         foreach ($templates as $t) {
             $isOverwritten = false;
 
+            // Emails in mysite/email are not properly marked as emails
+            if(isset($t['mysite']) && isset($t['mysite']['email'])) {
+                $t['email'] = $t['mysite']['email'];
+            }
+
             // Should be in the /email folder
             if (!isset($t['email'])) continue;
 

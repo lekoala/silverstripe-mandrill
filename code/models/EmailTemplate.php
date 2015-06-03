@@ -232,6 +232,16 @@ class EmailTemplate extends DataObject
         return $template;
     }
 
+    /**
+     * A shorthand to get an email by code
+     * 
+     * @param string $code
+     * @return MandrillEmail
+     */
+    public static function getEmailByCode($code) {
+        return self::getByCode($code)->getEmail();
+    }
+
     public function onBeforeWrite()
     {
         if ($this->Code) {
