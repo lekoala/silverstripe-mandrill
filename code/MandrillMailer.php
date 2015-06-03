@@ -78,11 +78,17 @@ class MandrillMailer extends Mailer
         return self::$instance;
     }
 
+    /**
+     * @return bool
+     */
     public static function getSendingDisabled()
     {
         return self::$disable_sending;
     }
 
+    /**
+     * @param bool $v
+     */
     public static function setSendingDisabled($v = true)
     {
         self::$disable_sending = $v;
@@ -467,6 +473,9 @@ class MandrillMailer extends Mailer
                     $failed++;
                     if (!empty($result['reject_reason'])) {
                         $reasons[] = $result['reject_reason'];
+                    }
+                    else if($result['status'] == 'invalid') {
+                        $reasons[] = 'Email "' . $result['email'] . '" is invalid';
                     }
                     continue;
                 }
