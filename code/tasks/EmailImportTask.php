@@ -181,7 +181,7 @@ class EmailImportTask extends BuildTask
             if(!empty($matches) && !empty($matches[1])) {
                 $arr = array_unique($matches[1]);
                 foreach($arr as $n) {
-                    if($n == 'SiteConfig') {
+                    if(strtolower($n) === 'siteconfig') {
                         continue;
                     }
                     if(class_exists($n)) {
