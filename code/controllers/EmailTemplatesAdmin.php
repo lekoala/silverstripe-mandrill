@@ -24,6 +24,10 @@ class EmailTemplatesAdmin extends ModelAdmin
     {
         $context = parent::getSearchContext();
 
+        $categories = EmailTemplate::get()->column('Category');
+        $context->getFields()->replaceField('q[Category]',
+            new DropdownField('q[Category]', 'Category', ArrayLib::valuekey($categories)));
+
         return $context;
     }
 
@@ -48,8 +52,9 @@ class EmailTemplatesAdmin extends ModelAdmin
 
     public function doSendTestEmail()
     {
-        $template  = EmailTemplate::get()->byID(filter_input(INPUT_POST,'EmailTemplateID'));
-        if(!$template) {
+        $template = EmailTemplate::get()->byID(filter_input(INPUT_POST,
+                'EmailTemplateID'));
+        if (!$template) {
             throw new Exception("Template is not found");
         }
         $emailAddr = $this->getRequest()->postVar('SendTestEmail');
@@ -57,7 +62,7 @@ class EmailTemplatesAdmin extends ModelAdmin
         $email = $template->getEmail();
         $email->setSampleRequiredObjects();
         $email->setTo($emailAddr);
-		
+
         $res = $email->send();
 
         if ($res) {
