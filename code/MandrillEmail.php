@@ -100,6 +100,10 @@ class MandrillEmail extends Email
         if (!$this->from) {
             throw new Exception('You must set a sender');
         }
+        if ($this->to_member && !$this->to) {
+            // Include name in to as standard rfc
+            $this->to = $this->to_member->FirstName.' '.$this->to_member->Surname.' <'.$this->to_member->Email.'>';
+        }
         $this->to = MandrillMailer::resolveDefaultToEmail($this->to);
         if (!$this->to) {
             throw new Exception('You must set a recipient');
@@ -117,8 +121,6 @@ class MandrillEmail extends Email
                 $restore_locale = i18n::get_locale();
                 i18n::set_locale($this->to_member->Locale);
             }
-            // Include name in to as standard rfc
-            $this->to = $this->to_member->FirstName.' '.$this->to_member->Surname.' <'.$this->to_member->Email.'>';
         }
 
         $res = parent::send($messageID);
