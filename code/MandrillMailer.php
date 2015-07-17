@@ -548,6 +548,10 @@ class MandrillMailer extends Mailer
      */
     public static function resolveDefaultToEmail($to = null)
     {
+        // In case of multiple recipients, do not validate anything
+        if(is_array($to) || strpos($to, ',') !== false) {
+            return $to;
+        }
         $original_to = $to;
         $to          = MandrillMailer::get_email_from_rfc_email($to);
         if (!empty($to) && filter_var($to, FILTER_VALIDATE_EMAIL)) {
