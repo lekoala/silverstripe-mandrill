@@ -85,6 +85,12 @@ class MandrillEmail extends Email
         // Check required objects
         if ($this->required_objects) {
             foreach ($this->required_objects as $reqName => $reqClass) {
+                if ($reqName == 'Member' && !$this->templateData()->$reqName) {
+                    $this->templateData()->$reqName = Member::currentUser();
+                }
+                if ($reqName == 'SiteConfig' && !$this->templateData()->$reqName) {
+                    $this->templateData()->$reqName = SiteConfig::current_site_config();
+                }
                 if (!$this->templateData()->$reqName) {
                     throw new Exception('Required object '.$reqName.' of class '.$reqClass.' is not defined in template data');
                 }
