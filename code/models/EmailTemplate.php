@@ -72,9 +72,9 @@ class EmailTemplate extends DataObject
         // form-extras integration
         if (class_exists('TableField')) {
             $fields->replaceField('ExtraModels',
-                $extraModels = new TableField('ExtraModels', 'Extra Models'));
-            $extraModels->setHeaders(array('Name', 'Model'));
-            $extraModels->setColumnValues('Model', $objectsSource);
+            $extraModels = new TableField('ExtraModels', 'Extra Models'));
+            $extraModels->addColumn('Name');
+            $extraModels->addColumn('Model', null, TableField::TYPE_SELECT,null,array('ctrlOptions' => $objectsSource));
         }
 
 
