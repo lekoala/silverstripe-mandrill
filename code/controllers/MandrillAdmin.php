@@ -262,7 +262,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             } catch (Exception $ex) {
                 $message = new MandrillMessage();
                 $this->getCache()->clean('matchingTag', array(self::MESSAGE_TAG));
-                SS_Log::log(get_class($ex).': '.$ex->getMessage());
+                SS_Log::log(get_class($ex).': '.$ex->getMessage(), SS_LOG::DEBUG);
             }
         }
         return $message;
