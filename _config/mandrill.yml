@@ -19,6 +19,7 @@ MandrillAdmin:
   cache_enabled: true
 MandrillEmail:
   default_theme: 'dark'
+  default_template: 'email/BasicEmail'
   templates:
     - BasicEmail
     - BoilerplateEmail

@@ -43,18 +43,26 @@ class EmailTemplate extends DataObject
         $fields = parent::getCMSFields();
         $config = EmailTemplate::config();
 
+        if (!$this->Theme) {
+            $this->Theme = MandrillEmail::config()->default_theme;
+        }
+        if(!$this->Template) {
+            $this->Template = MandrillEmail::config()->default_template;
+        }
+
         if ($config->allow_configure_template || Permission::check('ADMIN')) {
-            $templates = MandrillEmail::getAvailablesTemplates();
+            $templates        = MandrillEmail::getAvailablesTemplates();
             $fields->replaceField('Template',
-                new DropdownField('Template', 'Template', $templates));
+                $templateDropdown = new DropdownField('Template', 'Template',
+                $templates));
         } else {
             $fields->removeByName('Template');
         }
 
         if ($config->allow_configure_theme || Permission::check('ADMIN')) {
-            $themes = MandrillEmail::getAvailableThemes();
+            $themes        = MandrillEmail::getAvailableThemes();
             $fields->replaceField('Theme',
-                new DropdownField('Theme', 'Theme',
+                $themeDropdown = new DropdownField('Theme', 'Theme',
                 array_combine($themes, $themes)));
         } else {
             $fields->removeByName('Theme');
@@ -72,9 +80,10 @@ class EmailTemplate extends DataObject
         // form-extras integration
         if (class_exists('TableField')) {
             $fields->replaceField('ExtraModels',
-            $extraModels = new TableField('ExtraModels', 'Extra Models'));
+                $extraModels = new TableField('ExtraModels', 'Extra Models'));
             $extraModels->addColumn('Name');
-            $extraModels->addColumn('Model', null, TableField::TYPE_SELECT,null,array('ctrlOptions' => $objectsSource));
+            $extraModels->addColumn('Model', null, TableField::TYPE_SELECT,
+                null, array('ctrlOptions' => $objectsSource));
         }
 
 
@@ -107,31 +116,32 @@ class EmailTemplate extends DataObject
         }
         $content = trim($content, ', ').'<br/><br/>';
 
-        $models = $this->getAvailableModels();
+        $models        = $this->getAvailableModels();
         $modelsByClass = array();
-        $classes = array();
-        foreach($models as $name => $model) {
+        $classes       = array();
+        foreach ($models as $name => $model) {
             $classes[] = $model;
-            if(!isset($modelsByClass[$model])) {
+            if (!isset($modelsByClass[$model])) {
                 $modelsByClass[$model] = array();
             }
             $modelsByClass[$model][] = $name;
         }
         $classes = array_unique($classes);
         foreach ($classes as $model) {
-            if(!class_exists($model)) {
+            if (!class_exists($model)) {
                 continue;
             }
-            $props = Config::inst()->get($model, 'db');
-            $o = singleton($model);
+            $props   = Config::inst()->get($model, 'db');
+            $o       = singleton($model);
             $methods = array_diff($o->allMethodNames(true), $o->allMethodNames());
-            $content .= '<strong>'.$model . ' (' .implode(',', $modelsByClass[$model]) .') :</strong><br/>';
+            $content .= '<strong>'.$model.' ('.implode(',',
+                    $modelsByClass[$model]).') :</strong><br/>';
             foreach ($props as $fieldName => $fieldType) {
                 $content .= $fieldName.', ';
             }
-            foreach($methods as $method) {
-                if(strpos($method, 'get') === 0) {
-                    $content .= $method . ', ';
+            foreach ($methods as $method) {
+                if (strpos($method, 'get') === 0) {
+                    $content .= $method.', ';
                 }
             }
             $content = trim($content, ', ').'<br/>';
@@ -175,7 +185,7 @@ class EmailTemplate extends DataObject
     {
         $extraModels = $this->ExtraModels ? json_decode($this->ExtraModels) : array();
         $arr         = array();
-        if(!$extraModels) {
+        if (!$extraModels) {
             return array();
         }
         foreach ($extraModels as $extraModel) {
@@ -241,7 +251,8 @@ class EmailTemplate extends DataObject
      * @param string $code
      * @return MandrillEmail
      */
-    public static function getEmailByCode($code) {
+    public static function getEmailByCode($code)
+    {
         return self::getByCode($code)->getEmail();
     }
 
@@ -305,7 +316,7 @@ class EmailTemplate extends DataObject
         if ($this->Callout) {
             $email->setCallout($this->Callout);
         }
-        if($this->SideBar) {
+        if ($this->SideBar) {
             $email->setSidebar($this->SideBar);
         }
         if ($this->ExtraModels) {
@@ -326,10 +337,10 @@ class EmailTemplate extends DataObject
     {
         $email = $this->getEmail();
         $email->setParseBody($parse);
-        if($injectFake) {
+        if ($injectFake) {
             $email->setSampleRequiredObjects();
         }
-        $html  = $email->getRenderedBody();
+        $html = $email->getRenderedBody();
 
         return (string) $html;
     }

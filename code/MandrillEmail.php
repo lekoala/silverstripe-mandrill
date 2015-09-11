@@ -59,6 +59,10 @@ class MandrillEmail extends Email
         $class = get_called_class();
         if ($class != 'MandrillEmail') {
             $this->ss_template = array('emails/'.$class, $this->ss_template);
+        } else {
+            if ($defaultTemplate = self::config()->default_template) {
+                $this->setTemplate('emails/' . $defaultTemplate);
+            }
         }
 
         // Allow theming
@@ -471,7 +475,7 @@ class MandrillEmail extends Email
      */
     public static function getPathForTemplate($templateName)
     {
-        return 'emails/'.$templateName;
+        return 'email/'.$templateName;
     }
 
     /**
@@ -582,7 +586,7 @@ class MandrillEmail extends Email
     {
         $data = array();
         foreach ($this->required_objects as $name => $class) {
-            if(!class_exists($class)) {
+            if (!class_exists($class)) {
                 continue;
             }
             $o = $class::get()->sort('RAND()')->first();
