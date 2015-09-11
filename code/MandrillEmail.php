@@ -61,7 +61,7 @@ class MandrillEmail extends Email
             $this->ss_template = array('emails/'.$class, $this->ss_template);
         } else {
             if ($defaultTemplate = self::config()->default_template) {
-                $this->setTemplate('emails/' . $defaultTemplate);
+                $this->setTemplate('emails/'.$defaultTemplate);
             }
         }
 
@@ -589,7 +589,12 @@ class MandrillEmail extends Email
             if (!class_exists($class)) {
                 continue;
             }
-            $o = $class::get()->sort('RAND()')->first();
+            if (method_exists($class, 'getSampleRecord')) {
+                $o = $class::getSampleRecord();
+            } else {
+                $o = $class::get()->sort('RAND()')->first();
+            }
+
             if (!$o) {
                 $o = new $class;
             }
