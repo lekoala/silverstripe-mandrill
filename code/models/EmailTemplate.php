@@ -46,7 +46,7 @@ class EmailTemplate extends DataObject
         if (!$this->Theme) {
             $this->Theme = MandrillEmail::config()->default_theme;
         }
-        if(!$this->Template) {
+        if (!$this->Template) {
             $this->Template = MandrillEmail::config()->default_template;
         }
 
@@ -84,9 +84,12 @@ class EmailTemplate extends DataObject
             $extraModels->addColumn('Name');
             $extraModels->addColumn('Model', null, TableField::TYPE_SELECT,
                 null, array('ctrlOptions' => $objectsSource));
+        } else if (class_exists('CodeEditorField')) {
+            $fields->replaceField('ExtraModels',
+                $extraModelsCode = new CodeEditorField('ExtraModels',
+                'Extra Models'));
+            $extraModelsCode->setMode('json');
         }
-
-
         // form-extras integration
         if (class_exists('ComboField')) {
             $categories = EmailTemplate::get()->column('Category');
