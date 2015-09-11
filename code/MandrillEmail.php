@@ -582,6 +582,9 @@ class MandrillEmail extends Email
     {
         $data = array();
         foreach ($this->required_objects as $name => $class) {
+            if(!class_exists($class)) {
+                continue;
+            }
             $o = $class::get()->sort('RAND()')->first();
             if (!$o) {
                 $o = new $class;

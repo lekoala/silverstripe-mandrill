@@ -4,7 +4,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width"/>
 		<title>$Subject</title>
-		<style>
+		<style type="text/css">
 			/**********************************************
 			* Ink v1.0.5 - Copyright 2013 ZURB Inc        *
 			**********************************************/

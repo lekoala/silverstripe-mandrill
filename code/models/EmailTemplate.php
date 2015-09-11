@@ -175,6 +175,9 @@ class EmailTemplate extends DataObject
     {
         $extraModels = $this->ExtraModels ? json_decode($this->ExtraModels) : array();
         $arr         = array();
+        if(!$extraModels) {
+            return array();
+        }
         foreach ($extraModels as $extraModel) {
             if (!class_exists($extraModel->Model)) {
                 continue;
@@ -264,7 +267,7 @@ class EmailTemplate extends DataObject
         // Preview iframe
         $previewLink = '/admin/emails/EmailTemplate/PreviewEmail/?id='.$this->ID;
         $iframe      = new LiteralField('iframe',
-            '<iframe src="'.$previewLink.'" style="width:600px;background:#fff;min-height:500px;vertical-align:top"></iframe>');
+            '<iframe src="'.$previewLink.'" style="width:800px;background:#fff;min-height:500px;vertical-align:top"></iframe>');
         $tab->push($iframe);
 
         if (class_exists('CmsInlineFormAction')) {
@@ -274,6 +277,7 @@ class EmailTemplate extends DataObject
                 $action    = new CmsInlineFormAction('doSendTestEmail', 'Send')
             );
             $recipient->setAttribute('placeholder', 'my@email.test');
+            $recipient->setValue(Email::config()->admin_email);
             $tab->push(new HiddenField('EmailTemplateID', '', $this->ID));
             $tab->push(new HeaderField('SendTestEmailHeader', 'Send test email'));
             $tab->push($compo);
@@ -318,10 +322,13 @@ class EmailTemplate extends DataObject
      * @param bool $parse Should we parse variables or not?
      * @return string
      */
-    public function renderTemplate($parse = false)
+    public function renderTemplate($parse = false, $injectFake = false)
     {
         $email = $this->getEmail();
         $email->setParseBody($parse);
+        if($injectFake) {
+            $email->setSampleRequiredObjects();
+        }
         $html  = $email->getRenderedBody();
 
         return (string) $html;

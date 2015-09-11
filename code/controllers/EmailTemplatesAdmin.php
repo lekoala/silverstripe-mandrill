@@ -45,7 +45,7 @@ class EmailTemplatesAdmin extends ModelAdmin
         /* @var $emailTemplate EmailTemplate */
         $emailTemplate = EmailTemplate::get()->byID($id);
 
-        $html = $emailTemplate->renderTemplate(true);
+        $html = $emailTemplate->renderTemplate(true,true);
 
         return $html;
     }
