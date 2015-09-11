@@ -5,13 +5,9 @@
 		<meta name="viewport" content="width=device-width"/>
 		<title>$Subject</title>
 		<style type="text/css">
-			@import url('http://fonts.googleapis.com/css?family=Roboto');
-		</style>
-		<style type="text/css">
-
 			#outlook a{padding:0}
 			body,#bodyTable,#bodyCell{
-				font-family: Roboto, Verdana sans-serif; 
+				font-family:Helvetica,Arial,sans-serif;
 				height:100% !important;
 				margin:0;
 				padding:0;
@@ -68,7 +64,7 @@
 
 			#templateContainer{border:1px solid #DDDDDD;}
 
-			h1,.h1{display:block; font-family: Roboto, Verdana sans-serif; font-size: 36px; line-height:1.2; text-align:center; color: $HeaderFontColor; text-transform:uppercase;}
+			h1,.h1{display:block; font-family:Helvetica,Arial,sans-serif;font-size: 36px; line-height:1.2; text-align:center; color: $HeaderFontColor; text-transform:uppercase;}
 
 			.btn {
 				display:block;
@@ -78,7 +74,7 @@
 				border:1px solid #2284a1;
 				color:#fff;
 				margin:8px 0;
-				padding:8px 0;
+				padding:8px;
 				-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;
 				margin-bottom:8px;
 			}
@@ -235,13 +231,13 @@
 				<tbody  bgcolor="#f2f2f2">
 					<tr>
 						<td>
-							<table cellspacing="0" cellpadding="10" style="width: 100%; margin-top:40px;">
+							<table cellspacing="0" cellpadding="10" style="width: 100%; margin-top:40px;" align="center">
 								<tbody>
 									<tr>
 										<td>
-											<div style="width:640px; height:77px; display:block; margin: auto;">
+											<div style="width:640px; height:77px; display:block; margin: auto;text-align: center">
 												<% if SiteConfig.EmailLogoTemplate %>
-												<img src="$SiteConfig.EmailLogoTemplate.SetHeight(70).Link" alt="$SiteConfig.Title" style="width:auto;" />
+												<img src="$SiteConfig.EmailLogoTemplate.SetHeight(70).Link" alt="$SiteConfig.Title" style="width:auto;margin:0 auto;" />
 												<% end_if %>
 											</div>
 										</td>
@@ -252,17 +248,17 @@
 								<tbody>
 									<tr>
 										<td valign="top">
-											<div style="text-align: center;"><span style="color: #6c737b; font-family: Roboto, Verdana sans-serif; font-size: 36px; line-height: 1.2; text-transform:uppercase; text-align: center;">$Subject</span></div>
+											<div style="text-align: center;"><span style="color: #6c737b; font-family:Helvetica,Arial,sans-serif;font-size: 36px; line-height: 1.2; text-transform:uppercase; text-align: center;">$Subject</span></div>
 											<div><br />
 												<hr style="height: 1px; color: #00afcb; background-color: #00afcb; width: 10%; border: none; margin-top:-5px;">
 													<% if Sidebar %>
 													<div style="width:165px; margin-top:40px; float:left;">$Sidebar</div>
 
-													<span style="font-family: Roboto, Verdana sans-serif; font-size: 16px; color: #a7a7a7; width:390px; display:block; float:right; margin-left:auto; margin-right:auto; margin-top:40px; text-align:justify; line-height: 1.3;">
+													<span style="font-family:Helvetica,Arial,sans-serif;font-size: 16px; color: #a7a7a7; width:390px; display:block; float:right; margin-left:auto; margin-right:auto; margin-top:40px; text-align:justify; line-height: 1.3;">
 														<p>$Body</p>
 													</span>
 													<% else %>
-													<span style="font-family: Roboto, Verdana sans-serif; font-size: 16px; color: #a7a7a7; width:390px; display:block; float:right; margin-left:auto; margin-right:auto; margin-top:40px; text-align:justify; line-height: 1.3;">
+													<span style="font-family:Helvetica,Arial,sans-serif;font-size: 16px; color: #a7a7a7; width:390px; display:block; float:right; margin-left:auto; margin-right:auto; margin-top:40px; text-align:justify; line-height: 1.3;">
 														<p>$Body</p>
 													</span>
 													<% end_if %>
@@ -297,7 +293,7 @@
 											<table border="0" cellpadding="0" cellspacing="0" style="border-collapse:separate!important; border-radius:10px; min-width:240px; background-color:#00afcb">
 												<tbody>
 													<tr>
-														<td class="callout" align="center" valign="middle" style="font-family:Roboto, Verdana sans-serif; color:$PanelFontColor; font-size:14px; padding:10px">
+														<td class="callout" align="center" valign="middle" style="font-family:Helvetica,Arial,sans-serif; color:$PanelFontColor; font-size:14px; padding:10px">
 															$Callout
 														</td>
 													</tr>
@@ -331,7 +327,7 @@
 																	</tr>
 																	<tr>
 																		<td align="center" valign="top" style="padding-right:0px;padding-bottom:9px">
-																			<a href="https://www.facebook.com/$SiteConfig.FacebookAccount" style="color:#6c737b;font-family:Roboto, Verdana sans-serif;font-size:14px;text-align:center;text-decoration:none;word-wrap:break-word" target="_blank">Facebook</a>
+																			<a href="https://www.facebook.com/$SiteConfig.FacebookAccount" style="color:#6c737b;font-family:Helvetica,Arial,sans-serif;font-size:14px;text-align:center;text-decoration:none;word-wrap:break-word" target="_blank">Facebook</a>
 																		</td>
 																	</tr>
 																</tbody>
@@ -347,7 +343,7 @@
 																	</tr>
 																	<tr>
 																		<td align="center" valign="top" style="padding-right:0px;padding-bottom:9px">
-																			<a href="https://twitter.com/$SiteConfig.TwitterAccount" style="color:#6c737b;font-family:Roboto, Verdana sans-serif;font-size:14px;text-align:center;text-decoration:none;word-wrap:break-word" target="_blank">Twitter</a>
+																			<a href="https://twitter.com/$SiteConfig.TwitterAccount" style="color:#6c737b;font-family:Helvetica,Arial,sans-serif;font-size:14px;text-align:center;text-decoration:none;word-wrap:break-word" target="_blank">Twitter</a>
 																		</td>
 																	</tr>
 																</tbody>
@@ -364,7 +360,7 @@
 																	</tr>
 																	<tr>
 																		<td align="center" valign="top" style="padding-right:0;padding-bottom:9px">
-																			<a href="$BaseHref" style="color:#6c737b;font-family:Roboto, Verdana sans-serif;font-size:14px;text-align:center;text-decoration:none;word-wrap:break-word" target="_blank">Site Web</a>
+																			<a href="$BaseHref" style="color:#6c737b;font-family:Helvetica,Arial,sans-serif;font-size:14px;text-align:center;text-decoration:none;word-wrap:break-word" target="_blank">Site Web</a>
 																		</td>
 																	</tr>
 																</tbody>
