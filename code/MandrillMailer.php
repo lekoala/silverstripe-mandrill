@@ -473,9 +473,8 @@ class MandrillMailer extends Mailer
                     $failed++;
                     if (!empty($result['reject_reason'])) {
                         $reasons[] = $result['reject_reason'];
-                    }
-                    else if($result['status'] == 'invalid') {
-                        $reasons[] = 'Email "' . $result['email'] . '" is invalid';
+                    } else if ($result['status'] == 'invalid') {
+                        $reasons[] = 'Email "'.$result['email'].'" is invalid';
                     }
                     continue;
                 }
@@ -528,8 +527,12 @@ class MandrillMailer extends Mailer
      */
     public static function resolveDefaultFromEmail($from = null)
     {
-        if (!empty($from) && filter_var($from, FILTER_VALIDATE_EMAIL)) {
-            return $from;
+        $original_from = $from;
+        if (!empty($from)) {
+            $from = MandrillMailer::get_email_from_rfc_email($from);
+            if (filter_var($from, FILTER_VALIDATE_EMAIL)) {
+                return $original_from;
+            }
         }
         $config = SiteConfig::current_site_config();
         if (!empty($config->DefaultFromEmail)) {
@@ -549,13 +552,15 @@ class MandrillMailer extends Mailer
     public static function resolveDefaultToEmail($to = null)
     {
         // In case of multiple recipients, do not validate anything
-        if(is_array($to) || strpos($to, ',') !== false) {
+        if (is_array($to) || strpos($to, ',') !== false) {
             return $to;
         }
         $original_to = $to;
-        $to          = MandrillMailer::get_email_from_rfc_email($to);
-        if (!empty($to) && filter_var($to, FILTER_VALIDATE_EMAIL)) {
-            return $original_to;
+        if (!empty($to)) {
+            $to = MandrillMailer::get_email_from_rfc_email($to);
+            if (filter_var($to, FILTER_VALIDATE_EMAIL)) {
+                return $original_to;
+            }
         }
         $config = SiteConfig::current_site_config();
         if (!empty($config->DefaultToEmail)) {
