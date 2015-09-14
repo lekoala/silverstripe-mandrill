@@ -58,10 +58,10 @@ class MandrillEmail extends Email
         // Allow subclass template
         $class = get_called_class();
         if ($class != 'MandrillEmail') {
-            $this->ss_template = array('emails/'.$class, $this->ss_template);
+            $this->ss_template = array('email/'.$class, $this->ss_template);
         } else {
             if ($defaultTemplate = self::config()->default_template) {
-                $this->setTemplate('emails/'.$defaultTemplate);
+                $this->setTemplate('email/'.$defaultTemplate);
             }
         }
 
