@@ -100,9 +100,14 @@ class EmailTemplate extends DataObject
 
         $fields->dataFieldByName('Callout')->setRows(5);
 
-        $fields->dataFieldByName('Code')->setAttribute('placeholder',
+        $codeField = $fields->dataFieldByName('Code');
+        $codeField->setAttribute('placeholder',
             _t('EmailTemplate.CODEPLACEHOLDER',
                 'A unique code that will be used in code to retrieve the template, e.g.: my-email'));
+
+        if($this->Code) {
+            $codeField->setReadonly(true);
+        }
 
         // Merge fields helper
         $fields->addFieldToTab('Root.Main',
