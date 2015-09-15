@@ -104,6 +104,11 @@ class EmailTemplate extends DataObject
             _t('EmailTemplate.CODEPLACEHOLDER',
                 'A unique code that will be used in code to retrieve the template, e.g.: my-email'));
 
+        // Here we remove the code from the editor if it is set so clients can not update
+        if ($this->Code) {
+            $fields->removeByName('Code');
+        }
+
         // Merge fields helper
         $fields->addFieldToTab('Root.Main',
             new HeaderField('MergeFieldsHelperTitle',
