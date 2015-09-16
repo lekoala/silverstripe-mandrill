@@ -61,7 +61,7 @@ class MandrillEmail extends Email
             $this->ss_template = array('email/'.$class, $this->ss_template);
         } else {
             if ($defaultTemplate = self::config()->default_template) {
-                $this->setTemplate('email/'.$defaultTemplate);
+                $this->setTemplate($defaultTemplate);
             }
         }
 
