@@ -25,6 +25,8 @@ class MandrillMailer extends Mailer
     protected $last_is_error          = false;
     protected static $instance;
     protected static $disable_sending = false;
+    protected static $enable_logging  = false;
+    protected static $log_folder      = 'silverstripe-cache/emails';
 
     function __construct($apiKey)
     {
@@ -68,6 +70,12 @@ class MandrillMailer extends Mailer
         }
         $mandrillMailer = new MandrillMailer($apiKey);
         Email::set_mailer($mandrillMailer);
+        if (defined('MANDRILL_SENDING_DISABLED') && MANDRILL_SENDING_DISABLED) {
+            self::setSendingDisabled();
+        }
+        if (defined('MANDRILL_ENABLE_LOGGING') && MANDRILL_ENABLE_LOGGING) {
+            self::setEnableLogging();
+        }
     }
 
     /**
@@ -92,6 +100,38 @@ class MandrillMailer extends Mailer
     public static function setSendingDisabled($v = true)
     {
         self::$disable_sending = $v;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function getEnableLogging()
+    {
+        return self::$enable_logging;
+    }
+
+    /**
+     * @param bool $v
+     */
+    public static function setEnableLogging($v = true)
+    {
+        self::$enable_logging = $v;
+    }
+
+    /**
+     * @return string
+     */
+    public static function getLogFolder()
+    {
+        return self::$log_folder;
+    }
+
+    /**
+     * @param bool $v
+     */
+    public static function setLogFolder($v)
+    {
+        self::$log_folder = $v;
     }
 
     /**
@@ -450,6 +490,39 @@ class MandrillMailer extends Mailer
         if ($customheaders) {
             $params['headers'] = $customheaders;
         }
+
+        if (self::getEnableLogging()) {
+            // Append some extra information at the end
+            $logContent = $htmlContent;
+            $logContent .= '<pre>';
+            $logContent .= 'To : '.print_r($original_to, true)."\n";
+            $logContent .= 'Subject : '.$subject."\n";
+            $logContent .= 'Headers : '.print_r($customheaders, true)."\n";
+            if (!empty($params['from_email'])) {
+                $logContent .= 'From email : '.$params['from_email']."\n";
+            }
+            if (!empty($params['from_name'])) {
+                $logContent .= 'From name : '.$params['from_name']."\n";
+            }
+            if (!empty($params['to'])) {
+                $logContent .= 'Recipients : '.print_r($params['to'], true)."\n";
+            }
+            $logContent .= '</pre>';
+
+            // Store it
+            $logFolder = BASE_PATH.'/'.self::getLogFolder();
+            if (!is_dir($logFolder)) {
+                mkdir($logFolder, 0777, true);
+            }
+            $filter = new FileNameFilter();
+            $title  = substr($filter->filter($subject), 0, 20);
+            $r      = file_put_contents($logFolder.'/'.time().'-'.$title.'.html',
+                $logContent);
+            if (!$r) {
+                throw new Exception('Failed to store email in '.$logFolder);
+            }
+        }
+
 
         if (self::getSendingDisabled()) {
             $customheaders['X-SendingDisabled'] = true;
