@@ -15,10 +15,16 @@ class EmailImportTask extends BuildTask
     {
         echo 'Run with ?clear=1 to clear empty database before running the task<br/>';
         echo 'Run with ?overwrite=1 to overwrite templates that exists in the cms<br/>';
+        echo 'Run with ?templates=xxx,yyy to specify which template should be imported<br/>';
         echo '<hr/>';
 
-        $overwrite = $request->getVar('overwrite');
-        $clear     = $request->getVar('clear');
+        $overwrite         = $request->getVar('overwrite');
+        $clear             = $request->getVar('clear');
+        $templatesToImport = $request->getVar('templates');
+
+        if ($templatesToImport) {
+            $templatesToImport = explode(',', $templatesToImport);
+        }
 
         if ($clear == 1) {
             echo '<strong>Clear all email templates</strong><br/>';
@@ -49,7 +55,7 @@ class EmailImportTask extends BuildTask
             $isOverwritten = false;
 
             // Emails in mysite/email are not properly marked as emails
-            if(isset($t['mysite']) && isset($t['mysite']['email'])) {
+            if (isset($t['mysite']) && isset($t['mysite']['email'])) {
                 $t['email'] = $t['mysite']['email'];
             }
 
@@ -82,6 +88,11 @@ class EmailImportTask extends BuildTask
             $code = strtolower(preg_replace('/([a-zA-Z])(?=[A-Z])/', '$1-',
                     $fileName));
             $code = preg_replace('/-email$/', '', $code);
+
+            if (!empty($templatesToImport) && !in_array($code, $templatesToImport)) {
+                echo "<div style='color:blue'>Template with code '$code' was ignored.</div>";
+                continue;
+            }
 
             $emailTemplate = EmailTemplate::get()->filter('Code', $code)->first();
             if (!$overwrite && $emailTemplate) {
@@ -159,14 +170,13 @@ class EmailImportTask extends BuildTask
                         $translation = $baseTranslation;
                     }
                     // This regex should match old and new style
-                    $count = 0;
+                    $count                  = 0;
                     $contentLocale[$locale] = preg_replace("/<%(t | _t\(')".$escapedEntity."( |').*?%>/ums",
                         $translation, $contentLocale[$locale], -1, $count);
-                    if(!$count) {
+                    if (!$count) {
                         throw new Exception("Failed to replace $escapedEntity with translation $translation");
                     }
                 }
-
             }
 
             if (!$emailTemplate) {
@@ -176,15 +186,16 @@ class EmailImportTask extends BuildTask
             }
 
             // Scan for extra models based on convention
-            preg_match_all('/\$([a-zA-Z]+)\./ms', $contentLocale[$defaultLocale], $matches);
+            preg_match_all('/\$([a-zA-Z]+)\./ms',
+                $contentLocale[$defaultLocale], $matches);
             $extraModels = array();
-            if(!empty($matches) && !empty($matches[1])) {
+            if (!empty($matches) && !empty($matches[1])) {
                 $arr = array_unique($matches[1]);
-                foreach($arr as $n) {
-                    if(strtolower($n) === 'siteconfig') {
+                foreach ($arr as $n) {
+                    if (strtolower($n) === 'siteconfig') {
                         continue;
                     }
-                    if(class_exists($n)) {
+                    if (class_exists($n)) {
                         $extraModels[$n] = $n;
                     }
                 }
@@ -214,7 +225,7 @@ class EmailImportTask extends BuildTask
                     }
                     $emailTemplate->$localeField = $translation;
 
-                    if(strpos($translation, '%s') !== false) {
+                    if (strpos($translation, '%s') !== false) {
                         echo '<div style="color:red">There is a %s in the title that should be replaced in locale '.$locale.'!</div>';
                     }
 
@@ -267,7 +278,8 @@ class EmailImportTask extends BuildTask
 
     protected function cleanContent($content)
     {
-        return utf8_decode(strip_tags($content, '<p><br><br/><div><img><a><span>'));
+        return utf8_decode(strip_tags($content,
+                '<p><br><br/><div><img><a><span>'));
     }
 
     protected function getInnerHtml(DOMElement $node)

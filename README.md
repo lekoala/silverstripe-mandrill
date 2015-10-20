@@ -12,6 +12,11 @@ You can also manually initialize the module by calling the following method in \
 
 This module uses the official php sdk version 1.0.54 with a few tweaks.
 
+You can also autoconfigure the module with the following constants in your _ss_environment.php
+
+	define('MANDRILL_ENABLE_LOGGING',true); // Will log emails in the temp folders
+	define('MANDRILL_SENDING_DISABLED',true); // Will disable sending (useful in development)
+
 Mandrillapp integration
 ==================
 
