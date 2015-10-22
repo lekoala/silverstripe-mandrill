@@ -1,15 +1,20 @@
-Silverstripe Mandrill module
+SilverStripe Mandrill module
 ==================
-Use Mandrill in Silverstripe
+Use Mandrill in SilverStripe
 
-Define in your \_ss\_environment.php file the following constant
+Define in your _ss_environment.php file the following constant
 
-	define('MANDRILL\_API\_KEY','YOUR_API_KEY_HERE');
+    ```php
+	define('MANDRILL_API_KEY','YOUR_API_KEY_HERE');
+    ```
+    
+or by defining the api key in your config.yml
 
-You can also manually initialize the module by calling the following method in \_config.php
-
-	MandrillMailer::setAsMailer(MANDRILL_API_KEY);
-
+   ```yaml
+   MandrillMailer:
+     mandrill_api_key: 'key3goes9here'
+   ```
+	
 This module uses the official php sdk version 1.0.54 with a few tweaks.
 
 You can also autoconfigure the module with the following constants in your _ss_environment.php
@@ -21,7 +26,7 @@ Mandrillapp integration
 ==================
 
 This module create a new admin section that allows you to see results from
-your api calls right from the Silverstripe CMS without having to log into
+your api calls right from the SilverStripe CMS without having to log into
 mandrillapp.com
 
 

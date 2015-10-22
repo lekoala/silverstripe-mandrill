@@ -25,12 +25,29 @@ class MandrillMailer extends Mailer
     protected $last_is_error          = false;
     protected static $instance;
     protected static $disable_sending = false;
-    protected static $enable_logging  = false;
     protected static $log_folder      = 'silverstripe-cache/emails';
+    private static $mandrill_api_key;
 
-    function __construct($apiKey)
+    /**
+     * Get the API key to use
+     *
+     * @return string
+     */
+    public static function get_mandrill_api_key() {
+
+        if(defined('MANDRILL_API_KEY')) {
+            return MANDRILL_API_KEY;
+        } elseif($apikey = Config::inst()->get(__CLASS__, 'mandrill_api_key')) {
+            return $apikey;
+        } else {
+            throw new Exception('Api key is empty');
+        }
+
+    }
+
+    public function __construct()
     {
-        $this->mandrill = new Mandrill($apiKey);
+        $this->mandrill = new Mandrill(self::get_mandrill_api_key());
         self::$instance = $this;
     }
 
@@ -58,17 +75,9 @@ class MandrillMailer extends Mailer
      * @param string $apiKey
      * @throws Exception
      */
-    public static function setAsMailer($apiKey = null)
+    public static function setAsMailer()
     {
-        if ($apiKey === null) {
-            if (defined('MANDRILL_API_KEY')) {
-                $apiKey = MANDRILL_API_KEY;
-            }
-        }
-        if (empty($apiKey)) {
-            throw new Exception('Api key is empty');
-        }
-        $mandrillMailer = new MandrillMailer($apiKey);
+        $mandrillMailer = new MandrillMailer();
         Email::set_mailer($mandrillMailer);
         if (defined('MANDRILL_SENDING_DISABLED') && MANDRILL_SENDING_DISABLED) {
             self::setSendingDisabled();
