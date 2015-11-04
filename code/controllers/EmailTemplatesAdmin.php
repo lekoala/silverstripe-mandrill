@@ -20,13 +20,18 @@ class EmailTemplatesAdmin extends ModelAdmin
         'doSendTestEmail'
     );
 
+    public function subsiteCMSShowInMenu() {
+        return true;
+    }
+
     public function getSearchContext()
     {
         $context = parent::getSearchContext();
 
         $categories = EmailTemplate::get()->column('Category');
         $context->getFields()->replaceField('q[Category]',
-            new DropdownField('q[Category]', 'Category', ArrayLib::valuekey($categories)));
+            $dd = new DropdownField('q[Category]', 'Category', ArrayLib::valuekey($categories)));
+        $dd->setEmptyString('');
 
         return $context;
     }
@@ -34,6 +39,13 @@ class EmailTemplatesAdmin extends ModelAdmin
     public function getList()
     {
         $list = parent::getList();
+
+        $singl = singleton('EmailTemplate');
+
+        // In this case, the extension is not filtering by itself, so we need to do it manually
+        if($singl->hasExtension('SubsiteDataObject') && !Subsite::currentSubsiteID()) {
+            $list = $list->filter('SubsiteID',0);
+        }
 
         return $list;
     }

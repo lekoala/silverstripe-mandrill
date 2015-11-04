@@ -16,11 +16,18 @@ class EmailImportTask extends BuildTask
         echo 'Run with ?clear=1 to clear empty database before running the task<br/>';
         echo 'Run with ?overwrite=1 to overwrite templates that exists in the cms<br/>';
         echo 'Run with ?templates=xxx,yyy to specify which template should be imported<br/>';
+        echo 'Run with ?subsite=1 to create email templates in all subsites as well. Overwriting is based on main site.<br/>';
         echo '<hr/>';
 
         $overwrite         = $request->getVar('overwrite');
         $clear             = $request->getVar('clear');
         $templatesToImport = $request->getVar('templates');
+        $importToSubsite   = $request->getVar('subsite');
+
+        $subsites = array();
+        if ($importToSubsite) {
+            $subsites = Subsite::get()->map();
+        }
 
         if ($templatesToImport) {
             $templatesToImport = explode(',', $templatesToImport);
@@ -89,7 +96,8 @@ class EmailImportTask extends BuildTask
                     $fileName));
             $code = preg_replace('/-email$/', '', $code);
 
-            if (!empty($templatesToImport) && !in_array($code, $templatesToImport)) {
+            if (!empty($templatesToImport) && !in_array($code,
+                    $templatesToImport)) {
                 echo "<div style='color:blue'>Template with code '$code' was ignored.</div>";
                 continue;
             }
@@ -243,10 +251,34 @@ class EmailImportTask extends BuildTask
 
             $emailTemplate->write();
 
+            $subsiteImport = '';
+            
+            // Loop through subsites
+            if ($importToSubsite) {
+                $subsiteImport .= ' => Main site and subsites';
+                Subsite::$disable_subsite_filter = true;
+                foreach ($subsites as $subsiteID => $subsiteTitle) {
+                     $subsiteEmailTemplate = EmailTemplate::get()->filter(array(
+                         'Code' => $code,
+                         'SubsiteID' => $subsiteID
+                     ))->first();
+
+                     $emailTemplateCopy = $emailTemplate;
+                     $emailTemplateCopy->SubsiteID = $subsiteID;
+                     if($subsiteEmailTemplate) {
+                         $emailTemplateCopy->ID = $subsiteEmailTemplate->ID;
+                     }
+                     else {
+                         $emailTemplateCopy->ID = 0; // New
+                     }
+                     $emailTemplateCopy->write();
+                }
+            }
+
             if ($isOverwritten) {
-                echo "<div style='color:orange'>Overwrote {$emailTemplate->Code}</div>";
+                echo "<div style='color:orange'>Overwrote {$emailTemplate->Code}{$subsiteImport}</div>";
             } else {
-                echo "<div style='color:green'>Imported {$emailTemplate->Code}</div>";
+                echo "<div style='color:green'>Imported {$emailTemplate->Code}{$subsiteImport}</div>";
             }
         }
     }

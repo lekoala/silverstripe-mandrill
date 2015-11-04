@@ -29,10 +29,7 @@ class EmailTemplate extends DataObject
         'Category'
     );
     private static $indexes           = array(
-        'Code' => array(
-            'type' => 'unique',
-            'value' => 'Code'
-        )
+        'Code' => true
     );
     private static $translate         = array(
         'Title', 'Content', 'Callout', 'SideBar'
@@ -105,7 +102,7 @@ class EmailTemplate extends DataObject
             _t('EmailTemplate.CODEPLACEHOLDER',
                 'A unique code that will be used in code to retrieve the template, e.g.: my-email'));
 
-        if($this->Code) {
+        if ($this->Code) {
             $codeField->setReadonly(true);
         }
 
@@ -243,7 +240,14 @@ class EmailTemplate extends DataObject
     public static function getByCode($code)
     {
         $template = EmailTemplate::get()->filter('Code', $code)->first();
-        if (!$template) {
+        // If subsite, fallback to main site email if not defined
+        if (!$template && class_exists('Subsite') && Subsite::currentSubsiteID()) {
+            Subsite::$disable_subsite_filter = true;
+            $template = EmailTemplate::get()->filter('Code', $code)->first();
+            Subsite::$disable_subsite_filter = false;
+        }
+        // In dev mode, create a placeholder email
+        if (!$template && Director::isDev()) {
             $template          = new EmailTemplate();
             $template->Title   = $code;
             $template->Code    = $code;
