@@ -40,13 +40,6 @@ class EmailTemplatesAdmin extends ModelAdmin
     {
         $list = parent::getList();
 
-        $singl = singleton('EmailTemplate');
-
-        // In this case, the extension is not filtering by itself, so we need to do it manually
-        if($singl->hasExtension('SubsiteDataObject') && !Subsite::currentSubsiteID()) {
-            $list = $list->filter('SubsiteID',0);
-        }
-
         return $list;
     }
 

@@ -63,8 +63,8 @@ EmailTemplate:
     - FluentExtension
 ---
 Only:
-  classexists: 'SubsiteDataObject'
+  classexists: 'Subsite'
 ---
 EmailTemplate:
   extensions:
-    - SubsiteDataObject
+    - EmailTemplateSubsiteExtension
