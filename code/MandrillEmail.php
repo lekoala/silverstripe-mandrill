@@ -621,7 +621,8 @@ class MandrillEmail extends Email
     }
 
     /**
-     *
+     * Set recipient
+     * 
      * @param string $val
      * @return Email
      */
@@ -631,6 +632,15 @@ class MandrillEmail extends Email
             $this->to_member = false;
         }
         return parent::setTo($val);
+    }
+
+    /**
+     * Send to admin
+     *
+     * @return Email
+     */
+    public function setToAdmin() {
+        return $this->setTo(Email::config()->admin_email);
     }
 
     /**
