@@ -640,7 +640,15 @@ class MandrillEmail extends Email
      * @return Email
      */
     public function setToAdmin() {
-        return $this->setTo(Email::config()->admin_email);
+        $email = Email::config()->admin_email;
+        $sc = SiteConfig::current_site_config();
+        if($sc->DefaultToEmail) {
+            $email = $sc->DefaultToEmail;
+        }
+        else if($sc->ContactEmail) {
+            $email = $sc->ContactEmail;
+        }
+        return $this->setTo($email);
     }
 
     /**
