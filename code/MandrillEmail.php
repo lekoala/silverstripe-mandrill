@@ -19,7 +19,7 @@ class MandrillEmail extends Email
      * @var ViewableData
      */
     protected $template_data;
-    protected $ss_template = "email/BasicEmail";
+    protected $ss_template = "email/BasicEmail"; // This will be overriden by default_template config if set
     protected $original_body;
     protected $locale;
     protected $callout;
@@ -55,17 +55,18 @@ class MandrillEmail extends Email
         parent::__construct($from, $to, $subject, $body, $bounceHandlerURL, $cc,
             $bcc);
 
+        // Use config template
+        if ($defaultTemplate = self::config()->default_template) {
+            $this->setTemplate($defaultTemplate);
+        }
+
         // Allow subclass template
         $class = get_called_class();
         if ($class != 'MandrillEmail') {
             $this->ss_template = array('email/'.$class, $this->ss_template);
-        } else {
-            if ($defaultTemplate = self::config()->default_template) {
-                $this->setTemplate($defaultTemplate);
-            }
         }
 
-        // Allow theming
+        // Allow user configurable theming
         $config = SiteConfig::current_site_config();
         if ($config->EmailTheme) {
             $this->setTheme($config->EmailTheme);
@@ -251,6 +252,8 @@ class MandrillEmail extends Email
 
         if (!$this->parseVariables_done) {
             $this->parseVariables_done = true;
+
+            // Keep a reference to the unparsed body content
             if (!$this->original_body) {
                 $this->original_body = $this->body;
             }
@@ -261,8 +264,13 @@ class MandrillEmail extends Email
             // Process a .SS template file
             $fullBody = $this->original_body;
 
-            if ($this->parse_body) {
+            // Fullbody could be an instance of SSViewer
+            if (is_object($fullBody) && $fullBody instanceof SSViewer) {
+                $viewer   = $fullBody;
+                $fullBody = $viewer->process($data);
+            }
 
+            if ($this->parse_body) {
                 try {
                     $viewer   = new SSViewer_FromString($fullBody);
                     $fullBody = $viewer->process($data);
@@ -639,13 +647,13 @@ class MandrillEmail extends Email
      *
      * @return Email
      */
-    public function setToAdmin() {
+    public function setToAdmin()
+    {
         $email = Email::config()->admin_email;
-        $sc = SiteConfig::current_site_config();
-        if($sc->DefaultToEmail) {
+        $sc    = SiteConfig::current_site_config();
+        if ($sc->DefaultToEmail) {
             $email = $sc->DefaultToEmail;
-        }
-        else if($sc->ContactEmail) {
+        } else if ($sc->ContactEmail) {
             $email = $sc->ContactEmail;
         }
         return $this->setTo($email);

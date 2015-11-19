@@ -36,7 +36,6 @@ class MandrillMailer extends Mailer
      */
     public static function get_mandrill_api_key()
     {
-
         if (defined('MANDRILL_API_KEY')) {
             return MANDRILL_API_KEY;
         } elseif ($apikey = Config::inst()->get(__CLASS__, 'mandrill_api_key')) {
@@ -86,6 +85,10 @@ class MandrillMailer extends Mailer
         if (defined('MANDRILL_ENABLE_LOGGING') && MANDRILL_ENABLE_LOGGING) {
             self::setEnableLogging();
         }
+
+        // Use custom classes
+        Object::useCustomClass('Member_ChangePasswordEmail','Mandrill_ChangePasswordEmail');
+        Object::useCustomClass('Member_ForgotPasswordEmail','Mandrill_ForgotPasswordEmail');
     }
 
     /**

@@ -22,6 +22,8 @@ You can also autoconfigure the module with the following constants in your _ss_e
 	define('MANDRILL_ENABLE_LOGGING',true); // Will log emails in the temp folders
 	define('MANDRILL_SENDING_DISABLED',true); // Will disable sending (useful in development)
 
+By defining the Api Key, the module will register a new mailer that will be used to send all emails.
+
 Mandrillapp integration
 ==================
 
@@ -101,6 +103,9 @@ Basic how-to guide
 ==================
 
 After installing through your method of choice and setting up the API keys you have access to the MandrillEmail class. 
+
+Please note that even if the module provides the MandrillEmail class, you don't have to use it. The regular Email class will work
+just as well because we have registered a new mailer (MandrillMailer).
 
 Lets say we want to send an email on form submission, the Silverstripe guide on forms is [here](https://docs.silverstripe.org/en/3.1/developer_guides/forms/introduction/) if you are unsure about forms.
 
