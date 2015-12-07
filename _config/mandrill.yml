@@ -18,6 +18,8 @@ MandrillMailer:
 MandrillAdmin:
   cache_enabled: true
 MandrillEmail:
+  change_password_template: 'ChangePasswordEmail'
+  forgot_password_template: 'ForgotPasswordEmail'
   default_theme: 'dark'
   default_template: 'email/BasicEmail'
   templates:

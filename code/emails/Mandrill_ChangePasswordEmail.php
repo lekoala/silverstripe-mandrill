@@ -17,7 +17,11 @@ class Mandrill_ChangePasswordEmail extends MandrillEmail
         $this->subject = _t('Member.SUBJECTPASSWORDCHANGED',
             "Your password has been changed", 'Email subject');
 
-        $viewer     = new SSViewer('ChangePasswordEmail');
+        $template = $this->config()->change_password_template;
+        if (!$template) {
+            $template = 'ChangePasswordEmail';
+        }
+        $viewer     = new SSViewer($template);
         $this->body = $viewer;
     }
 }

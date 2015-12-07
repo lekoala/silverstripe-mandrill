@@ -17,7 +17,11 @@ class Mandrill_ForgotPasswordEmail extends MandrillEmail
         $this->subject = _t('Member.SUBJECTPASSWORDRESET',
             "Your password reset link", 'Email subject');
 
-        $viewer     = new SSViewer('ForgotPasswordEmail');
+        $template = $this->config()->forgot_password_template;
+        if(!$template) {
+            $template = 'ForgotPasswordEmail';
+        }
+        $viewer     = new SSViewer($template);
         $this->body = $viewer;
     }
 }
