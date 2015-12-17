@@ -12,13 +12,15 @@ class EmailTemplateSubsiteExtension extends DataExtension
         'Subsite' => 'Subsite',
     );
 
-    function isMainDataObject()
+    public function isMainDataObject()
     {
-        if ($this->owner->SubsiteID == 0) return true;
+        if ($this->owner->SubsiteID == 0) {
+            return true;
+        }
         return false;
     }
 
-    function canView($member = null)
+    public function canView($member = null)
     {
         if ($this->canEdit($member)) {
             return true;
@@ -28,25 +30,32 @@ class EmailTemplateSubsiteExtension extends DataExtension
     /**
      * Update any requests to limit the results to the current site
      */
-    function augmentSQL(SQLQuery &$query, DataQuery &$dataQuery = null)
+    public function augmentSQL(SQLQuery &$query, DataQuery &$dataQuery = null)
     {
         $ctrl = null;
         if (Controller::has_curr()) {
             $ctrl = Controller::curr();
         }
 
-        if (Subsite::$disable_subsite_filter) return;
-        if ($dataQuery->getQueryParam('Subsite.filter') === false) return;
-        if ($ctrl && get_class(Controller::curr()) == 'Security') return;
+        if (Subsite::$disable_subsite_filter) {
+            return;
+        }
+        if ($dataQuery->getQueryParam('Subsite.filter') === false) {
+            return;
+        }
+        if ($ctrl && get_class(Controller::curr()) == 'Security') {
+            return;
+        }
 
         // Don't run on delete queries, since they are always tied to
         // a specific ID.
-        if ($query->getDelete()) return;
+        if ($query->getDelete()) {
+            return;
+        }
 
         // If you're querying by ID, ignore the sub-site - this is a bit ugly...
         // if(!$query->where || (strpos($query->where[0], ".\"ID\" = ") === false && strpos($query->where[0], ".`ID` = ") === false && strpos($query->where[0], ".ID = ") === false && strpos($query->where[0], "ID = ") !== 0)) {
         if (!$query->filtersOnID()) {
-
             if (Subsite::$force_subsite) {
                 $subsiteID = Subsite::$force_subsite;
             } else {
@@ -60,7 +69,7 @@ class EmailTemplateSubsiteExtension extends DataExtension
         }
     }
 
-    function onBeforeWrite()
+    public function onBeforeWrite()
     {
         parent::onBeforeWrite();
         if (!$this->owner->ID && !$this->owner->SubsiteID) {
@@ -68,7 +77,7 @@ class EmailTemplateSubsiteExtension extends DataExtension
         }
     }
 
-    static function accessible_sites_map($refresh = false)
+    public static function accessible_sites_map($refresh = false)
     {
         if (!$refresh && self::$_accessible_sites_map_cache) {
             return self::$_accessible_sites_map_cache;
@@ -82,13 +91,13 @@ class EmailTemplateSubsiteExtension extends DataExtension
         return self::$_accessible_sites_map_cache;
     }
 
-    static function accessible_sites_ids($refresh = false)
+    public static function accessible_sites_ids($refresh = false)
     {
         $map = self::accessible_sites_map($refresh);
         return array_keys($map);
     }
 
-    static function check_accessible_sites_map($subsiteID, $refresh = false)
+    public static function check_accessible_sites_map($subsiteID, $refresh = false)
     {
         if (!$subsiteID) {
             return false;
@@ -104,7 +113,7 @@ class EmailTemplateSubsiteExtension extends DataExtension
      *
      * @return boolean
      */
-    function canEdit($member = null)
+    public function canEdit($member = null)
     {
         // If no subsite ID is defined, let dataobject determine the permission
         if (!$this->owner->SubsiteID || !Subsite::currentSubsiteID()) {
@@ -117,7 +126,7 @@ class EmailTemplateSubsiteExtension extends DataExtension
             // The relationships might not be available during the record creation when using a GridField.
             // In this case the related objects will have empty fields, and SubsiteID will not be available.
             //
-			// We do the second best: fetch the likely SubsiteID from the session. The drawback is this might
+            // We do the second best: fetch the likely SubsiteID from the session. The drawback is this might
             // make it possible to force relations to point to other (forbidden) subsites.
             $subsiteID = Subsite::currentSubsiteID();
         }
@@ -127,7 +136,9 @@ class EmailTemplateSubsiteExtension extends DataExtension
             return null;
         }
 
-        if (!$member) $member = Member::currentUser();
+        if (!$member) {
+            $member = Member::currentUser();
+        }
 
         // Find the sites that this user has access to
         if ($member->ID == Member::currentUserID()) {
@@ -148,7 +159,7 @@ class EmailTemplateSubsiteExtension extends DataExtension
      * @param Member
      * @return boolean|null
      */
-    function canCreate($member = null)
+    public function canCreate($member = null)
     {
         return Permission::check('CMS_ACCESS_EmailsAdmin', 'any', $member);
     }
@@ -156,7 +167,7 @@ class EmailTemplateSubsiteExtension extends DataExtension
     /**
      * @return boolean
      */
-    function canDelete($member = null)
+    public function canDelete($member = null)
     {
         return Permission::check('CMS_ACCESS_EmailsAdmin', 'any', $member);
     }
@@ -164,7 +175,7 @@ class EmailTemplateSubsiteExtension extends DataExtension
     /**
      * Called by ContentController::init();
      */
-    static function contentcontrollerInit($controller)
+    public static function contentcontrollerInit($controller)
     {
         $subsite = Subsite::currentSubsite();
         if ($subsite && $subsite->Theme) {
@@ -172,7 +183,7 @@ class EmailTemplateSubsiteExtension extends DataExtension
         }
     }
 
-    function alternateAbsoluteLink()
+    public function alternateAbsoluteLink()
     {
         // Generate the existing absolute URL and replace the domain with the subsite domain.
         // This helps deal with Link() returning an absolute URL.
@@ -187,7 +198,7 @@ class EmailTemplateSubsiteExtension extends DataExtension
     /**
      * Return a piece of text to keep DataObject cache keys appropriately specific
      */
-    function cacheKeyComponent()
+    public function cacheKeyComponent()
     {
         return 'subsite-'.Subsite::currentSubsiteID();
     }

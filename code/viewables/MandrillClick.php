@@ -59,7 +59,7 @@ class MandrillClick extends ViewableData
      */
     public function canView($member = null)
     {
-        if (!$member && $member !== FALSE) {
+        if (!$member && $member !== false) {
             $member = Member::currentUser();
         }
 

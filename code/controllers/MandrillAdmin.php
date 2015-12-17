@@ -135,13 +135,13 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             'clicks' => _t('MandrillAdmin.MessageClicks', 'Clicks'),
         ));
         $columns->setFieldFormatting(array(
-            'subject' => function($value, &$item) {
+            'subject' => function ($value, &$item) {
                 return sprintf(
                     '<a href="%s" class="cms-panel-link" data-pjax-target="Content">%s</a>',
                     Convert::raw2xml($item->Link), $value
                 );
             },
-            'state' => function($value, &$item) {
+            'state' => function ($value, &$item) {
                 $color = MandrillMessage::getColorForState($value);
                 return sprintf('<span style="color:%s">%s</span>', $color,
                     $value);
@@ -203,7 +203,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         } else {
             $defaultQuery = '*';
             // If we have a subaccount defined, we need to restrict the query to this subaccount
-            if($subaccount = MandrillMailer::getSubaccount()) {
+            if ($subaccount = MandrillMailer::getSubaccount()) {
                 $defaultQuery = 'subaccount:' . $subaccount;
             }
 
@@ -307,11 +307,10 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             $values[$field->getName()] = $field->datavalue();
         }
         // If we have a subaccount defined, we need to restrict the query to this subaccount
-        if($subaccount = MandrillMailer::getSubaccount()) {
-            if(empty($values['Query'])) {
+        if ($subaccount = MandrillMailer::getSubaccount()) {
+            if (empty($values['Query'])) {
                 $values['Query'] = 'subaccount:' . $subaccount;
-            }
-            else {
+            } else {
                 $values['Query'] = $values['Query'] . ' AND subaccount:' . $subaccount;
             }
         }
@@ -462,7 +461,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
      *
      * @return bool
      */
-    public function CanConfigureWebhooks() {
+    public function CanConfigureWebhooks()
+    {
         return Permission::check('ADMIN') || Director::isDev();
     }
 

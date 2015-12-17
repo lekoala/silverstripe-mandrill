@@ -87,8 +87,8 @@ class MandrillMailer extends Mailer
         }
 
         // Use custom classes
-        Object::useCustomClass('Member_ChangePasswordEmail','Mandrill_ChangePasswordEmail');
-        Object::useCustomClass('Member_ForgotPasswordEmail','Mandrill_ForgotPasswordEmail');
+        Object::useCustomClass('Member_ChangePasswordEmail', 'Mandrill_ChangePasswordEmail');
+        Object::useCustomClass('Member_ForgotPasswordEmail', 'Mandrill_ForgotPasswordEmail');
     }
 
     /**
@@ -250,8 +250,8 @@ class MandrillMailer extends Mailer
      * @param string $extraHeaders
      * @return array
      */
-    function encodeFileForEmail($file, $destFileName = false,
-                                $disposition = NULL, $extraHeaders = "")
+    public function encodeFileForEmail($file, $destFileName = false,
+                                $disposition = null, $extraHeaders = "")
     {
         if (!$file) {
             user_error("encodeFileForEmail: not passed a filename and/or data",
@@ -264,8 +264,9 @@ class MandrillMailer extends Mailer
             $fh   = fopen($file['filename'], "rb");
             if ($fh) {
                 $file['contents'] = "";
-                while (!feof($fh))
+                while (!feof($fh)) {
                     $file['contents'] .= fread($fh, 10000);
+                }
                 fclose($fh);
             }
         }
@@ -306,7 +307,7 @@ class MandrillMailer extends Mailer
      * @param array $customheaders
      * @return array|bool
      */
-    function sendPlain($to, $from, $subject, $plainContent,
+    public function sendPlain($to, $from, $subject, $plainContent,
                        $attachedFiles = false, $customheaders = false)
     {
         return $this->send($to, $from, $subject, false, $attachedFiles,
@@ -324,7 +325,7 @@ class MandrillMailer extends Mailer
      * @param array $customheaders
      * @return array|bool
      */
-    function sendHTML($to, $from, $subject, $htmlContent,
+    public function sendHTML($to, $from, $subject, $htmlContent,
                       $attachedFiles = false, $customheaders = false,
                       $plainContent = false, $inlineImages = false)
     {
@@ -343,7 +344,7 @@ class MandrillMailer extends Mailer
         if (is_array($recipient)) {
             $email = $recipient['email'];
             $name  = $recipient['name'];
-        } else if (strpos($recipient, '<') !== false) {
+        } elseif (strpos($recipient, '<') !== false) {
             $email = self::get_email_from_rfc_email($recipient);
             $name  = self::get_displayname_from_rfc_email($recipient);
         } else {
@@ -559,7 +560,7 @@ class MandrillMailer extends Mailer
                     $failed++;
                     if (!empty($result['reject_reason'])) {
                         $reasons[] = $result['reject_reason'];
-                    } else if ($result['status'] == 'invalid') {
+                    } elseif ($result['status'] == 'invalid') {
                         $reasons[] = 'Email "'.$result['email'].'" is invalid';
                     }
                     continue;

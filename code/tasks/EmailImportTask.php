@@ -67,13 +67,17 @@ class EmailImportTask extends BuildTask
             }
 
             // Should be in the /email folder
-            if (!isset($t['email'])) continue;
+            if (!isset($t['email'])) {
+                continue;
+            }
 
             $filePath = $t['email'];
             $fileName = basename($filePath, '.ss');
 
             // Should end with *Email
-            if (!preg_match('/Email$/', $fileName)) continue;
+            if (!preg_match('/Email$/', $fileName)) {
+                continue;
+            }
 
             $relativeFilePath      = str_replace(Director::baseFolder(), '',
                 $filePath);
@@ -83,7 +87,9 @@ class EmailImportTask extends BuildTask
             $module = array_shift($relativeFilePathParts);
 
             // Ignore some modules
-            if (in_array($module, $ignoredModules)) continue;
+            if (in_array($module, $ignoredModules)) {
+                continue;
+            }
 
             array_shift($relativeFilePathParts); // remove /templates part
             $templateName = str_replace('.ss', '',
@@ -110,7 +116,7 @@ class EmailImportTask extends BuildTask
 
             // Create a default title from code
             $title = explode('-', $code);
-            $title = array_map(function($item) {
+            $title = array_map(function ($item) {
                 return ucfirst($item);
             }, $title);
             $title = implode(' ', $title);
@@ -258,20 +264,19 @@ class EmailImportTask extends BuildTask
                 $subsiteImport .= ' => Main site and subsites';
                 Subsite::$disable_subsite_filter = true;
                 foreach ($subsites as $subsiteID => $subsiteTitle) {
-                     $subsiteEmailTemplate = EmailTemplate::get()->filter(array(
+                    $subsiteEmailTemplate = EmailTemplate::get()->filter(array(
                          'Code' => $code,
                          'SubsiteID' => $subsiteID
                      ))->first();
 
-                     $emailTemplateCopy = $emailTemplate;
-                     $emailTemplateCopy->SubsiteID = $subsiteID;
-                     if($subsiteEmailTemplate) {
-                         $emailTemplateCopy->ID = $subsiteEmailTemplate->ID;
-                     }
-                     else {
-                         $emailTemplateCopy->ID = 0; // New
-                     }
-                     $emailTemplateCopy->write();
+                    $emailTemplateCopy = $emailTemplate;
+                    $emailTemplateCopy->SubsiteID = $subsiteID;
+                    if ($subsiteEmailTemplate) {
+                        $emailTemplateCopy->ID = $subsiteEmailTemplate->ID;
+                    } else {
+                        $emailTemplateCopy->ID = 0; // New
+                    }
+                    $emailTemplateCopy->write();
                 }
             }
 

@@ -39,7 +39,7 @@ class MandrillSiteConfig extends DataExtension
 
         // form-extras integration
         $uploadClass = 'UploadField';
-        if(class_exists('ImageUploadField')) {
+        if (class_exists('ImageUploadField')) {
             $uploadClass = 'ImageUploadField';
         }
         $fields->addFieldToTab('Root.Email',

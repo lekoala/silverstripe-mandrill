@@ -20,7 +20,8 @@ class EmailTemplatesAdmin extends ModelAdmin
         'doSendTestEmail'
     );
 
-    public function subsiteCMSShowInMenu() {
+    public function subsiteCMSShowInMenu()
+    {
         return true;
     }
 
@@ -50,7 +51,7 @@ class EmailTemplatesAdmin extends ModelAdmin
         /* @var $emailTemplate EmailTemplate */
         $emailTemplate = EmailTemplate::get()->byID($id);
 
-        $html = $emailTemplate->renderTemplate(true,true);
+        $html = $emailTemplate->renderTemplate(true, true);
 
         return $html;
     }

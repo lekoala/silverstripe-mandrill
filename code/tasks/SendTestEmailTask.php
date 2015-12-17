@@ -9,7 +9,7 @@ class SendTestEmailTask extends BuildTask
     protected $title       = "Send Test Email Task";
     protected $description = 'Send a sample email to admin or to ?email=';
 
-    function run($request)
+    public function run($request)
     {
         $config = SiteConfig::current_site_config();
 
@@ -20,7 +20,7 @@ class SendTestEmailTask extends BuildTask
         $template       = $request->getVar('template');
         $disabled       = $request->getVar('disabled');
 
-        if($disabled) {
+        if ($disabled) {
             MandrillMailer::setSendingDisabled();
         }
 

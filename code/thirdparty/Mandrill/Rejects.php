@@ -1,7 +1,9 @@
 <?php
 
-class Mandrill_Rejects {
-    public function __construct(Mandrill $master) {
+class Mandrill_Rejects
+{
+    public function __construct(Mandrill $master)
+    {
         $this->master = $master;
     }
 
@@ -17,7 +19,8 @@ address that has been whitelisted will have no effect.
      *     - email string the email address you provided
      *     - added boolean whether the operation succeeded
      */
-    public function add($email, $comment=null, $subaccount=null) {
+    public function add($email, $comment=null, $subaccount=null)
+    {
         $_params = array("email" => $email, "comment" => $comment, "subaccount" => $subaccount);
         return $this->master->call('rejects/add', $_params);
     }
@@ -54,7 +57,8 @@ include_expired to true to include them.
      *             - unique_clicks integer the number of unique clicks for emails sent for this sender
      *         - subaccount string the subaccount that this blacklist entry applies to, or null if none.
      */
-    public function getList($email=null, $include_expired=false, $subaccount=null) {
+    public function getList($email=null, $include_expired=false, $subaccount=null)
+    {
         $_params = array("email" => $email, "include_expired" => $include_expired, "subaccount" => $subaccount);
         return $this->master->call('rejects/list', $_params);
     }
@@ -70,11 +74,9 @@ has an affect on your reputation.
      *     - deleted boolean whether the address was deleted successfully.
      *     - subaccount string the subaccount blacklist that the address was removed from, if any
      */
-    public function delete($email, $subaccount=null) {
+    public function delete($email, $subaccount=null)
+    {
         $_params = array("email" => $email, "subaccount" => $subaccount);
         return $this->master->call('rejects/delete', $_params);
     }
-
 }
-
-
