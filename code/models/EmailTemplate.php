@@ -81,7 +81,7 @@ class EmailTemplate extends DataObject
             $extraModels->addColumn('Name');
             $extraModels->addColumn('Model', null, TableField::TYPE_SELECT,
                 null, array('ctrlOptions' => $objectsSource));
-        } else if (class_exists('CodeEditorField')) {
+        } elseif (class_exists('CodeEditorField')) {
             $fields->replaceField('ExtraModels',
                 $extraModelsCode = new CodeEditorField('ExtraModels',
                 'Extra Models'));

@@ -1,7 +1,9 @@
 <?php
 
-class Mandrill_Ips {
-    public function __construct(Mandrill $master) {
+class Mandrill_Ips
+{
+    public function __construct(Mandrill $master)
+    {
         $this->master = $master;
     }
 
@@ -22,7 +24,8 @@ class Mandrill_Ips {
      *             - start_at string the start time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      *             - end_at string the end date and time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      */
-    public function getList() {
+    public function getList()
+    {
         $_params = array();
         return $this->master->call('ips/list', $_params);
     }
@@ -44,7 +47,8 @@ class Mandrill_Ips {
      *         - start_at string the start time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      *         - end_at string the end date and time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      */
-    public function info($ip) {
+    public function info($ip)
+    {
         $_params = array("ip" => $ip);
         return $this->master->call('ips/info', $_params);
     }
@@ -58,7 +62,8 @@ are processed within 24 hours.
      * @return struct a description of the provisioning request that was created
      *     - requested_at string the date and time that the request was created as a UTC timestamp in YYYY-MM-DD HH:MM:SS format
      */
-    public function provision($warmup=false, $pool=null) {
+    public function provision($warmup=false, $pool=null)
+    {
         $_params = array("warmup" => $warmup, "pool" => $pool);
         return $this->master->call('ips/provision', $_params);
     }
@@ -83,7 +88,8 @@ will be sent over shared IPs or other dedicated IPs in the same pool.
      *         - start_at string the start time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      *         - end_at string the end date and time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      */
-    public function startWarmup($ip) {
+    public function startWarmup($ip)
+    {
         $_params = array("ip" => $ip);
         return $this->master->call('ips/start-warmup', $_params);
     }
@@ -105,7 +111,8 @@ will be sent over shared IPs or other dedicated IPs in the same pool.
      *         - start_at string the start time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      *         - end_at string the end date and time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      */
-    public function cancelWarmup($ip) {
+    public function cancelWarmup($ip)
+    {
         $_params = array("ip" => $ip);
         return $this->master->call('ips/cancel-warmup', $_params);
     }
@@ -129,7 +136,8 @@ will be sent over shared IPs or other dedicated IPs in the same pool.
      *         - start_at string the start time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      *         - end_at string the end date and time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      */
-    public function setPool($ip, $pool, $create_pool=false) {
+    public function setPool($ip, $pool, $create_pool=false)
+    {
         $_params = array("ip" => $ip, "pool" => $pool, "create_pool" => $create_pool);
         return $this->master->call('ips/set-pool', $_params);
     }
@@ -141,7 +149,8 @@ will be sent over shared IPs or other dedicated IPs in the same pool.
      *     - ip string the ip address
      *     - deleted string a boolean indicating whether the ip was successfully deleted
      */
-    public function delete($ip) {
+    public function delete($ip)
+    {
         $_params = array("ip" => $ip);
         return $this->master->call('ips/delete', $_params);
     }
@@ -167,7 +176,8 @@ will be sent over shared IPs or other dedicated IPs in the same pool.
      *                     - start_at string the start time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      *                     - end_at string the end date and time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      */
-    public function listPools() {
+    public function listPools()
+    {
         $_params = array();
         return $this->master->call('ips/list-pools', $_params);
     }
@@ -193,7 +203,8 @@ will be sent over shared IPs or other dedicated IPs in the same pool.
      *                 - start_at string the start time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      *                 - end_at string the end date and time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      */
-    public function poolInfo($pool) {
+    public function poolInfo($pool)
+    {
         $_params = array("pool" => $pool);
         return $this->master->call('ips/pool-info', $_params);
     }
@@ -220,7 +231,8 @@ name, no action will be performed.
      *                 - start_at string the start time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      *                 - end_at string the end date and time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      */
-    public function createPool($pool) {
+    public function createPool($pool)
+    {
         $_params = array("pool" => $pool);
         return $this->master->call('ips/create-pool', $_params);
     }
@@ -232,7 +244,8 @@ name, no action will be performed.
      *     - pool string the name of the pool
      *     - deleted boolean whether the pool was deleted
      */
-    public function deletePool($pool) {
+    public function deletePool($pool)
+    {
         $_params = array("pool" => $pool);
         return $this->master->call('ips/delete-pool', $_params);
     }
@@ -246,7 +259,8 @@ DNS for a dedicated IP.
      *     - valid string whether the domain name has a correctly-configured A record pointing to the ip address
      *     - error string if valid is false, this will contain details about why the domain's A record is incorrect
      */
-    public function checkCustomDns($ip, $domain) {
+    public function checkCustomDns($ip, $domain)
+    {
         $_params = array("ip" => $ip, "domain" => $domain);
         return $this->master->call('ips/check-custom-dns', $_params);
     }
@@ -269,11 +283,9 @@ DNS for a dedicated IP.
      *         - start_at string the start time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      *         - end_at string the end date and time for the warmup process as a UTC string in YYYY-MM-DD HH:MM:SS format
      */
-    public function setCustomDns($ip, $domain) {
+    public function setCustomDns($ip, $domain)
+    {
         $_params = array("ip" => $ip, "domain" => $domain);
         return $this->master->call('ips/set-custom-dns', $_params);
     }
-
 }
-
-

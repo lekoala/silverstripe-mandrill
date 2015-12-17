@@ -70,7 +70,7 @@ class MandrillEmail extends Email
         $config = SiteConfig::current_site_config();
         if ($config->EmailTheme) {
             $this->setTheme($config->EmailTheme);
-        } else if ($theme = self::config()->default_theme) {
+        } elseif ($theme = self::config()->default_theme) {
             $this->setTheme($theme);
         }
     }
@@ -653,7 +653,7 @@ class MandrillEmail extends Email
         $sc    = SiteConfig::current_site_config();
         if ($sc->DefaultToEmail) {
             $email = $sc->DefaultToEmail;
-        } else if ($sc->ContactEmail) {
+        } elseif ($sc->ContactEmail) {
             $email = $sc->ContactEmail;
         }
         return $this->setTo($email);
@@ -828,7 +828,7 @@ class MandrillEmail extends Email
      * @param bool $relativeToSiteBase
      * @return string
      */
-    static protected function safeAbsoluteURL($url, $relativeToSiteBase = false)
+    protected static function safeAbsoluteURL($url, $relativeToSiteBase = false)
     {
         if (empty($url)) {
             return Director::baseURL();
@@ -846,7 +846,7 @@ class MandrillEmail extends Email
                 $html);
         }
         return HTTP::urlRewriter($html,
-                function($url) {
+                function ($url) {
                 //no need to rewrite, if uri has a protocol (determined here by existence of reserved URI character ":")
                 if (preg_match('/^\w+:/', $url)) {
                     return $url;
