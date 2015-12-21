@@ -247,11 +247,11 @@ class EmailTemplate extends DataObject
             Subsite::$disable_subsite_filter = false;
         }
         // In dev mode, create a placeholder email
-        if (!$template && Director::isDev()) {
+        if (!$template) {
             $template          = new EmailTemplate();
             $template->Title   = $code;
             $template->Code    = $code;
-            $template->Content = 'Please replace the content of this email';
+            $template->Content = '';
             $template->write();
         }
         return $template;
