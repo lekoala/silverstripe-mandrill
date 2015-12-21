@@ -14,19 +14,40 @@ class EmailImportTask extends BuildTask
     public function run($request)
     {
         echo 'Run with ?clear=1 to clear empty database before running the task<br/>';
-        echo 'Run with ?overwrite=1 to overwrite templates that exists in the cms<br/>';
+        echo 'Run with ?overwrite=soft|hard to overwrite templates that exists in the cms. Soft will replace template if not modified by the user, hard will replace template even if modified by user.<br/>';
         echo 'Run with ?templates=xxx,yyy to specify which template should be imported<br/>';
-        echo 'Run with ?subsite=1 to create email templates in all subsites as well. Overwriting is based on main site.<br/>';
+        echo 'Run with ?subsite=all|subsiteID to create email templates in all subsites (including main site) or only in the chosen subsite (if a subsite is active, it will be used by default).<br/>';
+        echo 'Run with ?locales=fr,en to choose which locale to import.<br/>';
+        echo '<strong>Remember to flush the templates/translations if needed</strong><br/>';
         echo '<hr/>';
 
         $overwrite         = $request->getVar('overwrite');
         $clear             = $request->getVar('clear');
         $templatesToImport = $request->getVar('templates');
         $importToSubsite   = $request->getVar('subsite');
+        $chosenLocales     = $request->getVar('locales');
+
+        // Normalize argument
+        if ($overwrite && $overwrite != 'soft' && $overwrite != 'hard') {
+            $overwrite = 'soft';
+        }
 
         $subsites = array();
-        if ($importToSubsite) {
+        if ($importToSubsite == 'all') {
             $subsites = Subsite::get()->map();
+        } else if (is_numeric($importToSubsite)) {
+            $subsites = array(
+                $importToSubsite => Subsite::get()->byID($importToSubsite)->Title
+            );
+        }
+        if (class_exists('Subsite') && Subsite::currentSubsiteID()) {
+            DB::alteration_message("Importing to current subsite. Run from main site to import other subsites at once.",
+                "created");
+            $subsites = array();
+        }
+        if (!empty($subsites)) {
+            DB::alteration_message("Importing to subsites : ".implode(',',
+                    array_values($subsites)), "created");
         }
 
         if ($templatesToImport) {
@@ -34,14 +55,14 @@ class EmailImportTask extends BuildTask
         }
 
         if ($clear == 1) {
-            echo '<strong>Clear all email templates</strong><br/>';
+            DB::alteration_message("Clear all email templates", "created");
             $emailTemplates = EmailTemplate::get();
             foreach ($emailTemplates as $emailTemplate) {
                 $emailTemplate->delete();
             }
         }
 
-        $o = singleton('EmailTemplate');
+        $emailTemplateSingl = singleton('EmailTemplate');
 
         $ignoredModules = self::config()->ignored_modules;
         if (!is_array($ignoredModules)) {
@@ -50,8 +71,18 @@ class EmailImportTask extends BuildTask
 
         $locales = null;
         if (class_exists('Fluent') && Fluent::locale_names()) {
-            if ($o->hasExtension('FluentExtension')) {
+            if ($emailTemplateSingl->hasExtension('FluentExtension')) {
                 $locales = array_keys(Fluent::locale_names());
+                if ($chosenLocales) {
+                    $arr     = explode(',', $chosenLocales);
+                    $locales = array();
+                    foreach ($arr as $a) {
+                        if (strlen($a) == 2) {
+                            $a = i18n::get_locale_from_lang($a);
+                        }
+                        $locales[] = $a;
+                    }
+                }
             }
         }
 
@@ -104,14 +135,30 @@ class EmailImportTask extends BuildTask
 
             if (!empty($templatesToImport) && !in_array($code,
                     $templatesToImport)) {
-                echo "<div style='color:blue'>Template with code '$code' was ignored.</div>";
+                DB::alteration_message("Template with code <b>$code</b> was ignored.",
+                    "repaired");
                 continue;
             }
 
-            $emailTemplate = EmailTemplate::get()->filter('Code', $code)->first();
+            $whereCode     = array(
+                'Code' => $code
+            );
+            $emailTemplate = EmailTemplate::get()->filter($whereCode)->first();
+
+            // Check if it has been modified or not
+            $templateModified = false;
+            if ($emailTemplate) {
+                $templateModified = $emailTemplate->Created != $emailTemplate->LastEdited;
+            }
+
             if (!$overwrite && $emailTemplate) {
-                echo "<div style='color:blue'>Template with code '$code' already exists.</div>";
+                DB::alteration_message("Template with code <b>$code</b> already exists. Choose overwrite if you want to import again.",
+                    "repaired");
                 continue;
+            }
+            if ($overwrite == 'soft' && $templateModified) {
+                DB::alteration_message("Template with code <b>$code</b> has been modified by the user. Choose overwrite=hard to change.",
+                    "repaired");
             }
 
             // Create a default title from code
@@ -236,6 +283,8 @@ class EmailImportTask extends BuildTask
                     $translation = i18n::_t($entity);
                     if (!$translation) {
                         $translation = $title;
+                        DB::alteration_message("No title found in $locale for $title. You should define $templateTitle.SUBJECT",
+                            "error");
                     }
                     $emailTemplate->$localeField = $translation;
 
@@ -253,23 +302,24 @@ class EmailImportTask extends BuildTask
             // Other properties
             $emailTemplate->Code     = $code;
             $emailTemplate->Category = $module;
+            if (class_exists('Subsite') && Subsite::currentSubsiteID()) {
+                $emailTemplate->SubsiteID = Subsite::currentSubsiteID();
+            }
             $emailTemplate->setExtraModelsAsArray($extraModels);
 
+            // Write to main site or current subsite
             $emailTemplate->write();
+            $this->resetLastEditedDate($emailTemplate->ID);
 
-            $subsiteImport = '';
-            
             // Loop through subsites
-            if ($importToSubsite) {
-                $subsiteImport .= ' => Main site and subsites';
+            if (!empty($importToSubsite)) {
                 Subsite::$disable_subsite_filter = true;
                 foreach ($subsites as $subsiteID => $subsiteTitle) {
-                    $subsiteEmailTemplate = EmailTemplate::get()->filter(array(
-                         'Code' => $code,
-                         'SubsiteID' => $subsiteID
-                     ))->first();
+                    $whereCode['SubsiteID'] = $subsiteID;
 
-                    $emailTemplateCopy = $emailTemplate;
+                    $subsiteEmailTemplate = EmailTemplate::get()->filter($whereCode)->first();
+
+                    $emailTemplateCopy            = $emailTemplate;
                     $emailTemplateCopy->SubsiteID = $subsiteID;
                     if ($subsiteEmailTemplate) {
                         $emailTemplateCopy->ID = $subsiteEmailTemplate->ID;
@@ -277,15 +327,24 @@ class EmailImportTask extends BuildTask
                         $emailTemplateCopy->ID = 0; // New
                     }
                     $emailTemplateCopy->write();
+
+                    $this->resetLastEditedDate($emailTemplateCopy->ID);
                 }
             }
 
             if ($isOverwritten) {
-                echo "<div style='color:orange'>Overwrote {$emailTemplate->Code}{$subsiteImport}</div>";
+                DB::alteration_message("Overwrote <b>{$emailTemplate->Code}</b>",
+                    "created");
             } else {
-                echo "<div style='color:green'>Imported {$emailTemplate->Code}{$subsiteImport}</div>";
+                DB::alteration_message("Imported <b>{$emailTemplate->Code}</b>",
+                    "created");
             }
         }
+    }
+
+    protected function resetLastEditedDate($ID)
+    {
+        return DB::query("UPDATE `EmailTemplate` SET LastEdited = Created WHERE ID = ".$ID);
     }
 
     protected function assignContent($emailTemplate, $content, $locale = null)
