@@ -159,6 +159,7 @@ class EmailImportTask extends BuildTask
             if ($overwrite == 'soft' && $templateModified) {
                 DB::alteration_message("Template with code <b>$code</b> has been modified by the user. Choose overwrite=hard to change.",
                     "repaired");
+                continue;
             }
 
             // Create a default title from code
