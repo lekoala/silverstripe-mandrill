@@ -3,7 +3,7 @@
 	"description": "Adds mandrill in the SilverStripe CMS",
 	"type": "silverstripe-module",
 	"keywords": ["silverstripe", "mandrill", "module", "cms"],
-	"license": "BSD-3-Clause",
+	"license": "MIT",
 	"authors": [
 		{
 			"name": "LeKoala",
