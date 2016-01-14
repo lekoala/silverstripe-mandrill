@@ -3,12 +3,12 @@ require_once "thirdparty/Mandrill.php";
 
 /*
  * MandrillMailer for Silverstripe
- * 
+ *
  * Features
  * - Global tag support
  * - Multiple recipient support (use comma separated list, not array)
  * - File attachment support
- * 
+ *
  * @link https://mandrillapp.com/api/docs/messages.php.html#method-send
  * @package Mandrill
  * @author LeKoala <thomas@lekoala.be>
@@ -335,7 +335,7 @@ class MandrillMailer extends Mailer
 
     /**
      * Normalize a recipient to an array of email and name
-     * 
+     *
      * @param string|array $recipient
      * @return array
      */
@@ -389,7 +389,7 @@ class MandrillMailer extends Mailer
 
     /**
      * Send the email through mandrill
-     * 
+     *
      * @param string|array $to
      * @param string $from
      * @param string $subject
@@ -572,6 +572,118 @@ class MandrillMailer extends Mailer
         if ($sent) {
             $this->last_is_error = false;
             return array($original_to, $subject, $htmlContent, $customheaders);
+        } else {
+            $this->last_is_error = true;
+            $this->last_error    = $ret;
+            SS_Log::log("Failed to send $failed emails", SS_Log::DEBUG);
+            foreach ($reasons as $reason) {
+                SS_Log::log("Failed to send because: $reason", SS_Log::DEBUG);
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Sends emails using specified template in mandrill.
+     * Note: not all parameters and features of mandrill->messages->sendTemplate are implimented.
+     * @param  string templateName The name of the template in mandrill.
+     * @param  array globalMergeVars associative array of merge vars.
+     * @param  string to email address to send the message.
+     * @param  string from the email address the message is from.
+     * @param  string subject subject of the email.
+     * @param  array customheaders custom headers to add to the request.
+     * @return bool success indicates result to sending the message to mantrill.
+     */
+    public function sendTemplate($templateName, $globalMergeVars, $to, $from, $subject, $customheaders)
+    {
+        // Process recipients
+        $to_array = array();
+        $to_array = $this->appendTo($to_array, $to, 'to');
+        if (isset($customheaders['Cc'])) {
+            $to_array = $this->appendTo($to_array, $customheaders['Cc'], 'cc');
+            unset($customheaders['Cc']);
+        }
+        if (isset($customheaders['Bcc'])) {
+            $to_array = $this->appendTo($to_array, $customheaders['Bcc'], 'bcc');
+            unset($customheaders['Bcc']);
+        }
+
+        // Process sender
+        $fromArray = $this->processRecipient($from);
+        $fromEmail = $fromArray['email'];
+        $fromName  = $fromArray['name'];
+
+        // Create params to send to mandrill message api
+        $default_params = array();
+
+        if (self::getDefaultParams()) {
+            $default_params = self::getDefaultParams();
+        }
+
+        // Put together the parameters.
+        $params = array_merge($default_params,
+            array(
+            "subject" => $subject,
+            "from_email" => $fromEmail,
+            "to" => $to_array
+        ));
+
+        if ($fromName) {
+            $params['from_name'] = $fromName;
+        }
+
+        // If merge vars specified then include.
+        // @TODO probablly need to allow non-global merge vars as well.
+        if ($globalMergeVars) {
+            $params['global_merge_vars'] = array($globalMergeVars);
+        }
+
+        // Inject additional params into message
+        if (isset($customheaders['X-MandrillMailer'])) {
+            $params = array_merge($params, $customheaders['X-MandrillMailer']);
+            unset($customheaders['X-MandrillMailer']);
+        }
+
+        if ($customheaders) {
+            $params['headers'] = $customheaders;
+        }
+
+        // @TODO probably/possibly need to also do the following things like in function above.
+        // BCC, Analytics, Attachments, Global Tags, Logging.
+
+        // -------------------
+        // Finally try sending the message with the sendTemplate() function in the Messages class.
+        try {
+            $ret = $this->getMandrill()->messages->sendTemplate($templateName, null, $params);
+        } catch (Exception $ex) {
+            $ret = array(array('status' => 'rejected', 'reject_reason' => $ex->getMessage()));
+        }
+
+        $this->last_result = $ret;
+
+        // Process the results, extracting the reasons for failure.
+        $sent    = 0;
+        $failed  = 0;
+        $reasons = array();
+        if ($ret) {
+            foreach ($ret as $result) {
+                if (in_array($result['status'], array('rejected', 'invalid'))) {
+                    $failed++;
+                    if (!empty($result['reject_reason'])) {
+                        $reasons[] = $result['reject_reason'];
+                    } elseif ($result['status'] == 'invalid') {
+                        $reasons[] = 'Email "'.$result['email'].'" is invalid';
+                    }
+                    continue;
+                }
+                $sent++;
+            }
+        }
+
+        if ($sent) {
+            $this->last_is_error = false;
+            // @TODO work out if anything more needs to be returned for this.
+            return true;
         } else {
             $this->last_is_error = true;
             $this->last_error    = $ret;
