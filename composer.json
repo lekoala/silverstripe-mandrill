@@ -1,24 +1,27 @@
 {
-	"name": "lekoala/silverstripe-mandrill",
-	"description": "Adds mandrill in the SilverStripe CMS",
-	"type": "silverstripe-module",
-	"keywords": ["silverstripe", "mandrill", "module", "cms"],
-	"license": "MIT",
-	"authors": [
-		{
-			"name": "LeKoala",
-			"email": "thomas@lekoala.be"
-		}
-	],
-	"require":
-			{
-				"silverstripe/framework": "~3.1"
-			},
-	"suggest": {
-		"lekoala/silverstripe-form-extras": "Better form fields"
-	},
-	"extra": {
-		"installer-name": "mandrill"
-	}
-
+    "name": "lekoala/silverstripe-mandrill",
+    "description": "Adds mandrill in the SilverStripe CMS",
+    "type": "silverstripe-module",
+    "keywords": [
+        "silverstripe",
+        "mandrill",
+        "module",
+        "cms"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "LeKoala",
+            "email": "thomas@lekoala.be"
+        }
+    ],
+    "require": {
+        "silverstripe/framework": "~3.1"
+    },
+    "suggest": {
+        "lekoala/silverstripe-form-extras": "Better form fields"
+    },
+    "extra": {
+        "installer-name": "mandrill"
+    }
 }
