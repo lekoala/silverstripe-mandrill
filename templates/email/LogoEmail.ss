@@ -16,22 +16,22 @@
 				-ms-text-size-adjust:100%;
 			}
 
-			img{ 
+			img{
 				width:100%;
 				height:auto;
-				border:none; 
-				font-size:14px; 
-				font-weight:bold; 
-				line-height:100%; 
-				outline:none; 
-				text-decoration:none; 
+				border:none;
+				font-size:14px;
+				font-weight:bold;
+				line-height:100%;
+				outline:none;
+				text-decoration:none;
 				text-transform:capitalize;
 			}
 
-			#backgroundTable{ 
-				height:100% !important; 
-				margin:0; 
-				padding:0; 
+			#backgroundTable{
+				height:100% !important;
+				margin:0;
+				padding:0;
 				width:100% !important;
 			}
 
@@ -41,7 +41,7 @@
 			}
 
 			p a{
-				color: #00afcb; 
+				color: #00afcb;
 				text-decoration:underline;
 				word-wrap:break-word;
 			}
@@ -262,7 +262,7 @@
 														<p>$Body</p>
 													</span>
 													<% end_if %>
-											</div>										
+											</div>
 										</td>
 									</tr>
 								</tbody>

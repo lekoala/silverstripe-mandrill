@@ -154,7 +154,7 @@ class MandrillEmail extends Email
 
     /**
      * Set if body should be parsed or not
-     * 
+     *
      * @param bool $v
      * @return \MandrillEmail
      */
@@ -417,7 +417,7 @@ class MandrillEmail extends Email
 
     /**
      * Get rendered body
-     * 
+     *
      * @return string
      */
     public function getRenderedBody()
@@ -428,7 +428,7 @@ class MandrillEmail extends Email
 
     /**
      * Set image in the body of the message - see BasicEmail.ss
-     * 
+     *
      * @param Image|int $image Image or ImageID
      * @param int $size
      */
@@ -487,7 +487,7 @@ class MandrillEmail extends Email
     }
 
     /**
-     * 
+     *
      * @return string
      */
     public function getTheme()
@@ -533,7 +533,7 @@ class MandrillEmail extends Email
 
     /**
      * Set theme variables - see getTheme for available options
-     * 
+     *
      * @param array $vars
      */
     public function setThemeOptions($vars)
@@ -613,7 +613,7 @@ class MandrillEmail extends Email
 
     /**
      * Get recipient as member
-     * 
+     *
      * @return Member
      */
     public function getToMember()
@@ -630,7 +630,7 @@ class MandrillEmail extends Email
 
     /**
      * Set recipient
-     * 
+     *
      * @param string $val
      * @return Email
      */
@@ -677,7 +677,7 @@ class MandrillEmail extends Email
 
     /**
      * Set current member as recipient
-     * 
+     *
      * @return MandrillEmail
      */
     public function setToCurrentMember()
@@ -707,7 +707,7 @@ class MandrillEmail extends Email
 
     /**
      * Set From Member
-     * 
+     *
      * @param Member $member
      * @return MandrillEmail
      */
@@ -720,7 +720,7 @@ class MandrillEmail extends Email
 
     /**
      * Get custom api params for this message.
-     * 
+     *
      * @return array
      */
     public function getApiParams()

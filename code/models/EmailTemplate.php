@@ -168,7 +168,7 @@ class EmailTemplate extends DataObject
      * Base models always available
      *
      * These models are defined in MandrillEmail::templateData()
-     * 
+     *
      * @return array
      */
     public function getBaseModels()
@@ -233,7 +233,7 @@ class EmailTemplate extends DataObject
 
     /**
      * Get an email template by code
-     * 
+     *
      * @param string $code
      * @return EmailTemplate
      */
@@ -259,7 +259,7 @@ class EmailTemplate extends DataObject
 
     /**
      * A shorthand to get an email by code
-     * 
+     *
      * @param string $code
      * @return MandrillEmail
      */
@@ -280,7 +280,7 @@ class EmailTemplate extends DataObject
 
     /**
      * Provide content for the Preview tab
-     * 
+     *
      * @return \Tab
      */
     protected function previewTab()
@@ -311,7 +311,7 @@ class EmailTemplate extends DataObject
 
     /**
      * Returns an instance of MandrillEmail with the content of the template
-     * 
+     *
      * @return \MandrillEmail
      */
     public function getEmail()

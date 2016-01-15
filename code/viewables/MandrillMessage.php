@@ -1,7 +1,7 @@
 <?php
 /*
  * Mandrill message to be displayed in a gridfield
- * 
+ *
  * @link https://mandrillapp.com/api/docs/messages.JSON.html#method=search
  * @package Mandrill
  * @author LeKoala <thomas@lekoala.be>
@@ -45,7 +45,7 @@ class MandrillMessage extends ViewableData
 
     /**
      * Get color for a given state
-     * 
+     *
      * @param string $state
      * @return string
      */

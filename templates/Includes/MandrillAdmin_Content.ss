@@ -5,7 +5,7 @@
 			<a class="ss-ui-button" data-icon="back" href="/admin/mandrill" data-pjax-target="Content"><% _t('BackLink_Button_ss.Back') %></a>
 			<% end_if %>
 			<% include CMSBreadcrumbs %>
-		</div>	
+		</div>
 	</div>
 
 	<div class="cms-content-fields center ui-widget-content cms-panel-padded">
