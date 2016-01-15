@@ -3,12 +3,12 @@ require_once "thirdparty/Mandrill.php";
 
 /*
  * MandrillMailer for Silverstripe
- * 
+ *
  * Features
  * - Global tag support
  * - Multiple recipient support (use comma separated list, not array)
  * - File attachment support
- * 
+ *
  * @link https://mandrillapp.com/api/docs/messages.php.html#method-send
  * @package Mandrill
  * @author LeKoala <thomas@lekoala.be>
@@ -335,7 +335,7 @@ class MandrillMailer extends Mailer
 
     /**
      * Normalize a recipient to an array of email and name
-     * 
+     *
      * @param string|array $recipient
      * @return array
      */
@@ -389,7 +389,7 @@ class MandrillMailer extends Mailer
 
     /**
      * Send the email through mandrill
-     * 
+     *
      * @param string|array $to
      * @param string $from
      * @param string $subject

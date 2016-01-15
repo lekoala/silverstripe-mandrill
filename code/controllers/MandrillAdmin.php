@@ -2,7 +2,7 @@
 
 /**
  * Mandrill admin section
- * 
+ *
  * Allow you to see messages sent through the api key used to send messages
  *
  * @package Mandrill
@@ -468,7 +468,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
 
     /**
      * Install hook form
-     * 
+     *
      * @return \Form
      */
     public function InstallHookForm()

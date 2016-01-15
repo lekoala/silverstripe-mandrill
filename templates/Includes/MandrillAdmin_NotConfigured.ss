@@ -2,7 +2,7 @@
 	<div class="cms-content-header north">
 		<div class="cms-content-header-info">
 			<% include CMSBreadcrumbs %>
-		</div>	
+		</div>
 	</div>
 
 	<div class="cms-content-fields center ui-widget-content cms-panel-padded">

@@ -47,7 +47,7 @@ class MandrillSiteConfig extends DataExtension
             _t('MandrillSiteConfig.EmailLogo', 'Email Logo')));
         $emailLogo->setDescription(_t('MandrillSiteConfig.EmailLogoDesc',
                 'Will default to Logo if none defined'));
-        
+
         return $fields;
     }
 

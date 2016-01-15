@@ -45,7 +45,7 @@ require_once 'Mandrill/Exceptions.php';
  */
 class Mandrill
 {
-    
+
     public $apikey;
     public $ch;
     public $root = 'https://mandrillapp.com/api/1.0';
@@ -241,7 +241,7 @@ class Mandrill
         if ($result === null) {
             throw new Mandrill_Error('We were unable to decode the JSON response from the Mandrill API: ' . $response_body);
         }
-        
+
         if (floor($info['http_code'] / 100) >= 4) {
             throw $this->castError($result);
         }
