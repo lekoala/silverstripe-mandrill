@@ -34,7 +34,7 @@ class Mandrill_Subaccounts
      * @param string $id a unique identifier for the subaccount to be used in sending calls
      * @param string $name an optional display name to further identify the subaccount
      * @param string $notes optional extra text to associate with the subaccount
-     * @param integer $custom_quota an optional manual hourly quota for the subaccount. If not specified, Mandrill will manage this based on reputation
+     * @param int $custom_quota an optional manual hourly quota for the subaccount. If not specified, Mandrill will manage this based on reputation
      * @return struct the information saved about the new subaccount
      *     - id string a unique indentifier for the subaccount
      *     - name string an optional display name for the subaccount
@@ -93,7 +93,7 @@ class Mandrill_Subaccounts
      * @param string $id the unique identifier of the subaccount to update
      * @param string $name an optional display name to further identify the subaccount
      * @param string $notes optional extra text to associate with the subaccount
-     * @param integer $custom_quota an optional manual hourly quota for the subaccount. If not specified, Mandrill will manage this based on reputation
+     * @param int $custom_quota an optional manual hourly quota for the subaccount. If not specified, Mandrill will manage this based on reputation
      * @return struct the information for the updated subaccount
      *     - id string a unique indentifier for the subaccount
      *     - name string an optional display name for the subaccount
