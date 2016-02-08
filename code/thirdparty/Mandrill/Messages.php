@@ -172,7 +172,7 @@ class Mandrill_Messages
      * @param array $tags an array of tag names to narrow the search to, will return messages that contain ANY of the tags
      * @param array $senders an array of sender addresses to narrow the search to, will return messages sent by ANY of the senders
      * @param array $api_keys an array of API keys to narrow the search to, will return messages sent by ANY of the keys
-     * @param integer $limit the maximum number of results to return, defaults to 100, 1000 is the maximum
+     * @param int $limit the maximum number of results to return, defaults to 100, 1000 is the maximum
      * @return array of structs for each matching message
      *     - return[] struct the information for a single matching message
      *         - ts integer the Unix timestamp from when this message was sent
