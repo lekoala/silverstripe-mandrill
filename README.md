@@ -7,14 +7,14 @@ Define in your _ss_environment.php file the following constant
     ```php
 	define('MANDRILL_API_KEY','YOUR_API_KEY_HERE');
     ```
-    
+
 or by defining the api key in your config.yml
 
    ```yaml
    MandrillMailer:
      mandrill_api_key: 'key3goes9here'
    ```
-	
+
 This module uses the official php sdk version 1.0.54 with a few tweaks.
 
 You can also autoconfigure the module with the following constants in your _ss_environment.php
@@ -55,7 +55,7 @@ This is why this module comes with a SiteConfig extension that you can
 apply on your SiteConfig with the following yml config:
 
 	SiteConfig:
-	  extensions: 
+	  extensions:
 		- MandrillSiteConfig
 
 Also, it might be useful to set the email theme, logo and footer for your emails.
@@ -92,8 +92,8 @@ provide you with one central place to manage all your email content.
 
 This is why this module comes with one easy to use EmailTemplateAdmin based on ModelAdmin.
 
-To help you migrate from existing setups, you have an ImportEmailTask thats imports all *.ss templates in the /email folder that 
-end with Email in the name, like /email/myTestEmail.ss. 
+To help you migrate from existing setups, you have an ImportEmailTask thats imports all *.ss templates in the /email folder that
+end with Email in the name, like /email/myTestEmail.ss.
 The content is imported in the "Content" area, except if you specify ids for specific zones, like <div id="SideBar">My side bar content</div>
 
 NOTE: email templates could be split in a separate module in the near future once I've
@@ -102,7 +102,7 @@ determined if it's possible to make it standalone.
 Basic how-to guide
 ==================
 
-After installing through your method of choice and setting up the API keys you have access to the MandrillEmail class. 
+After installing through your method of choice and setting up the API keys you have access to the MandrillEmail class.
 
 Please note that even if the module provides the MandrillEmail class, you don't have to use it. The regular Email class will work
 just as well because we have registered a new mailer (MandrillMailer).
@@ -110,23 +110,23 @@ just as well because we have registered a new mailer (MandrillMailer).
 Lets say we want to send an email on form submission, the Silverstripe guide on forms is [here](https://docs.silverstripe.org/en/3.1/developer_guides/forms/introduction/) if you are unsure about forms.
 
 We want a user to input some data and then send an email notifying us that a form was submitted. After handeling our other form requirements like saving to the DB
-etc we would then want to send the email. 
+etc we would then want to send the email.
 
 ```php
 // Send an email using mandrill
 // The recipient, cc and bcc emails can be arrays of email addresses to include.
 // The 'Bounce' is the Silverstripe URL for handeling bounced emails
 $email = new MandrillEmail('from@outwebsite.com', 'recipient@email.com', 'Our Subject', 'The body of the email', 'BounceURL', 'AnyCCEmails@email.com', 'AnyBCCEmails@email.com');
-// Here we can set a template to use. This could be a custom email template you design or one of the included templates. 
+// Here we can set a template to use. This could be a custom email template you design or one of the included templates.
 $email->setTemplate('BoilerplateEmail');
 $email->send();
 ```
 
-The other option for setting a template for your email is to use the built in template builder. First you define the email template through the 'Emails' tab in the CMS. We can select a base template to use and then define the layout of the email body. We should make a note of the 'code' for the email template once we have created it. 
+The other option for setting a template for your email is to use the built in template builder. First you define the email template through the 'Emails' tab in the CMS. We can select a base template to use and then define the layout of the email body. We should make a note of the 'code' for the email template once we have created it.
 
-Within the content area we have access to the currently logged in user, the site config options and the basic information passed through such as to, from, subject etc. This is really handy when your client might need to make small changes to the emails sent out.  
+Within the content area we have access to the currently logged in user, the site config options and the basic information passed through such as to, from, subject etc. This is really handy when your client might need to make small changes to the emails sent out.
 
-To create an email using this process within out form we could use the following code. 
+To create an email using this process within out form we could use the following code.
 
 ```php
 // Send an email using the templating engine
