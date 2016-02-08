@@ -23,5 +23,8 @@
     },
     "extra": {
         "installer-name": "mandrill"
+    },
+    "support": {
+        "issues": "https://github.com/lekoala/silverstripe-mandrill/issues"
     }
 }
