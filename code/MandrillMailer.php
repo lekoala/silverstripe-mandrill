@@ -632,10 +632,20 @@ class MandrillMailer extends Mailer
             $params['from_name'] = $fromName;
         }
 
-        // If merge vars specified then include.
-        // @TODO probablly need to allow non-global merge vars as well.
+        // If merge vars specified then include them.
         if ($globalMergeVars) {
-            $params['global_merge_vars'] = array($globalMergeVars);
+
+            // Need to convert to the correct format for sending via the api.
+            $mergeVars = array();
+
+            foreach($globalMergeVars as $key => $val) {
+                $mergeVars[] = array(
+                    'name' => $key,
+                    'content' => $val
+                );
+            }
+
+            $params['global_merge_vars'] = $mergeVars;
         }
 
         // Inject additional params into message
