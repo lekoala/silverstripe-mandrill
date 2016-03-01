@@ -586,12 +586,12 @@ class MandrillMailer extends Mailer
     /**
      * Sends emails using specified template in mandrill.
      * Note: not all parameters and features of mandrill->messages->sendTemplate are implimented.
-     * @param  string templateName The name of the template in mandrill.
-     * @param  array globalMergeVars associative array of merge vars.
-     * @param  string to email address to send the message.
-     * @param  string from the email address the message is from.
-     * @param  string subject subject of the email.
-     * @param  array customheaders custom headers to add to the request.
+     * @param  string $templateName The name of the template in mandrill.
+     * @param  array $globalMergeVars associative array of merge vars.
+     * @param  string $to email address to send the message.
+     * @param  string $from the email address the message is from.
+     * @param  string $subject subject of the email.
+     * @param  array $customheaders custom headers to add to the request.
      * @return bool success indicates result to sending the message to mantrill.
      */
     public function sendTemplate($templateName, $globalMergeVars, $to, $from, $subject, $customheaders)
@@ -621,12 +621,14 @@ class MandrillMailer extends Mailer
         }
 
         // Put together the parameters.
-        $params = array_merge($default_params,
+        $params = array_merge(
+            $default_params,
             array(
-            "subject" => $subject,
-            "from_email" => $fromEmail,
-            "to" => $to_array
-        ));
+                "subject" => $subject,
+                "from_email" => $fromEmail,
+                "to" => $to_array
+            )
+        );
 
         if ($fromName) {
             $params['from_name'] = $fromName;
