@@ -143,6 +143,46 @@ class MandrillEmail extends Email
     }
 
     /**
+     * Basic functionality to allow sending of emails using templates up in Mandrill by using the
+     * sendTemplate function of the Messages class in the mailer.
+     * @param  string templateName the name of the template in mandril.
+     * @param  array globalMergeVars
+     * @param  string $messageID Optional message ID so the message can be identified in bounces etc.
+     * @return bool Success result of the sending operation.
+     */
+    public function sendTemplate($templateName, $globalMergeVars=null, $messageID = null)
+    {
+        // @TODO allow non-global merge vars and possibly impliment other features of sendTemplate.
+
+        // Do some checks that required things are set.
+        if (!$templateName) {
+            throw new Exception('You must set a template');
+        }
+
+        if (!$this->subject) {
+            throw new Exception('You must set a subject');
+        }
+
+        $this->from = MandrillMailer::resolveDefaultFromEmail($this->from);
+        if (!$this->from) {
+            throw new Exception('You must set a sender');
+        }
+
+        if ($this->to_member && !$this->to) {
+            // Include name in to as standard rfc
+            $this->to = $this->to_member->FirstName.' '.$this->to_member->Surname.' <'.$this->to_member->Email.'>';
+        }
+        $this->to = MandrillMailer::resolveDefaultToEmail($this->to);
+        if (!$this->to) {
+            throw new Exception('You must set a recipient');
+        }
+
+        // Need to call the sendTemplate function in the mailer which in turn calls
+        // the mandrill->messages->sendTemplate() to make the sendTemplate API call.
+        return self::mailer()->sendTemplate($templateName, $globalMergeVars, $this->to, $this->from, $this->subject, $this->customHeaders);
+    }
+
+    /**
      * Is body parsed or not?
      *
      * @return bool
