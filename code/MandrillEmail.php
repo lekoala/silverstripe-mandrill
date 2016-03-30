@@ -47,6 +47,9 @@ class MandrillEmail extends Email
     protected $panel_color;
     protected $panel_border_color;
     protected $panel_font_color;
+    protected $btn_color;
+    protected $btn_border_color;
+    protected $btn_font_color;
 
     public function __construct($from = null, $to = null, $subject = null,
                                 $body = null, $bounceHandlerURL = null,
@@ -68,11 +71,23 @@ class MandrillEmail extends Email
 
         // Allow user configurable theming
         $config = SiteConfig::current_site_config();
-        if ($config->EmailTheme) {
+        if ($config->hasMethod('ConfigurableEmailTheme')) {
+            $this->theme = 'configurable_theme';
+            $this->setThemeOptions($config->ConfigurableEmailTheme());
+        } elseif ($config->EmailTheme) {
             $this->setTheme($config->EmailTheme);
         } elseif ($theme = self::config()->default_theme) {
             $this->setTheme($theme);
         }
+    }
+
+    /**
+     * Determine if email is using configurable theme
+     * 
+     * @return bool
+     */
+    public function hasConfigurableTheme() {
+        return $this->theme == 'configurable_theme';
     }
 
     /**
@@ -150,10 +165,10 @@ class MandrillEmail extends Email
      * @param  string $messageID Optional message ID so the message can be identified in bounces etc.
      * @return bool Success result of the sending operation.
      */
-    public function sendTemplate($templateName, $globalMergeVars=null, $messageID = null)
+    public function sendTemplate($templateName, $globalMergeVars = null,
+                                 $messageID = null)
     {
         // @TODO allow non-global merge vars and possibly impliment other features of sendTemplate.
-
         // Do some checks that required things are set.
         if (!$templateName) {
             throw new Exception('You must set a template');
@@ -179,7 +194,8 @@ class MandrillEmail extends Email
 
         // Need to call the sendTemplate function in the mailer which in turn calls
         // the mandrill->messages->sendTemplate() to make the sendTemplate API call.
-        return self::mailer()->sendTemplate($templateName, $globalMergeVars, $this->to, $this->from, $this->subject, $this->customHeaders);
+        return self::mailer()->sendTemplate($templateName, $globalMergeVars,
+                $this->to, $this->from, $this->subject, $this->customHeaders);
     }
 
     /**
@@ -255,15 +271,7 @@ class MandrillEmail extends Email
         );
 
         // Theme options
-        $themesInfos = array(
-            'HeaderColor' => $this->header_color,
-            'HeaderFontColor' => $this->header_font_color,
-            'FooterColor' => $this->footer_color,
-            'FooterFontColor' => $this->footer_font_color,
-            'PanelColor' => $this->panel_color,
-            'PanelBorderColor' => $this->panel_border_color,
-            'PanelFontColor' => $this->panel_font_color,
-        );
+        $themesInfos = $this->getThemeOptions();
 
         $allInfos = array_merge(
             $modelsInfos, $templatesInfos, $themesInfos, $originalInfos
@@ -537,8 +545,7 @@ class MandrillEmail extends Email
 
     /**
      *
-     * @param type $val
-     * @return type
+     * @param string $val
      * @throws Exception
      */
     public function setTheme($val)
@@ -550,7 +557,7 @@ class MandrillEmail extends Email
         }
         $conf        = self::config()->themes[$val];
         $this->theme = $val;
-        return $this->setThemeOptions($conf);
+        $this->setThemeOptions($conf);
     }
 
     /**
@@ -561,13 +568,16 @@ class MandrillEmail extends Email
     public function getThemeOptions()
     {
         return array(
-            'header_color' => $this->header_color,
-            'header_font_color' => $this->header_font_color,
-            'footer_color' => $this->footer_color,
-            'footer_font_color' => $this->footer_font_color,
-            'panel_color' => $this->panel_color,
-            'panel_border_color' => $this->panel_border_color,
-            'panel_font_color' => $this->panel_font_color
+            'HeaderColor' => $this->header_color,
+            'HeaderFontColor' => $this->header_font_color,
+            'FooterColor' => $this->footer_color,
+            'FooterFontColor' => $this->footer_font_color,
+            'PanelColor' => $this->panel_color,
+            'PanelBorderColor' => $this->panel_border_color,
+            'PanelFontColor' => $this->panel_font_color,
+            'BtnColor' => $this->btn_color,
+            'BtnBorderColor' => $this->btn_border_color,
+            'BtnFontColor' => $this->btn_font_color
         );
     }
 

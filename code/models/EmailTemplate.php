@@ -320,7 +320,7 @@ class EmailTemplate extends DataObject
         if ($this->Template) {
             $email->setTemplate($this->Template);
         }
-        if ($this->Theme) {
+        if ($this->Theme && !$email->hasConfigurableTheme()) {
             $email->setTheme($this->Theme);
         }
         $email->setSubject($this->Title);

@@ -35,6 +35,9 @@ MandrillEmail:
       panel_color: '#ECF8FF'
       panel_border_color: '#b9e5ff'
       panel_font_color: '#000000'
+      btn_color: '#2ba6cb'
+      btn_border_color: '#2284a1'
+      btn_font_color: '#fff'
     light:
       header_color: '#eeeeee'
       header_font_color: '#333333'
@@ -43,6 +46,9 @@ MandrillEmail:
       panel_color: '#ECF8FF'
       panel_border_color: '#b9e5ff'
       panel_font_color: '#000000'
+      btn_color: '#2ba6cb'
+      btn_border_color: '#2284a1'
+      btn_font_color: '#fff'
     blue:
       header_color: '#eeeeee'
       header_font_color: '#6c737b'
@@ -51,6 +57,9 @@ MandrillEmail:
       panel_color: '#00afcb'
       panel_border_color: '#008ea5'
       panel_font_color: '#ffffff'
+      btn_color: '#2ba6cb'
+      btn_border_color: '#2284a1'
+      btn_font_color: '#fff'
 EmailTemplate:
   allow_configure_theme: false
   allow_configure_template: false
