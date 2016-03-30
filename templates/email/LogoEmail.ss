@@ -73,12 +73,13 @@
                 background:$BtnColor;
                 border:1px solid $BtnBorderColor;
                 color:$BtnFontColor;
+                text-decoration: none;
                 margin:8px 0;
                 padding:8px;
                 -webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;
                 margin-bottom:8px;
             }
-            .btn:hover, .btn:active, .btn:visited {
+            .btn:hover, .btn:active {
                 color:#fff !important;
                 background:$BtnBorderColor !important;
             }
