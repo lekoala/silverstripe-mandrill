@@ -147,6 +147,10 @@ class MandrillEmail extends Email
                 $restore_locale = i18n::get_locale();
                 i18n::set_locale($this->to_member->Locale);
             }
+            // Maybe this member don't want to receive emails?
+            if($this->to_member->hasMethod('canReceiveEmails') && !$this->to_member->canReceiveEmails()) {
+                return false;
+            }
         }
 
         $res = parent::send($messageID);
