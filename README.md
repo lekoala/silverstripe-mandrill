@@ -24,6 +24,21 @@ You can also autoconfigure the module with the following constants in your _ss_e
 
 By defining the Api Key, the module will register a new mailer that will be used to send all emails.
 
+Switching to SparkPost
+==================
+
+For those who want to keep a free email solution, I recommend from now on to use
+SparkPost. I created a [new module] (https://github.com/lekoala/silverstripe-sparkpost)
+for this.
+
+If needed, you can install SparkPost alongside this module.
+
+Standalone email templates
+==================
+
+For those who like the email templates but need another kind of email backend,
+I'm in the process of rewriting the Email Templates to a [standalone module] (https://github.com/lekoala/silverstripe-email-templates).
+
 Mandrillapp integration
 ==================
 
