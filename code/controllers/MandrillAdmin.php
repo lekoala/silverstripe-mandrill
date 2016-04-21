@@ -54,9 +54,6 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
 
     public function index($request)
     {
-        if (!MandrillMailer::getInstance()) {
-            $this->view = '_NotConfigured';
-        }
         return parent::index($request);
     }
 
@@ -203,18 +200,15 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         } else {
             $defaultQuery = '*';
             // If we have a subaccount defined, we need to restrict the query to this subaccount
-            if ($subaccount = MandrillMailer::getSubaccount()) {
-                $defaultQuery = 'subaccount:' . $subaccount;
+            if ($subaccount   = MandrillMailer::getSubaccount()) {
+                $defaultQuery = 'subaccount:'.$subaccount;
             }
 
             //search(string key, string query, string date_from, string date_to, array tags, array senders, array api_keys, integer limit)
             $messages = $this->getMandrill()->messages->search(
                 $this->getParam('Query', $defaultQuery),
-                $this->getParam('DateFrom'),
-                $this->getParam('DateTo'),
-                null,
-                null,
-                array($this->getMandrill()->apikey),
+                $this->getParam('DateFrom'), $this->getParam('DateTo'), null,
+                null, array($this->getMandrill()->apikey),
                 $this->getParam('Limit', 100)
             );
 
@@ -309,9 +303,9 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         // If we have a subaccount defined, we need to restrict the query to this subaccount
         if ($subaccount = MandrillMailer::getSubaccount()) {
             if (empty($values['Query'])) {
-                $values['Query'] = 'subaccount:' . $subaccount;
+                $values['Query'] = 'subaccount:'.$subaccount;
             } else {
-                $values['Query'] = $values['Query'] . ' AND subaccount:' . $subaccount;
+                $values['Query'] = $values['Query'].' AND subaccount:'.$subaccount;
             }
         }
         Session::set('MandrilAdminSearch', $values);
@@ -393,7 +387,11 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
      */
     public function canView($member = null)
     {
-        return Permission::check("CMS_ACCESS_Mandrill");
+        $mailer = Email::mailer();
+        if (get_class($mailer) != 'MandrillMailer') {
+            return false;
+        }
+        return Permission::check("CMS_ACCESS_Mandrill", "any", $member);
     }
 
     /**
@@ -417,7 +415,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             try {
                 $list = $mandrill->webhooks->getList();
                 if ($cache_enabled) {
-                    $cache->save(serialize($list), $cache_key, array(self::WEBHOOK_TAG),
+                    $cache->save(serialize($list), $cache_key,
+                        array(self::WEBHOOK_TAG),
                         60 * self::WEBHOOK_CACHE_MINUTES);
                 }
             } catch (Exception $ex) {
