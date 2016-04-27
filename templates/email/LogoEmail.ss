@@ -247,9 +247,11 @@
                                 <tbody>
                                     <tr>
                                         <td valign="top" style="text-align: center;">
-                                            <span style="color: #6c737b; font-family:Helvetica,Arial,sans-serif;font-size: 36px; line-height: 1.2; text-transform:uppercase; text-align: center;">$Subject</span>
+                                            <span style="color: #6c737b; font-family:Helvetica,Arial,sans-serif;font-size: 36px; line-height: 1.2; text-transform:uppercase; text-align: center;">
+                                                $Subject
+                                            </span>
                                             <br />
-                                                <hr style="height: 1px; color: #00afcb; background-color: $PanelBorderColor; width: 10%; border: none; margin-top:-5px;">
+                                                <hr style="height: 1px; color: #00afcb; background-color: $PanelBorderColor; width: 10%; border: none;">
                                                     <% if Sidebar %>
                                                     <div style="width:165px; margin-top:40px; float:left;">$Sidebar</div>
 
