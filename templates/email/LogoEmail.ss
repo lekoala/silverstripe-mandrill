@@ -36,7 +36,7 @@
             }
 
             .callout a, .callout p {
-                color: $PanelFontColor;
+                color: $PanelFontColor !important;
                 text-decoration:none;
             }
 
@@ -235,12 +235,10 @@
                             <table cellspacing="0" cellpadding="10" style="width: 100%; margin-top:40px;" align="center">
                                 <tbody>
                                     <tr>
-                                        <td>
-                                            <div style="width:640px; height:77px; display:block; margin: auto;text-align: center">
-                                                <% if SiteConfig.EmailLogoTemplate %>
-                                                <img src="$SiteConfig.EmailLogoTemplate.SetHeight(70).Link" alt="$SiteConfig.Title" style="width:auto;margin:0 auto;" />
-                                                <% end_if %>
-                                            </div>
+                                        <td style="width:640px; height:77px; display:block; margin: auto;text-align: center">
+                                            <% if SiteConfig.EmailLogoTemplate %>
+                                            <img src="$SiteConfig.EmailLogoTemplate.SetHeight(70).Link" alt="$SiteConfig.Title" style="width:auto;margin:0 auto;" />
+                                            <% end_if %>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -248,9 +246,9 @@
                             <table cellspacing="0" cellpadding="5" style="width: 640px; background-color: #ffffff; margin-left:auto; margin-right:auto; margin-top:-10px; padding:26px; position: relative; z-index:1;">
                                 <tbody>
                                     <tr>
-                                        <td valign="top">
-                                            <div style="text-align: center;"><span style="color: #6c737b; font-family:Helvetica,Arial,sans-serif;font-size: 36px; line-height: 1.2; text-transform:uppercase; text-align: center;">$Subject</span></div>
-                                            <div><br />
+                                        <td valign="top" style="text-align: center;">
+                                            <span style="color: #6c737b; font-family:Helvetica,Arial,sans-serif;font-size: 36px; line-height: 1.2; text-transform:uppercase; text-align: center;">$Subject</span>
+                                            <br />
                                                 <hr style="height: 1px; color: #00afcb; background-color: $PanelBorderColor; width: 10%; border: none; margin-top:-5px;">
                                                     <% if Sidebar %>
                                                     <div style="width:165px; margin-top:40px; float:left;">$Sidebar</div>
@@ -263,7 +261,7 @@
                                                         <p>$Body</p>
                                                     </span>
                                                     <% end_if %>
-                                            </div>
+                                            
                                         </td>
                                     </tr>
                                 </tbody>
