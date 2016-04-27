@@ -251,20 +251,49 @@
                                                 $Subject
                                             </span>
                                             <br />
-                                                <hr style="height: 1px; color: #00afcb; background-color: $PanelBorderColor; width: 10%; border: none;">
-                                                    <% if Sidebar %>
-                                                    <div style="width:165px; margin-top:40px; float:left;">$Sidebar</div>
-
-                                                    <span style="font-family:Helvetica,Arial,sans-serif;font-size: 16px; color: #a7a7a7; width:390px; display:block; float:right; margin-left:auto; margin-right:auto; margin-top:40px; text-align:justify; line-height: 1.3;">
-                                                        <p>$Body</p>
-                                                    </span>
-                                                    <% else %>
-                                                    <span style="font-family:Helvetica,Arial,sans-serif;font-size: 16px; color: #a7a7a7; width:390px; display:block; float:right; margin-left:auto; margin-right:auto; margin-top:40px; text-align:justify; line-height: 1.3;">
-                                                        <p>$Body</p>
-                                                    </span>
-                                                    <% end_if %>
-                                            
+                                            <hr style="height: 1px; color: #00afcb; background-color: $PanelBorderColor; width: 10%; border: none;">
                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <% if Sidebar %>
+                                        <td class="wrapper">
+
+                                            <table class="eight columns">
+                                                <tr>
+                                                    <td style="font-family:Helvetica,Arial,sans-serif;font-size: 16px; color: #a7a7a7; width:390px; display:block; float:right; margin-left:auto; margin-right:auto; margin-top:40px; text-align:justify; line-height: 1.3;">
+                                                        $Body
+                                                    </td>
+                                                    <td class="expander"></td>
+                                                </tr>
+                                            </table>
+
+                                        </td>
+                                        <td class="wrapper last sidebar">
+
+                                            <table class="four columns">
+                                                <tr>
+                                                    <td class="panel">
+                                                        $Sidebar
+                                                    </td>
+                                                    <td class="expander"></td>
+                                                </tr>
+                                            </table>
+
+                                        </td>
+                                        <% else %>
+                                        <td class="wrapper last">
+
+                                            <table class="twelve columns">
+                                                <tr>
+                                                    <td style="font-family:Helvetica,Arial,sans-serif;font-size: 16px; color: #a7a7a7; width:390px; display:block; float:right; margin-left:auto; margin-right:auto; margin-top:40px; text-align:justify; line-height: 1.3;">
+                                                        $Body
+                                                    </td>
+                                                    <td class="expander"></td>
+                                                </tr>
+                                            </table>
+
+                                        </td>
+                                        <% end_if %>
                                     </tr>
                                 </tbody>
                             </table>
