@@ -375,8 +375,14 @@ class EmailImportTask extends BuildTask
 
     protected function cleanContent($content)
     {
-        return utf8_decode(strip_tags($content,
-                '<p><br><br/><div><img><a><span>'));
+        $content = strip_tags($content,
+            '<p><br><br/><div><img><a><span><ul><li><strong><em><b><i><blockquote><h1><h2><h3><h4><h5><h6>');
+
+        if(class_exists('\\ForceUTF8\\Encoding')) {
+            $content = \ForceUTF8\Encoding::fixUTF8($content);
+        }
+
+        return $content;
     }
 
     protected function getInnerHtml(DOMElement $node)
