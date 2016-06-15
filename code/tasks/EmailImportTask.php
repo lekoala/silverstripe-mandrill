@@ -307,7 +307,6 @@ class EmailImportTask extends BuildTask
                 $emailTemplate->SubsiteID = Subsite::currentSubsiteID();
             }
             $emailTemplate->setExtraModelsAsArray($extraModels);
-
             // Write to main site or current subsite
             $emailTemplate->write();
             $this->resetLastEditedDate($emailTemplate->ID);
@@ -354,10 +353,13 @@ class EmailImportTask extends BuildTask
         if ($locale) {
             $baseField .= '_'.$locale;
         }
-        $emailTemplate->$baseField = $this->cleanContent($content);
+
+        $cleanContent              = $this->cleanContent($content);
+        $emailTemplate->$baseField = '';
+        $emailTemplate->$baseField = $cleanContent;
 
         $dom = new DOMDocument;
-        $dom->loadHTML('<div>'.$content.'</div>');
+        $dom->loadHTML(mb_convert_encoding('<div>'.$content.'</div>', 'HTML-ENTITIES', 'UTF-8'));
 
         // Look for nodes to assign to proper fields
         $fields = array('Content', 'Callout', 'SideBar');
@@ -368,7 +370,9 @@ class EmailImportTask extends BuildTask
             }
             $node = $dom->getElementById($field);
             if ($node) {
-                $emailTemplate->$localeField = $this->cleanContent($this->getInnerHtml($node));
+                $cleanContent                = $this->cleanContent($this->getInnerHtml($node));
+                $emailTemplate->$localeField = '';
+                $emailTemplate->$localeField = $cleanContent;
             }
         }
     }
@@ -378,7 +382,9 @@ class EmailImportTask extends BuildTask
         $content = strip_tags($content,
             '<p><br><br/><div><img><a><span><ul><li><strong><em><b><i><blockquote><h1><h2><h3><h4><h5><h6>');
 
-        if(class_exists('\\ForceUTF8\\Encoding')) {
+        $content = str_replace("’", "'", $content);
+
+        if (class_exists('\\ForceUTF8\\Encoding')) {
             $content = \ForceUTF8\Encoding::fixUTF8($content);
         }
 
