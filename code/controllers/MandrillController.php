@@ -48,7 +48,7 @@ class MandrillController extends Controller
         foreach ($events as $ev) {
             $this->handleAnyEvent($ev);
 
-            $event = $event->event;
+            $event = $ev->event;
             switch ($event) {
                 // Sync type
                 case self::EVENT_BLACKLIST:
