@@ -40,7 +40,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     /**
      * @var string
      */
-    protected $view = '_Content';
+    protected $view          = '_Content';
+    protected $mandrillError = null;
 
     public function init()
     {
@@ -205,12 +206,17 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             }
 
             //search(string key, string query, string date_from, string date_to, array tags, array senders, array api_keys, integer limit)
-            $messages = $this->getMandrill()->messages->search(
-                $this->getParam('Query', $defaultQuery),
-                $this->getParam('DateFrom'), $this->getParam('DateTo'), null,
-                null, array($this->getMandrill()->apikey),
-                $this->getParam('Limit', 100)
-            );
+            try {
+                $messages = $this->getMandrill()->messages->search(
+                    $this->getParam('Query', $defaultQuery),
+                    $this->getParam('DateFrom'), $this->getParam('DateTo'),
+                    null, null, array($this->getMandrill()->apikey),
+                    $this->getParam('Limit', 100)
+                );
+            } catch (Exception $ex) {
+                Requirements::customScript("jQuery.noticeAdd({text: '".$ex->getMessage()."', type: 'error'});");
+                $messages            = array();
+            }
 
             $list = new ArrayList();
             foreach ($messages as $message) {
@@ -218,7 +224,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
                 $list->push($m);
             }
             //5 minutes cache
-            if ($cache_enabled) {
+            if ($cache_enabled && !empty($messages)) {
                 $cache->save(serialize($list), $cache_key,
                     array(self::MESSAGE_TAG), 60 * self::MESSAGE_CACHE_MINUTES);
             }
