@@ -733,11 +733,20 @@ class MandrillMailer extends Mailer
 
     /**
      * Resolve default send from address
-     * @param string $from
+     * @param string|array $from
      * @return string
      */
     public static function resolveDefaultFromEmail($from = null)
     {
+        // If we pass an array, normalize it to a rfc string
+        if(is_array($from) && isset($from['email'])) {
+            if(isset($from['name'])) {
+                $from = $from['name'] . ' <' . $from['email'] . '>';
+            }
+            else {
+                $from = $from['email'];
+            }
+        }
         $original_from = $from;
         if (!empty($from)) {
             $from = MandrillMailer::get_email_from_rfc_email($from);
