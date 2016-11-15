@@ -186,7 +186,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
      */
     public function Messages()
     {
-        $data = $this->getRequest()->postVars();
+        $data = $this->getParams();
         if (isset($data['SecurityID'])) {
             unset($data['SecurityID']);
         }
@@ -319,6 +319,10 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         return $this->redirectBack();
     }
 
+    public function getParams() {
+        return Session::get('MandrilAdminSearch');
+    }
+
     public function getParam($name, $default = null)
     {
         $data = Session::get('MandrilAdminSearch');
@@ -337,6 +341,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             $this->getParam('DateTo', date('Y-m-d'))));
         $fields->push($queryField = new TextField('Query',
             _t('Mandrill.QUERY', 'Query'), $this->getParam('Query')));
+        $queryField->setAttribute('placeholder', 'full_email:joe@domain.* AND sender:me@company.com OR subject:welcome');
         $queryField->setDescription(_t('Mandrill.QUERYDESC',
                 'For more information about query syntax, please visit <a target="_blank" href="http://help.mandrill.com/entries/22211902">Mandrill Support</a>'));
         $fields->push(new DropdownField('Limit', _t('Mandrill.LIMIT', 'Limit'),
