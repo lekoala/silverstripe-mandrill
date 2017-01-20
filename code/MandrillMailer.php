@@ -489,6 +489,12 @@ class MandrillMailer extends Mailer
             $params['attachments'] = $attachments;
         }
 
+        $sendingDisabled = false;
+        if (isset($customheaders['X-SendingDisabled']) && $customheaders['X-SendingDisabled']) {
+            $sendingDisabled = $sendingDisabled;
+            unset($customheaders['X-SendingDisabled']);
+        }
+
         if ($customheaders) {
             $params['headers'] = $customheaders;
         }
@@ -524,8 +530,7 @@ class MandrillMailer extends Mailer
             }
         }
 
-
-        if (self::getSendingDisabled()) {
+        if (self::getSendingDisabled() || $sendingDisabled) {
             $customheaders['X-SendingDisabled'] = true;
             return array($original_to, $subject, $htmlContent, $customheaders);
         }

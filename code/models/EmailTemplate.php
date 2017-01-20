@@ -18,6 +18,7 @@ class EmailTemplate extends DataObject
         'Content' => 'HTMLText',
         'Callout' => 'HTMLText',
         'SideBar' => 'HTMLText',
+        'Disabled' => 'Boolean',
     );
     private static $summary_fields = array(
         'Title',
@@ -321,6 +322,10 @@ class EmailTemplate extends DataObject
             $email->setRequiredObjects($models);
         }
         $email->setParseBody(true);
+
+        if ($this->Disabled) {
+            $email->addCustomHeader('X-SendingDisabled', true);
+        }
         return $email;
     }
 
