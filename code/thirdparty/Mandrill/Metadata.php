@@ -2,6 +2,7 @@
 
 class Mandrill_Metadata
 {
+
     public function __construct(Mandrill $master)
     {
         $this->master = $master;
@@ -30,7 +31,7 @@ class Mandrill_Metadata
      *     - state string the current state of the metadata field, one of "active", "delete", or "index"
      *     - view_template string Mustache template to control how the metadata is rendered in your activity log
      */
-    public function add($name, $view_template=null)
+    public function add($name, $view_template = null)
     {
         $_params = array("name" => $name, "view_template" => $view_template);
         return $this->master->call('metadata/add', $_params);

@@ -2,6 +2,7 @@
 
 class Mandrill_Senders
 {
+
     public function __construct(Mandrill $master)
     {
         $this->master = $master;
@@ -56,7 +57,7 @@ class Mandrill_Senders
 
     /**
      * Adds a sender domain to your account. Sender domains are added automatically as you
-send, but you can use this call to add them ahead of time.
+      send, but you can use this call to add them ahead of time.
      * @param string $domain a domain name
      * @return struct information about the domain
      *     - domain string the sender domain name
@@ -81,7 +82,7 @@ send, but you can use this call to add them ahead of time.
 
     /**
      * Checks the SPF and DKIM settings for a domain. If you haven't already added this domain to your
-account, it will be added automatically.
+      account, it will be added automatically.
      * @param string $domain a domain name
      * @return struct information about the sender domain
      *     - domain string the sender domain name
@@ -106,10 +107,10 @@ account, it will be added automatically.
 
     /**
      * Sends a verification email in order to verify ownership of a domain.
-Domain verification is an optional step to confirm ownership of a domain. Once a
-domain has been verified in a Mandrill account, other accounts may not have their
-messages signed by that domain unless they also verify the domain. This prevents
-other Mandrill accounts from sending mail signed by your domain.
+      Domain verification is an optional step to confirm ownership of a domain. Once a
+      domain has been verified in a Mandrill account, other accounts may not have their
+      messages signed by that domain unless they also verify the domain. This prevents
+      other Mandrill accounts from sending mail signed by your domain.
      * @param string $domain a domain name at which you can receive email
      * @param string $mailbox a mailbox at the domain where the verification email should be sent
      * @return struct information about the verification that was sent

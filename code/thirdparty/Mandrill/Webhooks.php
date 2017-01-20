@@ -2,6 +2,7 @@
 
 class Mandrill_Webhooks
 {
+
     public function __construct(Mandrill $master)
     {
         $this->master = $master;
@@ -48,7 +49,7 @@ class Mandrill_Webhooks
      *     - events_sent integer the total number of events that have ever been sent to this webhook
      *     - last_error string if we've ever gotten an error trying to post to this webhook, the last error that we've seen
      */
-    public function add($url, $description=null, $events=array())
+    public function add($url, $description = null, $events = array())
     {
         $_params = array("url" => $url, "description" => $description, "events" => $events);
         return $this->master->call('webhooks/add', $_params);
@@ -96,7 +97,7 @@ class Mandrill_Webhooks
      *     - events_sent integer the total number of events that have ever been sent to this webhook
      *     - last_error string if we've ever gotten an error trying to post to this webhook, the last error that we've seen
      */
-    public function update($id, $url, $description=null, $events=array())
+    public function update($id, $url, $description = null, $events = array())
     {
         $_params = array("id" => $id, "url" => $url, "description" => $description, "events" => $events);
         return $this->master->call('webhooks/update', $_params);

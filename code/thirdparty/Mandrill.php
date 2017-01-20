@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This is a customised version of the mandrill api sdk available at
  * @https://bitbucket.org/mailchimp/mandrill-api-php/
@@ -8,7 +7,6 @@
  * - Add IDE helpers
  * - Fix ca_cert.pem if not available
  */
-
 require_once 'Mandrill/Templates.php';
 require_once 'Mandrill/Exports.php';
 require_once 'Mandrill/Users.php';
@@ -50,7 +48,6 @@ class Mandrill
     public $ch;
     public $root = 'https://mandrillapp.com/api/1.0';
     public $debug = false;
-
     public static $error_map = array(
         "ValidationError" => "Mandrill_ValidationError",
         "Invalid_Key" => "Mandrill_Invalid_Key",
@@ -83,7 +80,7 @@ class Mandrill
         "Unknown_MetadataField" => "Mandrill_Unknown_MetadataField"
     );
 
-    public function __construct($apikey=null)
+    public function __construct($apikey = null)
     {
         if (!$apikey) {
             $apikey = getenv('MANDRILL_APIKEY');
@@ -107,8 +104,7 @@ class Mandrill
 
         //fix ca cert permissions
         if (strlen(ini_get('curl.cainfo')) === 0) {
-            curl_setopt($this->ch, CURLOPT_CAINFO,
-                __DIR__."/cacert.pem");
+            curl_setopt($this->ch, CURLOPT_CAINFO, __DIR__ . "/cacert.pem");
         }
 
         $this->root = rtrim($this->root, '/') . '/';
@@ -130,7 +126,7 @@ class Mandrill
         $this->metadata = new Mandrill_Metadata($this);
     }
 
-     /**
+    /**
      * A workaround for cURL: follow locations with safe_mode enabled or open_basedir set
      *
      * This method is used in the call method in Mandrill.php instead of the original curl_exec
@@ -153,7 +149,7 @@ class Mandrill
 
             if ($mr > 0) {
                 $original_url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
-                $newurl       = $original_url;
+                $newurl = $original_url;
 
                 $rch = curl_copy_handle($ch);
 
@@ -174,7 +170,7 @@ class Mandrill
                             // if no scheme is present then the new url is a
                             // relative path and thus needs some extra care
                             if (!preg_match("/^https?:/i", $newurl)) {
-                                $newurl = $original_url.$newurl;
+                                $newurl = $original_url . $newurl;
                             }
                         } else {
                             $code = 0;

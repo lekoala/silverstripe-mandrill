@@ -2,6 +2,7 @@
 
 class Mandrill_Exports
 {
+
     public function __construct(Mandrill $master)
     {
         $this->master = $master;
@@ -9,10 +10,10 @@ class Mandrill_Exports
 
     /**
      * Returns information about an export job. If the export job's state is 'complete',
-the returned data will include a URL you can use to fetch the results. Every export
-job produces a zip archive, but the format of the archive is distinct for each job
-type. The api calls that initiate exports include more details about the output format
-for that job type.
+      the returned data will include a URL you can use to fetch the results. Every export
+      job produces a zip archive, but the format of the archive is distinct for each job
+      type. The api calls that initiate exports include more details about the output format
+      for that job type.
      * @param string $id an export job identifier
      * @return struct the information about the export
      *     - id string the unique identifier for this Export. Use this identifier when checking the export job's status
@@ -47,8 +48,8 @@ for that job type.
 
     /**
      * Begins an export of your rejection blacklist. The blacklist will be exported to a zip archive
-containing a single file named rejects.csv that includes the following fields: email,
-reason, detail, created_at, expires_at, last_event_at, expires_at.
+      containing a single file named rejects.csv that includes the following fields: email,
+      reason, detail, created_at, expires_at, last_event_at, expires_at.
      * @param string $notify_email an optional email address to notify when the export job has finished.
      * @return struct information about the rejects export job that was started
      *     - id string the unique identifier for this Export. Use this identifier when checking the export job's status
@@ -58,7 +59,7 @@ reason, detail, created_at, expires_at, last_event_at, expires_at.
      *     - state string the export job's state
      *     - result_url string the url for the export job's results, if the job is complete
      */
-    public function rejects($notify_email=null)
+    public function rejects($notify_email = null)
     {
         $_params = array("notify_email" => $notify_email);
         return $this->master->call('exports/rejects', $_params);
@@ -66,8 +67,8 @@ reason, detail, created_at, expires_at, last_event_at, expires_at.
 
     /**
      * Begins an export of your rejection whitelist. The whitelist will be exported to a zip archive
-containing a single file named whitelist.csv that includes the following fields:
-email, detail, created_at.
+      containing a single file named whitelist.csv that includes the following fields:
+      email, detail, created_at.
      * @param string $notify_email an optional email address to notify when the export job has finished.
      * @return struct information about the whitelist export job that was started
      *     - id string the unique identifier for this Export. Use this identifier when checking the export job's status
@@ -77,7 +78,7 @@ email, detail, created_at.
      *     - state string the export job's state
      *     - result_url string the url for the export job's results, if the job is complete
      */
-    public function whitelist($notify_email=null)
+    public function whitelist($notify_email = null)
     {
         $_params = array("notify_email" => $notify_email);
         return $this->master->call('exports/whitelist', $_params);
@@ -85,10 +86,10 @@ email, detail, created_at.
 
     /**
      * Begins an export of your activity history. The activity will be exported to a zip archive
-containing a single file named activity.csv in the same format as you would be able to export
-from your account's activity view. It includes the following fields: Date, Email Address,
-Sender, Subject, Status, Tags, Opens, Clicks, Bounce Detail. If you have configured any custom
-metadata fields, they will be included in the exported data.
+      containing a single file named activity.csv in the same format as you would be able to export
+      from your account's activity view. It includes the following fields: Date, Email Address,
+      Sender, Subject, Status, Tags, Opens, Clicks, Bounce Detail. If you have configured any custom
+      metadata fields, they will be included in the exported data.
      * @param string $notify_email an optional email address to notify when the export job has finished
      * @param string $date_from start date as a UTC string in YYYY-MM-DD HH:MM:SS format
      * @param string $date_to end date as a UTC string in YYYY-MM-DD HH:MM:SS format
@@ -108,7 +109,7 @@ metadata fields, they will be included in the exported data.
      *     - state string the export job's state
      *     - result_url string the url for the export job's results, if the job is complete
      */
-    public function activity($notify_email=null, $date_from=null, $date_to=null, $tags=null, $senders=null, $states=null, $api_keys=null)
+    public function activity($notify_email = null, $date_from = null, $date_to = null, $tags = null, $senders = null, $states = null, $api_keys = null)
     {
         $_params = array("notify_email" => $notify_email, "date_from" => $date_from, "date_to" => $date_to, "tags" => $tags, "senders" => $senders, "states" => $states, "api_keys" => $api_keys);
         return $this->master->call('exports/activity', $_params);

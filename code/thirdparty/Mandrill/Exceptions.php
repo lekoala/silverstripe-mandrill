@@ -2,9 +2,12 @@
 
 class Mandrill_Error extends Exception
 {
+
 }
+
 class Mandrill_HttpError extends Mandrill_Error
 {
+
 }
 
 /**
@@ -12,6 +15,7 @@ class Mandrill_HttpError extends Mandrill_Error
  */
 class Mandrill_ValidationError extends Mandrill_Error
 {
+
 }
 
 /**
@@ -19,6 +23,7 @@ class Mandrill_ValidationError extends Mandrill_Error
  */
 class Mandrill_Invalid_Key extends Mandrill_Error
 {
+
 }
 
 /**
@@ -26,6 +31,7 @@ class Mandrill_Invalid_Key extends Mandrill_Error
  */
 class Mandrill_PaymentRequired extends Mandrill_Error
 {
+
 }
 
 /**
@@ -33,6 +39,7 @@ class Mandrill_PaymentRequired extends Mandrill_Error
  */
 class Mandrill_Unknown_Subaccount extends Mandrill_Error
 {
+
 }
 
 /**
@@ -40,6 +47,7 @@ class Mandrill_Unknown_Subaccount extends Mandrill_Error
  */
 class Mandrill_Unknown_Template extends Mandrill_Error
 {
+
 }
 
 /**
@@ -47,6 +55,7 @@ class Mandrill_Unknown_Template extends Mandrill_Error
  */
 class Mandrill_ServiceUnavailable extends Mandrill_Error
 {
+
 }
 
 /**
@@ -54,6 +63,7 @@ class Mandrill_ServiceUnavailable extends Mandrill_Error
  */
 class Mandrill_Unknown_Message extends Mandrill_Error
 {
+
 }
 
 /**
@@ -61,6 +71,7 @@ class Mandrill_Unknown_Message extends Mandrill_Error
  */
 class Mandrill_Invalid_Tag_Name extends Mandrill_Error
 {
+
 }
 
 /**
@@ -68,6 +79,7 @@ class Mandrill_Invalid_Tag_Name extends Mandrill_Error
  */
 class Mandrill_Invalid_Reject extends Mandrill_Error
 {
+
 }
 
 /**
@@ -75,6 +87,7 @@ class Mandrill_Invalid_Reject extends Mandrill_Error
  */
 class Mandrill_Unknown_Sender extends Mandrill_Error
 {
+
 }
 
 /**
@@ -82,6 +95,7 @@ class Mandrill_Unknown_Sender extends Mandrill_Error
  */
 class Mandrill_Unknown_Url extends Mandrill_Error
 {
+
 }
 
 /**
@@ -89,6 +103,7 @@ class Mandrill_Unknown_Url extends Mandrill_Error
  */
 class Mandrill_Unknown_TrackingDomain extends Mandrill_Error
 {
+
 }
 
 /**
@@ -96,6 +111,7 @@ class Mandrill_Unknown_TrackingDomain extends Mandrill_Error
  */
 class Mandrill_Invalid_Template extends Mandrill_Error
 {
+
 }
 
 /**
@@ -103,6 +119,7 @@ class Mandrill_Invalid_Template extends Mandrill_Error
  */
 class Mandrill_Unknown_Webhook extends Mandrill_Error
 {
+
 }
 
 /**
@@ -110,6 +127,7 @@ class Mandrill_Unknown_Webhook extends Mandrill_Error
  */
 class Mandrill_Unknown_InboundDomain extends Mandrill_Error
 {
+
 }
 
 /**
@@ -117,6 +135,7 @@ class Mandrill_Unknown_InboundDomain extends Mandrill_Error
  */
 class Mandrill_Unknown_InboundRoute extends Mandrill_Error
 {
+
 }
 
 /**
@@ -124,6 +143,7 @@ class Mandrill_Unknown_InboundRoute extends Mandrill_Error
  */
 class Mandrill_Unknown_Export extends Mandrill_Error
 {
+
 }
 
 /**
@@ -131,6 +151,7 @@ class Mandrill_Unknown_Export extends Mandrill_Error
  */
 class Mandrill_IP_ProvisionLimit extends Mandrill_Error
 {
+
 }
 
 /**
@@ -138,6 +159,7 @@ class Mandrill_IP_ProvisionLimit extends Mandrill_Error
  */
 class Mandrill_Unknown_Pool extends Mandrill_Error
 {
+
 }
 
 /**
@@ -145,6 +167,7 @@ class Mandrill_Unknown_Pool extends Mandrill_Error
  */
 class Mandrill_NoSendingHistory extends Mandrill_Error
 {
+
 }
 
 /**
@@ -152,6 +175,7 @@ class Mandrill_NoSendingHistory extends Mandrill_Error
  */
 class Mandrill_PoorReputation extends Mandrill_Error
 {
+
 }
 
 /**
@@ -159,6 +183,7 @@ class Mandrill_PoorReputation extends Mandrill_Error
  */
 class Mandrill_Unknown_IP extends Mandrill_Error
 {
+
 }
 
 /**
@@ -166,6 +191,7 @@ class Mandrill_Unknown_IP extends Mandrill_Error
  */
 class Mandrill_Invalid_EmptyDefaultPool extends Mandrill_Error
 {
+
 }
 
 /**
@@ -173,6 +199,7 @@ class Mandrill_Invalid_EmptyDefaultPool extends Mandrill_Error
  */
 class Mandrill_Invalid_DeleteDefaultPool extends Mandrill_Error
 {
+
 }
 
 /**
@@ -180,6 +207,7 @@ class Mandrill_Invalid_DeleteDefaultPool extends Mandrill_Error
  */
 class Mandrill_Invalid_DeleteNonEmptyPool extends Mandrill_Error
 {
+
 }
 
 /**
@@ -187,6 +215,7 @@ class Mandrill_Invalid_DeleteNonEmptyPool extends Mandrill_Error
  */
 class Mandrill_Invalid_CustomDNS extends Mandrill_Error
 {
+
 }
 
 /**
@@ -194,6 +223,7 @@ class Mandrill_Invalid_CustomDNS extends Mandrill_Error
  */
 class Mandrill_Invalid_CustomDNSPending extends Mandrill_Error
 {
+
 }
 
 /**
@@ -201,6 +231,7 @@ class Mandrill_Invalid_CustomDNSPending extends Mandrill_Error
  */
 class Mandrill_Metadata_FieldLimit extends Mandrill_Error
 {
+
 }
 
 /**
@@ -208,4 +239,5 @@ class Mandrill_Metadata_FieldLimit extends Mandrill_Error
  */
 class Mandrill_Unknown_MetadataField extends Mandrill_Error
 {
+
 }

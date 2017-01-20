@@ -6,19 +6,20 @@
  */
 class SendTestEmailTask extends BuildTask
 {
-    protected $title       = "Send Test Email Task";
+
+    protected $title = "Send Test Email Task";
     protected $description = 'Send a sample email to admin or to ?email=';
 
     public function run($request)
     {
         $config = SiteConfig::current_site_config();
 
-        $default        = Email::config()->admin_email;
+        $default = Email::config()->admin_email;
         $default_config = $config->DefaultFromEmail;
-        $member         = Member::currentUser();
-        $to             = $request->getVar('email');
-        $template       = $request->getVar('template');
-        $disabled       = $request->getVar('disabled');
+        $member = Member::currentUser();
+        $to = $request->getVar('email');
+        $template = $request->getVar('template');
+        $disabled = $request->getVar('disabled');
 
         if ($disabled) {
             MandrillMailer::setSendingDisabled();
@@ -52,13 +53,13 @@ class SendTestEmailTask extends BuildTask
 
         if ($template) {
             $emailTemplate = EmailTemplate::getByCode($template);
-            $email         = $emailTemplate->getEmail();
-            $email->setSubject('Template '.$template.' from '.$config->Title);
+            $email = $emailTemplate->getEmail();
+            $email->setSubject('Template ' . $template . ' from ' . $config->Title);
             $email->setSampleRequiredObjects();
         } else {
             $email = new MandrillEmail();
             $email->setSampleContent();
-            $email->setSubject('Sample email from '.$config->Title);
+            $email->setSubject('Sample email from ' . $config->Title);
         }
 
         if (!$to) {
@@ -72,8 +73,8 @@ class SendTestEmailTask extends BuildTask
             }
         }
 
-        echo 'Sending to '.htmlentities($email->To()).'<br/>';
-        echo 'Using theme : '.$email->getTheme().'<br/>';
+        echo 'Sending to ' . htmlentities($email->To()) . '<br/>';
+        echo 'Using theme : ' . $email->getTheme() . '<br/>';
         echo '<hr/>';
 
         $res = $email->send();
@@ -81,17 +82,17 @@ class SendTestEmailTask extends BuildTask
         // Success!
         if ($res && is_array($res)) {
             echo '<div style="color:green">Successfully sent your email</div>';
-            echo 'Recipient : '.$res[0].'<br/>';
+            echo 'Recipient : ' . $res[0] . '<br/>';
             echo 'Additionnal headers : <br/>';
             foreach ($res[3] as $k => $v) {
-                echo "$k : $v".'<br/>';
+                echo "$k : $v" . '<br/>';
             }
-            echo 'Content : '.$res[2];
+            echo 'Content : ' . $res[2];
         }
         // Failed!
         else {
             echo '<div style="color:red">Failed to send email</div>';
-            echo 'Error is : '.MandrillMailer::getInstance()->getLastError();
+            echo 'Error is : ' . MandrillMailer::getInstance()->getLastError();
         }
     }
 }

@@ -2,6 +2,7 @@
 
 class Mandrill_Templates
 {
+
     public function __construct(Mandrill $master)
     {
         $this->master = $master;
@@ -38,7 +39,7 @@ class Mandrill_Templates
      *     - created_at string the date and time the template was first created as a UTC string in YYYY-MM-DD HH:MM:SS format
      *     - updated_at string the date and time the template was last modified as a UTC string in YYYY-MM-DD HH:MM:SS format
      */
-    public function add($name, $from_email=null, $from_name=null, $subject=null, $code=null, $text=null, $publish=true, $labels=array())
+    public function add($name, $from_email = null, $from_name = null, $subject = null, $code = null, $text = null, $publish = true, $labels = array())
     {
         $_params = array("name" => $name, "from_email" => $from_email, "from_name" => $from_name, "subject" => $subject, "code" => $code, "text" => $text, "publish" => $publish, "labels" => $labels);
         return $this->master->call('templates/add', $_params);
@@ -104,7 +105,7 @@ class Mandrill_Templates
      *     - created_at string the date and time the template was first created as a UTC string in YYYY-MM-DD HH:MM:SS format
      *     - updated_at string the date and time the template was last modified as a UTC string in YYYY-MM-DD HH:MM:SS format
      */
-    public function update($name, $from_email=null, $from_name=null, $subject=null, $code=null, $text=null, $publish=true, $labels=null)
+    public function update($name, $from_email = null, $from_name = null, $subject = null, $code = null, $text = null, $publish = true, $labels = null)
     {
         $_params = array("name" => $name, "from_email" => $from_email, "from_name" => $from_name, "subject" => $subject, "code" => $code, "text" => $text, "publish" => $publish, "labels" => $labels);
         return $this->master->call('templates/update', $_params);
@@ -192,7 +193,7 @@ class Mandrill_Templates
      *         - created_at string the date and time the template was first created as a UTC string in YYYY-MM-DD HH:MM:SS format
      *         - updated_at string the date and time the template was last modified as a UTC string in YYYY-MM-DD HH:MM:SS format
      */
-    public function getList($label=null)
+    public function getList($label = null)
     {
         $_params = array("label" => $label);
         return $this->master->call('templates/list', $_params);
@@ -234,7 +235,7 @@ class Mandrill_Templates
      * @return struct the result of rendering the given template with the content and merge field values injected
      *     - html string the rendered HTML as a string
      */
-    public function render($template_name, $template_content, $merge_vars=null)
+    public function render($template_name, $template_content, $merge_vars = null)
     {
         $_params = array("template_name" => $template_name, "template_content" => $template_content, "merge_vars" => $merge_vars);
         return $this->master->call('templates/render', $_params);

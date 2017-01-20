@@ -7,8 +7,9 @@
  */
 class EmailTemplateSubsiteExtension extends DataExtension
 {
+
     private static $_accessible_sites_map_cache = null;
-    private static $has_one                     = array(
+    private static $has_one = array(
         'Subsite' => 'Subsite',
     );
 
@@ -62,8 +63,8 @@ class EmailTemplateSubsiteExtension extends DataExtension
                 $subsiteID = (int) Subsite::currentSubsiteID();
             }
 
-            $froms     = $query->getFrom();
-            $froms     = array_keys($froms);
+            $froms = $query->getFrom();
+            $froms = array_keys($froms);
             $tableName = array_shift($froms);
             $query->addWhere("\"$tableName\".\"SubsiteID\" IN ($subsiteID)");
         }
@@ -82,7 +83,7 @@ class EmailTemplateSubsiteExtension extends DataExtension
         if (!$refresh && self::$_accessible_sites_map_cache) {
             return self::$_accessible_sites_map_cache;
         }
-        $subsites    = Subsite::accessible_sites("CMS_ACCESS_CMSMain");
+        $subsites = Subsite::accessible_sites("CMS_ACCESS_CMSMain");
         $subsitesMap = array();
         if ($subsites && $subsites->Count()) {
             $subsitesMap = $subsites->map('ID', 'Title');
@@ -144,8 +145,7 @@ class EmailTemplateSubsiteExtension extends DataExtension
         if ($member->ID == Member::currentUserID()) {
             $goodSites = self::accessible_sites_ids();
         } else {
-            $goodSites = Subsite::accessible_sites('CMS_ACCESS_CMSMain', true,
-                    'all', $member)->column('ID');
+            $goodSites = Subsite::accessible_sites('CMS_ACCESS_CMSMain', true, 'all', $member)->column('ID');
         }
 
         // Return true if they have access to this object's site
@@ -189,8 +189,7 @@ class EmailTemplateSubsiteExtension extends DataExtension
         // This helps deal with Link() returning an absolute URL.
         $url = Director::absoluteURL($this->owner->Link());
         if ($this->owner->SubsiteID) {
-            $url = preg_replace('/\/\/[^\/]+\//',
-                '//'.$this->owner->Subsite()->domain().'/', $url);
+            $url = preg_replace('/\/\/[^\/]+\//', '//' . $this->owner->Subsite()->domain() . '/', $url);
         }
         return $url;
     }
@@ -200,6 +199,6 @@ class EmailTemplateSubsiteExtension extends DataExtension
      */
     public function cacheKeyComponent()
     {
-        return 'subsite-'.Subsite::currentSubsiteID();
+        return 'subsite-' . Subsite::currentSubsiteID();
     }
 }

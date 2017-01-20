@@ -10,15 +10,16 @@
  */
 class MandrillAdmin extends LeftAndMain implements PermissionProvider
 {
-    const MESSAGE_TAG           = 'message';
+
+    const MESSAGE_TAG = 'message';
     const MESSAGE_CACHE_MINUTES = 5;
-    const WEBHOOK_TAG           = 'webhook';
+    const WEBHOOK_TAG = 'webhook';
     const WEBHOOK_CACHE_MINUTES = 1440; // 1 day
 
-    private static $menu_title      = "Mandrill";
-    private static $url_segment     = "mandrill";
-    private static $menu_icon       = "mandrill/images/icon.png";
-    private static $url_rule        = '/$Action/$ID';
+    private static $menu_title = "Mandrill";
+    private static $url_segment = "mandrill";
+    private static $menu_icon = "mandrill/images/icon.png";
+    private static $url_rule = '/$Action/$ID';
     private static $allowed_actions = array(
         "view",
         'view_message',
@@ -30,7 +31,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         "UninstallHookForm",
         "doUninstallHook"
     );
-    private static $cache_enabled   = true;
+    private static $cache_enabled = true;
 
     /**
      * @var MandrilMessage
@@ -40,7 +41,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     /**
      * @var string
      */
-    protected $view          = '_Content';
+    protected $view = '_Content';
     protected $mandrillError = null;
 
     public function init()
@@ -114,15 +115,12 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
      */
     public function ListForm()
     {
-        $fields          = new FieldList();
+        $fields = new FieldList();
         $gridFieldConfig = GridFieldConfig::create()->addComponents(
-            new GridFieldToolbarHeader(), new GridFieldSortableHeader(),
-            new GridFieldDataColumns(), new GridFieldFooter()
+            new GridFieldToolbarHeader(), new GridFieldSortableHeader(), new GridFieldDataColumns(), new GridFieldFooter()
         );
-        $gridField       = new GridField('SearchResults',
-            _t('MandrillAdmin.SearchResults', 'Search Results'),
-            $this->Messages(), $gridFieldConfig);
-        $columns         = $gridField->getConfig()->getComponentByType('GridFieldDataColumns');
+        $gridField = new GridField('SearchResults', _t('MandrillAdmin.SearchResults', 'Search Results'), $this->Messages(), $gridFieldConfig);
+        $columns = $gridField->getConfig()->getComponentByType('GridFieldDataColumns');
         $columns->setDisplayFields(array(
             'date' => _t('MandrillAdmin.MessageDate', 'Date'),
             'state' => _t('MandrillAdmin.MessageStatus', 'Status'),
@@ -135,21 +133,19 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         $columns->setFieldFormatting(array(
             'subject' => function ($value, &$item) {
                 return sprintf(
-                    '<a href="%s" class="cms-panel-link" data-pjax-target="Content">%s</a>',
-                    Convert::raw2xml($item->Link), $value
+                    '<a href="%s" class="cms-panel-link" data-pjax-target="Content">%s</a>', Convert::raw2xml($item->Link), $value
                 );
             },
             'state' => function ($value, &$item) {
                 $color = MandrillMessage::getColorForState($value);
-                return sprintf('<span style="color:%s">%s</span>', $color,
-                    $value);
+                return sprintf('<span style="color:%s">%s</span>', $color, $value);
             }
         ));
         $gridField->addExtraClass('all-messages-gridfield');
         $fields->push($gridField);
 
         $actions = new FieldList();
-        $form    = CMSForm::create(
+        $form = CMSForm::create(
                 $this, "ListForm", $fields, $actions
             )->setHTMLID('Form_ListForm');
         $form->setResponseNegotiator($this->getResponseNegotiator());
@@ -192,8 +188,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         }
         $cache_enabled = $this->getCacheEnabled();
         if ($cache_enabled) {
-            $cache        = $this->getCache();
-            $cache_key    = md5(serialize($data));
+            $cache = $this->getCache();
+            $cache_key = md5(serialize($data));
             $cache_result = $cache->load($cache_key);
         }
         if ($cache_enabled && $cache_result) {
@@ -201,21 +197,18 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         } else {
             $defaultQuery = '*';
             // If we have a subaccount defined, we need to restrict the query to this subaccount
-            if ($subaccount   = MandrillMailer::getSubaccount()) {
-                $defaultQuery = 'subaccount:'.$subaccount;
+            if ($subaccount = MandrillMailer::getSubaccount()) {
+                $defaultQuery = 'subaccount:' . $subaccount;
             }
 
             //search(string key, string query, string date_from, string date_to, array tags, array senders, array api_keys, integer limit)
             try {
                 $messages = $this->getMandrill()->messages->search(
-                    $this->getParam('Query', $defaultQuery),
-                    $this->getParam('DateFrom'), $this->getParam('DateTo'),
-                    null, null, array($this->getMandrill()->apikey),
-                    $this->getParam('Limit', 100)
+                    $this->getParam('Query', $defaultQuery), $this->getParam('DateFrom'), $this->getParam('DateTo'), null, null, array($this->getMandrill()->apikey), $this->getParam('Limit', 100)
                 );
             } catch (Exception $ex) {
-                Requirements::customScript("jQuery.noticeAdd({text: '".$ex->getMessage()."', type: 'error'});");
-                $messages            = array();
+                Requirements::customScript("jQuery.noticeAdd({text: '" . $ex->getMessage() . "', type: 'error'});");
+                $messages = array();
             }
 
             $list = new ArrayList();
@@ -225,8 +218,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             }
             //5 minutes cache
             if ($cache_enabled && !empty($messages)) {
-                $cache->save(serialize($list), $cache_key,
-                    array(self::MESSAGE_TAG), 60 * self::MESSAGE_CACHE_MINUTES);
+                $cache->save(serialize($list), $cache_key, array(self::MESSAGE_TAG), 60 * self::MESSAGE_CACHE_MINUTES);
             }
         }
         return $list;
@@ -242,27 +234,26 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     {
         $cache_enabled = $this->getCacheEnabled();
         if ($cache_enabled) {
-            $cache        = $this->getCache();
-            $cache_key    = 'message_'.$id;
+            $cache = $this->getCache();
+            $cache_key = 'message_' . $id;
             $cache_result = $cache->load($cache_key);
         }
         if ($cache_enabled && $cache_result) {
             $message = unserialize($cache_result);
         } else {
             try {
-                $info    = $this->getMandrill()->messages->info($id);
+                $info = $this->getMandrill()->messages->info($id);
                 $content = $this->MessageContent($id);
-                $info    = array_merge($content, $info);
+                $info = array_merge($content, $info);
                 $message = new MandrillMessage($info);
                 //the detail is not going to change very often
                 if ($cache_enabled) {
-                    $cache->save(serialize($message), $cache_key,
-                        array('message'), 60 * 60);
+                    $cache->save(serialize($message), $cache_key, array('message'), 60 * 60);
                 }
             } catch (Exception $ex) {
                 $message = new MandrillMessage();
                 $this->getCache()->clean('matchingTag', array(self::MESSAGE_TAG));
-                SS_Log::log(get_class($ex).': '.$ex->getMessage(), SS_LOG::DEBUG);
+                SS_Log::log(get_class($ex) . ': ' . $ex->getMessage(), SS_LOG::DEBUG);
             }
         }
         return $message;
@@ -278,8 +269,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     {
         $cache_enabled = $this->getCacheEnabled();
         if ($cache_enabled) {
-            $cache        = $this->getCache();
-            $cache_key    = 'content_'.$id;
+            $cache = $this->getCache();
+            $cache_key = 'content_' . $id;
             $cache_result = $cache->load($cache_key);
         }
         if ($cache_enabled && $cache_result) {
@@ -293,8 +284,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             }
             //if we have the content, store it forever since it's not available forever in the api
             if ($cache_enabled) {
-                $cache->save(serialize($content), $cache_key,
-                    array(self::MESSAGE_TAG), 0);
+                $cache->save(serialize($content), $cache_key, array(self::MESSAGE_TAG), 0);
             }
         }
         return $content;
@@ -309,9 +299,9 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         // If we have a subaccount defined, we need to restrict the query to this subaccount
         if ($subaccount = MandrillMailer::getSubaccount()) {
             if (empty($values['Query'])) {
-                $values['Query'] = 'subaccount:'.$subaccount;
+                $values['Query'] = 'subaccount:' . $subaccount;
             } else {
-                $values['Query'] = $values['Query'].' AND subaccount:'.$subaccount;
+                $values['Query'] = $values['Query'] . ' AND subaccount:' . $subaccount;
             }
         }
         Session::set('MandrilAdminSearch', $values);
@@ -319,7 +309,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         return $this->redirectBack();
     }
 
-    public function getParams() {
+    public function getParams()
+    {
         return Session::get('MandrilAdminSearch');
     }
 
@@ -334,28 +325,22 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
 
     public function SearchForm()
     {
-        $fields     = new FieldList();
-        $fields->push(new DateField('DateFrom', _t('Mandrill.DATEFROM', 'From'),
-            $this->getParam('DateFrom', date('Y-m-d', strtotime('-30 days')))));
-        $fields->push(new DateField('DateTo', _t('Mandrill.DATETO', 'To'),
-            $this->getParam('DateTo', date('Y-m-d'))));
-        $fields->push($queryField = new TextField('Query',
-            _t('Mandrill.QUERY', 'Query'), $this->getParam('Query')));
+        $fields = new FieldList();
+        $fields->push(new DateField('DateFrom', _t('Mandrill.DATEFROM', 'From'), $this->getParam('DateFrom', date('Y-m-d', strtotime('-30 days')))));
+        $fields->push(new DateField('DateTo', _t('Mandrill.DATETO', 'To'), $this->getParam('DateTo', date('Y-m-d'))));
+        $fields->push($queryField = new TextField('Query', _t('Mandrill.QUERY', 'Query'), $this->getParam('Query')));
         $queryField->setAttribute('placeholder', 'full_email:joe@domain.* AND sender:me@company.com OR subject:welcome');
-        $queryField->setDescription(_t('Mandrill.QUERYDESC',
-                'For more information about query syntax, please visit <a target="_blank" href="http://help.mandrill.com/entries/22211902">Mandrill Support</a>'));
-        $fields->push(new DropdownField('Limit', _t('Mandrill.LIMIT', 'Limit'),
-            array(
+        $queryField->setDescription(_t('Mandrill.QUERYDESC', 'For more information about query syntax, please visit <a target="_blank" href="http://help.mandrill.com/entries/22211902">Mandrill Support</a>'));
+        $fields->push(new DropdownField('Limit', _t('Mandrill.LIMIT', 'Limit'), array(
             10 => 10,
             50 => 50,
             100 => 100,
             500 => 500,
             1000 => 1000
             ), $this->getParam('Limit', 100)));
-        $actions    = new FieldList();
-        $actions->push(new FormAction('doSearch',
-            _t('Mandrill.DOSEARCH', 'Search')));
-        $form       = new Form($this, 'SearchForm', $fields, $actions);
+        $actions = new FieldList();
+        $actions->push(new FormAction('doSearch', _t('Mandrill.DOSEARCH', 'Search')));
+        $form = new Form($this, 'SearchForm', $fields, $actions);
         return $form;
     }
 
@@ -366,16 +351,13 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
      */
     public function providePermissions()
     {
-        $title = _t("Mandrill.MENUTITLE",
-            LeftAndMain::menu_title_for_class('Mandrill'));
+        $title = _t("Mandrill.MENUTITLE", LeftAndMain::menu_title_for_class('Mandrill'));
         return array(
             "CMS_ACCESS_Mandrill" => array(
-                'name' => _t('Mandrill.ACCESS', "Access to '{title}' section",
-                    array('title' => $title)),
+                'name' => _t('Mandrill.ACCESS', "Access to '{title}' section", array('title' => $title)),
                 'category' => _t('Permission.CMS_ACCESS_CATEGORY', 'CMS Access'),
                 'help' => _t(
-                    'Mandrill.ACCESS_HELP',
-                    'Allow use of Mandrill admin section'
+                    'Mandrill.ACCESS_HELP', 'Allow use of Mandrill admin section'
                 )
             ),
         );
@@ -416,8 +398,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
 
         $cache_enabled = $this->getCacheEnabled();
         if ($cache_enabled) {
-            $cache        = $this->getCache();
-            $cache_key    = 'webooks';
+            $cache = $this->getCache();
+            $cache_key = 'webooks';
             $cache_result = $cache->load($cache_key);
         }
         if ($cache_enabled && $cache_result) {
@@ -426,9 +408,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             try {
                 $list = $mandrill->webhooks->getList();
                 if ($cache_enabled) {
-                    $cache->save(serialize($list), $cache_key,
-                        array(self::WEBHOOK_TAG),
-                        60 * self::WEBHOOK_CACHE_MINUTES);
+                    $cache->save(serialize($list), $cache_key, array(self::WEBHOOK_TAG), 60 * self::WEBHOOK_CACHE_MINUTES);
                 }
             } catch (Exception $ex) {
                 $list = array();
@@ -483,15 +463,11 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
      */
     public function InstallHookForm()
     {
-        $fields  = new FieldList();
-        $fields->push(new LiteralField('Info',
-            '<div class="message info">'._t('MandrillAdmin.HookNotInstalled',
-                'Hook is not installed. Url of the webhook is: {url}. This url must be publicly visible to be used as a hook.',
-                array('url' => $this->WebhookUrl())).'</div>'));
+        $fields = new FieldList();
+        $fields->push(new LiteralField('Info', '<div class="message info">' . _t('MandrillAdmin.HookNotInstalled', 'Hook is not installed. Url of the webhook is: {url}. This url must be publicly visible to be used as a hook.', array('url' => $this->WebhookUrl())) . '</div>'));
         $actions = new FieldList();
-        $actions->push(new FormAction('doInstallHook',
-            _t('Mandrill.DOINSTALL', 'Install hook')));
-        $form    = new Form($this, 'InstallHookForm', $fields, $actions);
+        $actions->push(new FormAction('doInstallHook', _t('Mandrill.DOINSTALL', 'Install hook')));
+        $form = new Form($this, 'InstallHookForm', $fields, $actions);
         return $form;
     }
 
@@ -499,7 +475,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     {
         $mandrill = $this->getMandrill();
 
-        $url         = $this->WebhookUrl();
+        $url = $this->WebhookUrl();
         $description = SiteConfig::current_site_config()->Title;
 
         try {
@@ -519,15 +495,11 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
      */
     public function UninstallHookForm()
     {
-        $fields  = new FieldList();
-        $fields->push(new LiteralField('Info',
-            '<div class="message info">'._t('MandrillAdmin.HookInstalled',
-                'Hook is installed. Url of the webhook is: {url}.',
-                array('url' => $this->WebhookUrl())).'</div>'));
+        $fields = new FieldList();
+        $fields->push(new LiteralField('Info', '<div class="message info">' . _t('MandrillAdmin.HookInstalled', 'Hook is installed. Url of the webhook is: {url}.', array('url' => $this->WebhookUrl())) . '</div>'));
         $actions = new FieldList();
-        $actions->push(new FormAction('doUninstallHook',
-            _t('Mandrill.DOUNINSTALL', 'Uninstall hook')));
-        $form    = new Form($this, 'InstallHookForm', $fields, $actions);
+        $actions->push(new FormAction('doUninstallHook', _t('Mandrill.DOUNINSTALL', 'Uninstall hook')));
+        $form = new Form($this, 'InstallHookForm', $fields, $actions);
         return $form;
     }
 
@@ -535,7 +507,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     {
         $mandrill = $this->getMandrill();
 
-        $url         = $this->WebhookUrl();
+        $url = $this->WebhookUrl();
         $description = SiteConfig::current_site_config()->Title;
 
         try {

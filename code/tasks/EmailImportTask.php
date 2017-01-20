@@ -8,7 +8,8 @@
  */
 class EmailImportTask extends BuildTask
 {
-    protected $title       = "Email import task";
+
+    protected $title = "Email import task";
     protected $description = "Finds all *Email.ss templates and imports them into the CMS, if they don't already exist.";
 
     public function run($request)
@@ -21,11 +22,11 @@ class EmailImportTask extends BuildTask
         echo '<strong>Remember to flush the templates/translations if needed</strong><br/>';
         echo '<hr/>';
 
-        $overwrite         = $request->getVar('overwrite');
-        $clear             = $request->getVar('clear');
+        $overwrite = $request->getVar('overwrite');
+        $clear = $request->getVar('clear');
         $templatesToImport = $request->getVar('templates');
-        $importToSubsite   = $request->getVar('subsite');
-        $chosenLocales     = $request->getVar('locales');
+        $importToSubsite = $request->getVar('subsite');
+        $chosenLocales = $request->getVar('locales');
 
         // Normalize argument
         if ($overwrite && $overwrite != 'soft' && $overwrite != 'hard') {
@@ -41,13 +42,11 @@ class EmailImportTask extends BuildTask
             );
         }
         if (class_exists('Subsite') && Subsite::currentSubsiteID()) {
-            DB::alteration_message("Importing to current subsite. Run from main site to import other subsites at once.",
-                "created");
+            DB::alteration_message("Importing to current subsite. Run from main site to import other subsites at once.", "created");
             $subsites = array();
         }
         if (!empty($subsites)) {
-            DB::alteration_message("Importing to subsites : ".implode(',',
-                    array_values($subsites)), "created");
+            DB::alteration_message("Importing to subsites : " . implode(',', array_values($subsites)), "created");
         }
 
         if ($templatesToImport) {
@@ -74,7 +73,7 @@ class EmailImportTask extends BuildTask
             if ($emailTemplateSingl->hasExtension('FluentExtension')) {
                 $locales = array_keys(Fluent::locale_names());
                 if ($chosenLocales) {
-                    $arr     = explode(',', $chosenLocales);
+                    $arr = explode(',', $chosenLocales);
                     $locales = array();
                     foreach ($arr as $a) {
                         if (strlen($a) == 2) {
@@ -110,8 +109,7 @@ class EmailImportTask extends BuildTask
                 continue;
             }
 
-            $relativeFilePath      = str_replace(Director::baseFolder(), '',
-                $filePath);
+            $relativeFilePath = str_replace(Director::baseFolder(), '', $filePath);
             $relativeFilePathParts = explode('/', trim($relativeFilePath, '/'));
 
             // Group by module
@@ -123,24 +121,20 @@ class EmailImportTask extends BuildTask
             }
 
             array_shift($relativeFilePathParts); // remove /templates part
-            $templateName = str_replace('.ss', '',
-                implode('/', $relativeFilePathParts));
+            $templateName = str_replace('.ss', '', implode('/', $relativeFilePathParts));
 
             $templateTitle = basename($templateName);
 
             // Create a default code from template name
-            $code = strtolower(preg_replace('/([a-zA-Z])(?=[A-Z])/', '$1-',
-                    $fileName));
+            $code = strtolower(preg_replace('/([a-zA-Z])(?=[A-Z])/', '$1-', $fileName));
             $code = preg_replace('/-email$/', '', $code);
 
-            if (!empty($templatesToImport) && !in_array($code,
-                    $templatesToImport)) {
-                DB::alteration_message("Template with code <b>$code</b> was ignored.",
-                    "repaired");
+            if (!empty($templatesToImport) && !in_array($code, $templatesToImport)) {
+                DB::alteration_message("Template with code <b>$code</b> was ignored.", "repaired");
                 continue;
             }
 
-            $whereCode     = array(
+            $whereCode = array(
                 'Code' => $code
             );
             $emailTemplate = EmailTemplate::get()->filter($whereCode)->first();
@@ -152,13 +146,11 @@ class EmailImportTask extends BuildTask
             }
 
             if (!$overwrite && $emailTemplate) {
-                DB::alteration_message("Template with code <b>$code</b> already exists. Choose overwrite if you want to import again.",
-                    "repaired");
+                DB::alteration_message("Template with code <b>$code</b> already exists. Choose overwrite if you want to import again.", "repaired");
                 continue;
             }
             if ($overwrite == 'soft' && $templateModified) {
-                DB::alteration_message("Template with code <b>$code</b> has been modified by the user. Choose overwrite=hard to change.",
-                    "repaired");
+                DB::alteration_message("Template with code <b>$code</b> has been modified by the user. Choose overwrite=hard to change.", "repaired");
                 continue;
             }
 
@@ -189,7 +181,7 @@ class EmailImportTask extends BuildTask
             if (!empty($errors)) {
                 echo "<div style='color:red'>Invalid syntax was found in '$relativeFilePath'. Please fix these errors before importing the template<ul>";
                 foreach ($errors as $error) {
-                    echo '<li>'.$error.'</li>';
+                    echo '<li>' . $error . '</li>';
                 }
                 echo '</ul></div>';
                 continue;
@@ -197,8 +189,7 @@ class EmailImportTask extends BuildTask
 
             // Parse language
             $collector = new i18nTextCollector;
-            $entities  = $collector->collectFromTemplate($content, $fileName,
-                $module);
+            $entities = $collector->collectFromTemplate($content, $fileName, $module);
 
             $translationTable = array();
             foreach ($entities as $entity => $data) {
@@ -221,7 +212,7 @@ class EmailImportTask extends BuildTask
                 $contentLocale[$locale] = $content;
             }
             foreach ($translationTable as $entity => $translationData) {
-                $escapedEntity   = str_replace('.', '\.', $entity);
+                $escapedEntity = str_replace('.', '\.', $entity);
                 $baseTranslation = null;
 
                 foreach ($translationData as $locale => $translation) {
@@ -232,9 +223,8 @@ class EmailImportTask extends BuildTask
                         $translation = $baseTranslation;
                     }
                     // This regex should match old and new style
-                    $count                  = 0;
-                    $contentLocale[$locale] = preg_replace("/<%(t | _t\(')".$escapedEntity."( |').*?%>/ums",
-                        $translation, $contentLocale[$locale], -1, $count);
+                    $count = 0;
+                    $contentLocale[$locale] = preg_replace("/<%(t | _t\(')" . $escapedEntity . "( |').*?%>/ums", $translation, $contentLocale[$locale], -1, $count);
                     if (!$count) {
                         throw new Exception("Failed to replace $escapedEntity with translation $translation");
                     }
@@ -248,8 +238,7 @@ class EmailImportTask extends BuildTask
             }
 
             // Scan for extra models based on convention
-            preg_match_all('/\$([a-zA-Z]+)\./ms',
-                $contentLocale[$defaultLocale], $matches);
+            preg_match_all('/\$([a-zA-Z]+)\./ms', $contentLocale[$defaultLocale], $matches);
             $extraModels = array();
             if (!empty($matches) && !empty($matches[1])) {
                 $arr = array_unique($matches[1]);
@@ -268,8 +257,7 @@ class EmailImportTask extends BuildTask
 
             if (!empty($locales)) {
                 foreach ($locales as $locale) {
-                    $this->assignContent($emailTemplate,
-                        $contentLocale[$locale], $locale);
+                    $this->assignContent($emailTemplate, $contentLocale[$locale], $locale);
                 }
             }
 
@@ -279,18 +267,17 @@ class EmailImportTask extends BuildTask
                 // By convention, we store the translation under NameOfTheTemplateEmail.SUBJECT
                 foreach ($locales as $locale) {
                     i18n::set_locale($locale);
-                    $localeField = 'Title_'.$locale;
-                    $entity      = $templateTitle.'.SUBJECT';
+                    $localeField = 'Title_' . $locale;
+                    $entity = $templateTitle . '.SUBJECT';
                     $translation = i18n::_t($entity);
                     if (!$translation) {
                         $translation = $title;
-                        DB::alteration_message("No title found in $locale for $title. You should define $templateTitle.SUBJECT",
-                            "error");
+                        DB::alteration_message("No title found in $locale for $title. You should define $templateTitle.SUBJECT", "error");
                     }
                     $emailTemplate->$localeField = $translation;
 
                     if (strpos($translation, '%s') !== false) {
-                        echo '<div style="color:red">There is a %s in the title that should be replaced in locale '.$locale.'!</div>';
+                        echo '<div style="color:red">There is a %s in the title that should be replaced in locale ' . $locale . '!</div>';
                     }
 
                     if ($locale == $defaultLocale) {
@@ -301,7 +288,7 @@ class EmailImportTask extends BuildTask
             }
 
             // Other properties
-            $emailTemplate->Code     = $code;
+            $emailTemplate->Code = $code;
             $emailTemplate->Category = $module;
             if (class_exists('Subsite') && Subsite::currentSubsiteID()) {
                 $emailTemplate->SubsiteID = Subsite::currentSubsiteID();
@@ -319,7 +306,7 @@ class EmailImportTask extends BuildTask
 
                     $subsiteEmailTemplate = EmailTemplate::get()->filter($whereCode)->first();
 
-                    $emailTemplateCopy            = $emailTemplate;
+                    $emailTemplateCopy = $emailTemplate;
                     $emailTemplateCopy->SubsiteID = $subsiteID;
                     if ($subsiteEmailTemplate) {
                         $emailTemplateCopy->ID = $subsiteEmailTemplate->ID;
@@ -333,44 +320,42 @@ class EmailImportTask extends BuildTask
             }
 
             if ($isOverwritten) {
-                DB::alteration_message("Overwrote <b>{$emailTemplate->Code}</b>",
-                    "created");
+                DB::alteration_message("Overwrote <b>{$emailTemplate->Code}</b>", "created");
             } else {
-                DB::alteration_message("Imported <b>{$emailTemplate->Code}</b>",
-                    "created");
+                DB::alteration_message("Imported <b>{$emailTemplate->Code}</b>", "created");
             }
         }
     }
 
     protected function resetLastEditedDate($ID)
     {
-        return DB::query("UPDATE `EmailTemplate` SET LastEdited = Created WHERE ID = ".$ID);
+        return DB::query("UPDATE `EmailTemplate` SET LastEdited = Created WHERE ID = " . $ID);
     }
 
     protected function assignContent($emailTemplate, $content, $locale = null)
     {
         $baseField = 'Content';
         if ($locale) {
-            $baseField .= '_'.$locale;
+            $baseField .= '_' . $locale;
         }
 
-        $cleanContent              = $this->cleanContent($content);
+        $cleanContent = $this->cleanContent($content);
         $emailTemplate->$baseField = '';
         $emailTemplate->$baseField = $cleanContent;
 
         $dom = new DOMDocument;
-        $dom->loadHTML(mb_convert_encoding('<div>'.$content.'</div>', 'HTML-ENTITIES', 'UTF-8'));
+        $dom->loadHTML(mb_convert_encoding('<div>' . $content . '</div>', 'HTML-ENTITIES', 'UTF-8'));
 
         // Look for nodes to assign to proper fields
         $fields = array('Content', 'Callout', 'SideBar');
         foreach ($fields as $field) {
             $localeField = $field;
             if ($locale) {
-                $localeField .= '_'.$locale;
+                $localeField .= '_' . $locale;
             }
             $node = $dom->getElementById($field);
             if ($node) {
-                $cleanContent                = $this->cleanContent($this->getInnerHtml($node));
+                $cleanContent = $this->cleanContent($this->getInnerHtml($node));
                 $emailTemplate->$localeField = '';
                 $emailTemplate->$localeField = $cleanContent;
             }
@@ -379,8 +364,7 @@ class EmailImportTask extends BuildTask
 
     protected function cleanContent($content)
     {
-        $content = strip_tags($content,
-            '<p><br><br/><div><img><a><span><ul><li><strong><em><b><i><blockquote><h1><h2><h3><h4><h5><h6>');
+        $content = strip_tags($content, '<p><br><br/><div><img><a><span><ul><li><strong><em><b><i><blockquote><h1><h2><h3><h4><h5><h6>');
 
         $content = str_replace("’", "'", $content);
 
@@ -394,7 +378,7 @@ class EmailImportTask extends BuildTask
     protected function getInnerHtml(DOMElement $node)
     {
         $innerHTML = '';
-        $children  = $node->childNodes;
+        $children = $node->childNodes;
         foreach ($children as $child) {
             $innerHTML .= $child->ownerDocument->saveXML($child);
         }

@@ -7,7 +7,8 @@
  */
 class EmailTemplate extends DataObject
 {
-    private static $db                = array(
+
+    private static $db = array(
         'Title' => 'Varchar(255)',
         'Template' => 'Varchar(255)',
         'Theme' => 'Varchar(255)',
@@ -18,7 +19,7 @@ class EmailTemplate extends DataObject
         'Callout' => 'HTMLText',
         'SideBar' => 'HTMLText',
     );
-    private static $summary_fields    = array(
+    private static $summary_fields = array(
         'Title',
         'Code',
         'Category'
@@ -28,10 +29,10 @@ class EmailTemplate extends DataObject
         'Code',
         'Category'
     );
-    private static $indexes           = array(
+    private static $indexes = array(
         'Code' => true
     );
-    private static $translate         = array(
+    private static $translate = array(
         'Title', 'Content', 'Callout', 'SideBar'
     );
 
@@ -48,24 +49,20 @@ class EmailTemplate extends DataObject
         }
 
         if ($config->allow_configure_template || Permission::check('ADMIN')) {
-            $templates        = MandrillEmail::getAvailablesTemplates();
-            $fields->replaceField('Template',
-                $templateDropdown = new DropdownField('Template', 'Template',
-                $templates));
+            $templates = MandrillEmail::getAvailablesTemplates();
+            $fields->replaceField('Template', $templateDropdown = new DropdownField('Template', 'Template', $templates));
         } else {
             $fields->removeByName('Template');
         }
 
         if ($config->allow_configure_theme || Permission::check('ADMIN')) {
-            $themes        = MandrillEmail::getAvailableThemes();
-            $fields->replaceField('Theme',
-                $themeDropdown = new DropdownField('Theme', 'Theme',
-                array_combine($themes, $themes)));
+            $themes = MandrillEmail::getAvailableThemes();
+            $fields->replaceField('Theme', $themeDropdown = new DropdownField('Theme', 'Theme', array_combine($themes, $themes)));
         } else {
             $fields->removeByName('Theme');
         }
         $objectsSource = array();
-        $dataobjects   = ClassInfo::subclassesFor('DataObject');
+        $dataobjects = ClassInfo::subclassesFor('DataObject');
         foreach ($dataobjects as $dataobject) {
             if ($dataobject == 'DataObject') {
                 continue;
@@ -76,54 +73,43 @@ class EmailTemplate extends DataObject
 
         // form-extras integration
         if (class_exists('TableField')) {
-            $fields->replaceField('ExtraModels',
-                $extraModels = new TableField('ExtraModels', 'Extra Models'));
+            $fields->replaceField('ExtraModels', $extraModels = new TableField('ExtraModels', 'Extra Models'));
             $extraModels->addColumn('Name');
-            $extraModels->addColumn('Model', null, TableField::TYPE_SELECT,
-                null, array('ctrlOptions' => $objectsSource));
+            $extraModels->addColumn('Model', null, TableField::TYPE_SELECT, null, array('ctrlOptions' => $objectsSource));
         } elseif (class_exists('CodeEditorField')) {
-            $fields->replaceField('ExtraModels',
-                $extraModelsCode = new CodeEditorField('ExtraModels',
-                'Extra Models'));
+            $fields->replaceField('ExtraModels', $extraModelsCode = new CodeEditorField('ExtraModels', 'Extra Models'));
             $extraModelsCode->setMode('json');
         }
         // form-extras integration
         if (class_exists('ComboField')) {
             $categories = EmailTemplate::get()->column('Category');
-            $fields->replaceField('Category',
-                new ComboField('Category', 'Category',
-                array_combine($categories, $categories)));
+            $fields->replaceField('Category', new ComboField('Category', 'Category', array_combine($categories, $categories)));
         }
 
         $fields->dataFieldByName('Callout')->setRows(5);
 
         $codeField = $fields->dataFieldByName('Code');
-        $codeField->setAttribute('placeholder',
-            _t('EmailTemplate.CODEPLACEHOLDER',
-                'A unique code that will be used in code to retrieve the template, e.g.: my-email'));
+        $codeField->setAttribute('placeholder', _t('EmailTemplate.CODEPLACEHOLDER', 'A unique code that will be used in code to retrieve the template, e.g.: my-email'));
 
         if ($this->Code) {
             $codeField->setReadonly(true);
         }
 
         // Merge fields helper
-        $fields->addFieldToTab('Root.Main',
-            new HeaderField('MergeFieldsHelperTitle',
-            _t('EmailTemplate.AVAILABLEMERGEFIELDSTITLE',
-                'Available merge fields')));
+        $fields->addFieldToTab('Root.Main', new HeaderField('MergeFieldsHelperTitle', _t('EmailTemplate.AVAILABLEMERGEFIELDSTITLE', 'Available merge fields')));
         $content = '';
 
         $baseFields = array(
             'To', 'Cc', 'Bcc', 'From', 'Subject', 'Body', 'BaseURL', 'Controller'
         );
         foreach ($baseFields as $baseField) {
-            $content .= $baseField.', ';
+            $content .= $baseField . ', ';
         }
-        $content = trim($content, ', ').'<br/><br/>';
+        $content = trim($content, ', ') . '<br/><br/>';
 
-        $models        = $this->getAvailableModels();
+        $models = $this->getAvailableModels();
         $modelsByClass = array();
-        $classes       = array();
+        $classes = array();
         foreach ($models as $name => $model) {
             $classes[] = $model;
             if (!isset($modelsByClass[$model])) {
@@ -136,26 +122,23 @@ class EmailTemplate extends DataObject
             if (!class_exists($model)) {
                 continue;
             }
-            $props   = Config::inst()->get($model, 'db');
-            $o       = singleton($model);
+            $props = Config::inst()->get($model, 'db');
+            $o = singleton($model);
             $methods = array_diff($o->allMethodNames(true), $o->allMethodNames());
-            $content .= '<strong>'.$model.' ('.implode(',',
-                    $modelsByClass[$model]).') :</strong><br/>';
+            $content .= '<strong>' . $model . ' (' . implode(',', $modelsByClass[$model]) . ') :</strong><br/>';
             foreach ($props as $fieldName => $fieldType) {
-                $content .= $fieldName.', ';
+                $content .= $fieldName . ', ';
             }
             foreach ($methods as $method) {
                 if (strpos($method, 'get') === 0) {
-                    $content .= $method.', ';
+                    $content .= $method . ', ';
                 }
             }
-            $content = trim($content, ', ').'<br/>';
+            $content = trim($content, ', ') . '<br/>';
         }
-        $content .= "<div class='message info'>"._t('EmailTemplate.ENCLOSEFIELD',
-                'To escape a field from surrounding text, you can enclose it between brackets, eg: {$CurrentMember.FirstName}.').'</div>';
+        $content .= "<div class='message info'>" . _t('EmailTemplate.ENCLOSEFIELD', 'To escape a field from surrounding text, you can enclose it between brackets, eg: {$CurrentMember.FirstName}.') . '</div>';
 
-        $fields->addFieldToTab('Root.Main',
-            new LiteralField('MergeFieldsHelper', $content));
+        $fields->addFieldToTab('Root.Main', new LiteralField('MergeFieldsHelper', $content));
 
         if ($this->ID) {
             $fields->addFieldToTab('Root.Preview', $this->previewTab());
@@ -189,7 +172,7 @@ class EmailTemplate extends DataObject
     public function getExtraModelsAsArray()
     {
         $extraModels = $this->ExtraModels ? json_decode($this->ExtraModels) : array();
-        $arr         = array();
+        $arr = array();
         if (!$extraModels) {
             return array();
         }
@@ -205,7 +188,7 @@ class EmailTemplate extends DataObject
     public function setExtraModelsAsArray($models)
     {
         $baseModels = array_keys($this->getBaseModels());
-        $val        = array();
+        $val = array();
         foreach ($models as $name => $class) {
             // Ignore base models
             if (in_array($name, $baseModels)) {
@@ -227,7 +210,7 @@ class EmailTemplate extends DataObject
     public function getAvailableModels()
     {
         $extraModels = $this->getExtraModelsAsArray();
-        $arr         = $this->getBaseModels();
+        $arr = $this->getBaseModels();
         return array_merge($arr, $extraModels);
     }
 
@@ -248,9 +231,9 @@ class EmailTemplate extends DataObject
         }
         // In dev mode, create a placeholder email
         if (!$template) {
-            $template          = new EmailTemplate();
-            $template->Title   = $code;
-            $template->Code    = $code;
+            $template = new EmailTemplate();
+            $template->Title = $code;
+            $template->Code = $code;
             $template->Content = '';
             $template->write();
         }
@@ -271,7 +254,7 @@ class EmailTemplate extends DataObject
     public function onBeforeWrite()
     {
         if ($this->Code) {
-            $filter     = new URLSegmentFilter;
+            $filter = new URLSegmentFilter;
             $this->Code = $filter->filter($this->Code);
         }
 
@@ -288,16 +271,14 @@ class EmailTemplate extends DataObject
         $tab = new Tab('Preview');
 
         // Preview iframe
-        $previewLink = '/admin/emails/EmailTemplate/PreviewEmail/?id='.$this->ID;
-        $iframe      = new LiteralField('iframe',
-            '<iframe src="'.$previewLink.'" style="width:800px;background:#fff;min-height:500px;vertical-align:top"></iframe>');
+        $previewLink = '/admin/emails/EmailTemplate/PreviewEmail/?id=' . $this->ID;
+        $iframe = new LiteralField('iframe', '<iframe src="' . $previewLink . '" style="width:800px;background:#fff;min-height:500px;vertical-align:top"></iframe>');
         $tab->push($iframe);
 
         if (class_exists('CmsInlineFormAction')) {
             // Test emails
-            $compo     = new FieldGroup(
-                $recipient = new TextField('SendTestEmail', ''),
-                $action    = new CmsInlineFormAction('doSendTestEmail', 'Send')
+            $compo = new FieldGroup(
+                $recipient = new TextField('SendTestEmail', ''), $action = new CmsInlineFormAction('doSendTestEmail', 'Send')
             );
             $recipient->setAttribute('placeholder', 'my@email.test');
             $recipient->setValue(Email::config()->admin_email);
@@ -323,7 +304,11 @@ class EmailTemplate extends DataObject
         if ($this->Theme && !$email->hasConfigurableTheme()) {
             $email->setTheme($this->Theme);
         }
-        $email->setSubject($this->Title);
+        if ($this->Title) {
+            $email->setSubject($this->Title);
+            $email->setUserDefinedSubject(true);
+        }
+
         $email->setBody($this->Content);
         if ($this->Callout) {
             $email->setCallout($this->Callout);

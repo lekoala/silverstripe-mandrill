@@ -10,6 +10,7 @@
  */
 class MandrillRequirementsBackend extends Requirements_Backend
 {
+
     public function includeInHTML($templateFile, $content)
     {
         return $content;

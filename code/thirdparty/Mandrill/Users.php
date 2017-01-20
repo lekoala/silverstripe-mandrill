@@ -2,6 +2,7 @@
 
 class Mandrill_Users
 {
+
     public function __construct(Mandrill $master)
     {
         $this->master = $master;

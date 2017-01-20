@@ -16,17 +16,18 @@ require_once "thirdparty/Mandrill.php";
 
 class MandrillMailer extends Mailer
 {
+
     /**
      * @var Mandrill
      */
     protected $mandrill;
     protected $last_error;
     protected $last_result;
-    protected $last_is_error          = false;
+    protected $last_is_error = false;
     protected static $instance;
     protected static $disable_sending = false;
-    protected static $enable_logging  = false;
-    protected static $log_folder      = 'silverstripe-cache/emails';
+    protected static $enable_logging = false;
+    protected static $log_folder = 'silverstripe-cache/emails';
     private static $mandrill_api_key;
 
     /**
@@ -250,18 +251,16 @@ class MandrillMailer extends Mailer
      * @param string $extraHeaders
      * @return array
      */
-    public function encodeFileForEmail($file, $destFileName = false,
-                                $disposition = null, $extraHeaders = "")
+    public function encodeFileForEmail($file, $destFileName = false, $disposition = null, $extraHeaders = "")
     {
         if (!$file) {
-            user_error("encodeFileForEmail: not passed a filename and/or data",
-                E_USER_WARNING);
+            user_error("encodeFileForEmail: not passed a filename and/or data", E_USER_WARNING);
             return;
         }
 
         if (is_string($file)) {
             $file = array('filename' => $file);
-            $fh   = fopen($file['filename'], "rb");
+            $fh = fopen($file['filename'], "rb");
             if ($fh) {
                 $file['contents'] = "";
                 while (!feof($fh)) {
@@ -307,11 +306,9 @@ class MandrillMailer extends Mailer
      * @param array $customheaders
      * @return array|bool
      */
-    public function sendPlain($to, $from, $subject, $plainContent,
-                       $attachedFiles = false, $customheaders = false)
+    public function sendPlain($to, $from, $subject, $plainContent, $attachedFiles = false, $customheaders = false)
     {
-        return $this->send($to, $from, $subject, false, $attachedFiles,
-                $customheaders, $plainContent, false);
+        return $this->send($to, $from, $subject, false, $attachedFiles, $customheaders, $plainContent, false);
     }
 
     /**
@@ -325,12 +322,9 @@ class MandrillMailer extends Mailer
      * @param array $customheaders
      * @return array|bool
      */
-    public function sendHTML($to, $from, $subject, $htmlContent,
-                      $attachedFiles = false, $customheaders = false,
-                      $plainContent = false, $inlineImages = false)
+    public function sendHTML($to, $from, $subject, $htmlContent, $attachedFiles = false, $customheaders = false, $plainContent = false, $inlineImages = false)
     {
-        return $this->send($to, $from, $subject, $htmlContent, $attachedFiles,
-                $customheaders, $plainContent, $inlineImages);
+        return $this->send($to, $from, $subject, $htmlContent, $attachedFiles, $customheaders, $plainContent, $inlineImages);
     }
 
     /**
@@ -343,16 +337,15 @@ class MandrillMailer extends Mailer
     {
         if (is_array($recipient)) {
             $email = $recipient['email'];
-            $name  = $recipient['name'];
+            $name = $recipient['name'];
         } elseif (strpos($recipient, '<') !== false) {
             $email = self::get_email_from_rfc_email($recipient);
-            $name  = self::get_displayname_from_rfc_email($recipient);
+            $name = self::get_displayname_from_rfc_email($recipient);
         } else {
             $email = $recipient;
             // As a fallback, extract the first part of the email as the name
             if (self::config()->name_fallback) {
-                $name = trim(ucwords(str_replace(array('.', '-', '_'), ' ',
-                            substr($email, 0, strpos($email, '@')))));
+                $name = trim(ucwords(str_replace(array('.', '-', '_'), ' ', substr($email, 0, strpos($email, '@')))));
             } else {
                 $name = null;
             }
@@ -377,7 +370,7 @@ class MandrillMailer extends Mailer
             $recipients = explode(',', $recipients);
         }
         foreach ($recipients as $recipient) {
-            $r     = $this->processRecipient($recipient);
+            $r = $this->processRecipient($recipient);
             $arr[] = array(
                 'email' => $r['email'],
                 'name' => $r['name'],
@@ -399,9 +392,7 @@ class MandrillMailer extends Mailer
      * @param bool $inlineImages
      * @return array|bool
      */
-    protected function send($to, $from, $subject, $htmlContent,
-                            $attachedFiles = false, $customheaders = false,
-                            $plainContent = false, $inlineImages = false)
+    protected function send($to, $from, $subject, $htmlContent, $attachedFiles = false, $customheaders = false, $plainContent = false, $inlineImages = false)
     {
         $original_to = $to;
 
@@ -420,15 +411,14 @@ class MandrillMailer extends Mailer
         // Process sender
         $fromArray = $this->processRecipient($from);
         $fromEmail = $fromArray['email'];
-        $fromName  = $fromArray['name'];
+        $fromName = $fromArray['name'];
 
         // Create params to send to mandrill message api
         $default_params = array();
         if (self::getDefaultParams()) {
             $default_params = self::getDefaultParams();
         }
-        $params = array_merge($default_params,
-            array(
+        $params = array_merge($default_params, array(
             "subject" => $subject,
             "from_email" => $fromEmail,
             "to" => $to_array
@@ -474,8 +464,7 @@ class MandrillMailer extends Mailer
         if (self::getUseGoogleAnalytics() && !Director::isDev()) {
             if (!isset($params['google_analytics_domains'])) {
                 // Compute host
-                $host = str_replace(Director::protocol(), '',
-                    Director::protocolAndHost());
+                $host = str_replace(Director::protocol(), '', Director::protocolAndHost());
 
                 // Define in params
                 $params['google_analytics_domains'] = array(
@@ -491,8 +480,7 @@ class MandrillMailer extends Mailer
             // Include any specified attachments as additional parts
             foreach ($attachedFiles as $file) {
                 if (isset($file['tmp_name']) && isset($file['name'])) {
-                    $attachments[] = $this->encodeFileForEmail($file['tmp_name'],
-                        $file['name']);
+                    $attachments[] = $this->encodeFileForEmail($file['tmp_name'], $file['name']);
                 } else {
                     $attachments[] = $this->encodeFileForEmail($file);
                 }
@@ -509,31 +497,30 @@ class MandrillMailer extends Mailer
             // Append some extra information at the end
             $logContent = $htmlContent;
             $logContent .= '<pre>';
-            $logContent .= 'To : '.print_r($original_to, true)."\n";
-            $logContent .= 'Subject : '.$subject."\n";
-            $logContent .= 'Headers : '.print_r($customheaders, true)."\n";
+            $logContent .= 'To : ' . print_r($original_to, true) . "\n";
+            $logContent .= 'Subject : ' . $subject . "\n";
+            $logContent .= 'Headers : ' . print_r($customheaders, true) . "\n";
             if (!empty($params['from_email'])) {
-                $logContent .= 'From email : '.$params['from_email']."\n";
+                $logContent .= 'From email : ' . $params['from_email'] . "\n";
             }
             if (!empty($params['from_name'])) {
-                $logContent .= 'From name : '.$params['from_name']."\n";
+                $logContent .= 'From name : ' . $params['from_name'] . "\n";
             }
             if (!empty($params['to'])) {
-                $logContent .= 'Recipients : '.print_r($params['to'], true)."\n";
+                $logContent .= 'Recipients : ' . print_r($params['to'], true) . "\n";
             }
             $logContent .= '</pre>';
 
             // Store it
-            $logFolder = BASE_PATH.'/'.self::getLogFolder();
+            $logFolder = BASE_PATH . '/' . self::getLogFolder();
             if (!is_dir($logFolder)) {
                 mkdir($logFolder, 0777, true);
             }
             $filter = new FileNameFilter();
-            $title  = substr($filter->filter($subject), 0, 20);
-            $r      = file_put_contents($logFolder.'/'.time().'-'.$title.'.html',
-                $logContent);
+            $title = substr($filter->filter($subject), 0, 20);
+            $r = file_put_contents($logFolder . '/' . time() . '-' . $title . '.html', $logContent);
             if (!$r) {
-                throw new Exception('Failed to store email in '.$logFolder);
+                throw new Exception('Failed to store email in ' . $logFolder);
             }
         }
 
@@ -551,8 +538,8 @@ class MandrillMailer extends Mailer
 
         $this->last_result = $ret;
 
-        $sent    = 0;
-        $failed  = 0;
+        $sent = 0;
+        $failed = 0;
         $reasons = array();
         if ($ret) {
             foreach ($ret as $result) {
@@ -561,7 +548,7 @@ class MandrillMailer extends Mailer
                     if (!empty($result['reject_reason'])) {
                         $reasons[] = $result['reject_reason'];
                     } elseif ($result['status'] == 'invalid') {
-                        $reasons[] = 'Email "'.$result['email'].'" is invalid';
+                        $reasons[] = 'Email "' . $result['email'] . '" is invalid';
                     }
                     continue;
                 }
@@ -574,7 +561,7 @@ class MandrillMailer extends Mailer
             return array($original_to, $subject, $htmlContent, $customheaders);
         } else {
             $this->last_is_error = true;
-            $this->last_error    = $ret;
+            $this->last_error = $ret;
             SS_Log::log("Failed to send $failed emails", SS_Log::DEBUG);
             foreach ($reasons as $reason) {
                 SS_Log::log("Failed to send because: $reason", SS_Log::DEBUG);
@@ -611,7 +598,7 @@ class MandrillMailer extends Mailer
         // Process sender
         $fromArray = $this->processRecipient($from);
         $fromEmail = $fromArray['email'];
-        $fromName  = $fromArray['name'];
+        $fromName = $fromArray['name'];
 
         // Create params to send to mandrill message api
         $default_params = array();
@@ -622,11 +609,10 @@ class MandrillMailer extends Mailer
 
         // Put together the parameters.
         $params = array_merge(
-            $default_params,
-            array(
-                "subject" => $subject,
-                "from_email" => $fromEmail,
-                "to" => $to_array
+            $default_params, array(
+            "subject" => $subject,
+            "from_email" => $fromEmail,
+            "to" => $to_array
             )
         );
 
@@ -640,7 +626,7 @@ class MandrillMailer extends Mailer
             // Need to convert to the correct format for sending via the api.
             $mergeVars = array();
 
-            foreach($globalMergeVars as $key => $val) {
+            foreach ($globalMergeVars as $key => $val) {
                 $mergeVars[] = array(
                     'name' => $key,
                     'content' => $val
@@ -662,7 +648,6 @@ class MandrillMailer extends Mailer
 
         // @TODO probably/possibly need to also do the following things like in function above.
         // BCC, Analytics, Attachments, Global Tags, Logging.
-
         // -------------------
         // Finally try sending the message with the sendTemplate() function in the Messages class.
         try {
@@ -674,8 +659,8 @@ class MandrillMailer extends Mailer
         $this->last_result = $ret;
 
         // Process the results, extracting the reasons for failure.
-        $sent    = 0;
-        $failed  = 0;
+        $sent = 0;
+        $failed = 0;
         $reasons = array();
         if ($ret) {
             foreach ($ret as $result) {
@@ -684,7 +669,7 @@ class MandrillMailer extends Mailer
                     if (!empty($result['reject_reason'])) {
                         $reasons[] = $result['reject_reason'];
                     } elseif ($result['status'] == 'invalid') {
-                        $reasons[] = 'Email "'.$result['email'].'" is invalid';
+                        $reasons[] = 'Email "' . $result['email'] . '" is invalid';
                     }
                     continue;
                 }
@@ -698,7 +683,7 @@ class MandrillMailer extends Mailer
             return true;
         } else {
             $this->last_is_error = true;
-            $this->last_error    = $ret;
+            $this->last_error = $ret;
             SS_Log::log("Failed to send $failed emails", SS_Log::DEBUG);
             foreach ($reasons as $reason) {
                 SS_Log::log("Failed to send because: $reason", SS_Log::DEBUG);
@@ -739,11 +724,10 @@ class MandrillMailer extends Mailer
     public static function resolveDefaultFromEmail($from = null)
     {
         // If we pass an array, normalize it to a rfc string
-        if(is_array($from) && isset($from['email'])) {
-            if(isset($from['name'])) {
+        if (is_array($from) && isset($from['email'])) {
+            if (isset($from['name'])) {
                 $from = $from['name'] . ' <' . $from['email'] . '>';
-            }
-            else {
+            } else {
                 $from = $from['email'];
             }
         }
@@ -799,10 +783,10 @@ class MandrillMailer extends Mailer
     public static function createDefaultEmail()
     {
         $fulldom = Director::absoluteBaseURL();
-        $parse   = parse_url($fulldom);
-        $dom     = str_replace('www.', '', $parse['host']);
+        $parse = parse_url($fulldom);
+        $dom = str_replace('www.', '', $parse['host']);
 
-        return 'postmaster@'.$dom;
+        return 'postmaster@' . $dom;
     }
 
     /**
@@ -815,7 +799,7 @@ class MandrillMailer extends Mailer
      */
     public static function get_displayname_from_rfc_email($rfc_email_string)
     {
-        $name       = preg_match('/[\w\s]+/u', $rfc_email_string, $matches);
+        $name = preg_match('/[\w\s]+/u', $rfc_email_string, $matches);
         $matches[0] = trim($matches[0]);
         return $matches[0];
     }
@@ -831,8 +815,7 @@ class MandrillMailer extends Mailer
         if (strpos($rfc_email_string, '<') === false) {
             return $rfc_email_string;
         }
-        $mailAddress = preg_match('/(?:<)(.+)(?:>)$/', $rfc_email_string,
-            $matches);
+        $mailAddress = preg_match('/(?:<)(.+)(?:>)$/', $rfc_email_string, $matches);
         if (empty($matches)) {
             return $rfc_email_string;
         }

@@ -2,6 +2,7 @@
 
 class Mandrill_Tags
 {
+
     public function __construct(Mandrill $master)
     {
         $this->master = $master;
@@ -32,8 +33,8 @@ class Mandrill_Tags
 
     /**
      * Deletes a tag permanently. Deleting a tag removes the tag from any messages
-that have been sent, and also deletes the tag's stats. There is no way to
-undo this operation, so use it carefully.
+      that have been sent, and also deletes the tag's stats. There is no way to
+      undo this operation, so use it carefully.
      * @param string $tag a tag name
      * @return struct the tag that was deleted
      *     - tag string the actual tag as a string

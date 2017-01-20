@@ -9,15 +9,16 @@
 
 class MandrillMessage extends ViewableData
 {
+
     protected $ts;
     protected $_id;
     protected $sender;
     protected $template;
     protected $subject;
     protected $email;
-    protected $tags          = array();
+    protected $tags = array();
     protected $opens;
-    protected $opens_detail  = array();
+    protected $opens_detail = array();
     protected $clicks;
     protected $clicks_detail = array();
     protected $state;
@@ -31,7 +32,7 @@ class MandrillMessage extends ViewableData
     protected $headers;
     protected $text;
     protected $html;
-    protected $attachements  = array();
+    protected $attachements = array();
 
     public function __construct($data = array())
     {
@@ -86,7 +87,7 @@ class MandrillMessage extends ViewableData
     public function getAttachmentsList()
     {
         $attachments = $this->attachments;
-        $list        = new ArrayList();
+        $list = new ArrayList();
         foreach ($attachments as $attachment) {
             $list->push(new ViewableData($attachment));
         }
@@ -99,7 +100,7 @@ class MandrillMessage extends ViewableData
     public function getClicksList()
     {
         $clicks = $this->clicks_detail;
-        $list   = new ArrayList();
+        $list = new ArrayList();
         foreach ($clicks as $click) {
             $list->push(new MandrillClick($click));
         }
@@ -112,7 +113,7 @@ class MandrillMessage extends ViewableData
     public function getOpensList()
     {
         $opens = $this->opens_detail;
-        $list  = new ArrayList();
+        $list = new ArrayList();
 
         foreach ($opens as $open) {
             $list->push(new MandrillClick($open));
@@ -123,8 +124,7 @@ class MandrillMessage extends ViewableData
     public function getLink($action = null)
     {
         return Controller::join_links(
-                'admin/mandrill/view', "$this->_id",
-                '/', // trailing slash needed if $action is null!
+                'admin/mandrill/view', "$this->_id", '/', // trailing slash needed if $action is null!
                 "$action"
         );
     }

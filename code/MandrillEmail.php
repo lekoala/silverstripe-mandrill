@@ -15,6 +15,7 @@
  */
 class MandrillEmail extends Email
 {
+
     /**
      * @var ViewableData
      */
@@ -25,6 +26,7 @@ class MandrillEmail extends Email
     protected $callout;
     protected $sidebar;
     protected $image;
+    protected $userDefinedSubject = false;
 
     /**
      *
@@ -37,9 +39,9 @@ class MandrillEmail extends Email
      * @var Member
      */
     protected $from_member;
-    protected $parse_body       = false;
+    protected $parse_body = false;
     protected $required_objects = array();
-    protected $theme            = null;
+    protected $theme = null;
     protected $header_color;
     protected $header_font_color;
     protected $footer_color;
@@ -51,12 +53,9 @@ class MandrillEmail extends Email
     protected $btn_border_color;
     protected $btn_font_color;
 
-    public function __construct($from = null, $to = null, $subject = null,
-                                $body = null, $bounceHandlerURL = null,
-                                $cc = null, $bcc = null)
+    public function __construct($from = null, $to = null, $subject = null, $body = null, $bounceHandlerURL = null, $cc = null, $bcc = null)
     {
-        parent::__construct($from, $to, $subject, $body, $bounceHandlerURL, $cc,
-            $bcc);
+        parent::__construct($from, $to, $subject, $body, $bounceHandlerURL, $cc, $bcc);
 
         // Use config template
         if ($defaultTemplate = self::config()->default_template) {
@@ -66,7 +65,7 @@ class MandrillEmail extends Email
         // Allow subclass template
         $class = get_called_class();
         if ($class != 'MandrillEmail') {
-            $this->ss_template = array('email/'.$class, $this->ss_template);
+            $this->ss_template = array('email/' . $class, $this->ss_template);
         }
 
         // Allow user configurable theming
@@ -86,7 +85,8 @@ class MandrillEmail extends Email
      * 
      * @return bool
      */
-    public function hasConfigurableTheme() {
+    public function hasConfigurableTheme()
+    {
         return $this->theme == 'configurable_theme';
     }
 
@@ -112,7 +112,7 @@ class MandrillEmail extends Email
                     $this->templateData()->$reqName = SiteConfig::current_site_config();
                 }
                 if (!$this->templateData()->$reqName) {
-                    throw new Exception('Required object '.$reqName.' of class '.$reqClass.' is not defined in template data');
+                    throw new Exception('Required object ' . $reqName . ' of class ' . $reqClass . ' is not defined in template data');
                 }
             }
         }
@@ -128,7 +128,7 @@ class MandrillEmail extends Email
         }
         if ($this->to_member && !$this->to) {
             // Include name in to as standard rfc
-            $this->to = $this->to_member->FirstName.' '.$this->to_member->Surname.' <'.$this->to_member->Email.'>';
+            $this->to = $this->to_member->FirstName . ' ' . $this->to_member->Surname . ' <' . $this->to_member->Email . '>';
         }
         $this->to = MandrillMailer::resolveDefaultToEmail($this->to);
         if (!$this->to) {
@@ -148,7 +148,7 @@ class MandrillEmail extends Email
                 i18n::set_locale($this->to_member->Locale);
             }
             // Maybe this member don't want to receive emails?
-            if($this->to_member->hasMethod('canReceiveEmails') && !$this->to_member->canReceiveEmails()) {
+            if ($this->to_member->hasMethod('canReceiveEmails') && !$this->to_member->canReceiveEmails()) {
                 return false;
             }
         }
@@ -169,8 +169,7 @@ class MandrillEmail extends Email
      * @param  string $messageID Optional message ID so the message can be identified in bounces etc.
      * @return bool Success result of the sending operation.
      */
-    public function sendTemplate($templateName, $globalMergeVars = null,
-                                 $messageID = null)
+    public function sendTemplate($templateName, $globalMergeVars = null, $messageID = null)
     {
         // @TODO allow non-global merge vars and possibly impliment other features of sendTemplate.
         // Do some checks that required things are set.
@@ -189,7 +188,7 @@ class MandrillEmail extends Email
 
         if ($this->to_member && !$this->to) {
             // Include name in to as standard rfc
-            $this->to = $this->to_member->FirstName.' '.$this->to_member->Surname.' <'.$this->to_member->Email.'>';
+            $this->to = $this->to_member->FirstName . ' ' . $this->to_member->Surname . ' <' . $this->to_member->Email . '>';
         }
         $this->to = MandrillMailer::resolveDefaultToEmail($this->to);
         if (!$this->to) {
@@ -198,8 +197,7 @@ class MandrillEmail extends Email
 
         // Need to call the sendTemplate function in the mailer which in turn calls
         // the mandrill->messages->sendTemplate() to make the sendTemplate API call.
-        return self::mailer()->sendTemplate($templateName, $globalMergeVars,
-                $this->to, $this->from, $this->subject, $this->customHeaders);
+        return self::mailer()->sendTemplate($templateName, $globalMergeVars, $this->to, $this->from, $this->subject, $this->customHeaders);
     }
 
     /**
@@ -255,15 +253,15 @@ class MandrillEmail extends Email
         if ($this->to_member) {
             $modelsInfos['Recipient'] = $this->to_member;
         } else {
-            $member                   = new Member();
-            $member->Email            = $this->to;
+            $member = new Member();
+            $member->Email = $this->to;
             $modelsInfos['Recipient'] = $member;
         }
         if ($this->from_member) {
             $modelsInfos['Sender'] = $this->from_member;
         } else {
-            $member                = new Member();
-            $member->Email         = $this->from;
+            $member = new Member();
+            $member->Email = $this->from;
             $modelsInfos['Sender'] = $member;
         }
 
@@ -318,13 +316,13 @@ class MandrillEmail extends Email
 
             // Fullbody could be an instance of SSViewer
             if (is_object($fullBody) && $fullBody instanceof SSViewer) {
-                $viewer   = $fullBody;
+                $viewer = $fullBody;
                 $fullBody = $viewer->process($data);
             }
 
             if ($this->parse_body) {
                 try {
-                    $viewer   = new SSViewer_FromString($fullBody);
+                    $viewer = new SSViewer_FromString($fullBody);
                     $fullBody = $viewer->process($data);
                 } catch (Exception $ex) {
                     SS_Log::log($ex->getMessage(), SS_Log::DEBUG);
@@ -333,7 +331,7 @@ class MandrillEmail extends Email
 
                 // Also parse the email title
                 try {
-                    $viewer        = new SSViewer_FromString($this->subject);
+                    $viewer = new SSViewer_FromString($this->subject);
                     $this->subject = $viewer->process($data);
                 } catch (Exception $ex) {
                     SS_Log::log($ex->getMessage(), SS_Log::DEBUG);
@@ -342,7 +340,7 @@ class MandrillEmail extends Email
 
                 if ($this->callout) {
                     try {
-                        $viewer        = new SSViewer_FromString($this->callout);
+                        $viewer = new SSViewer_FromString($this->callout);
                         $this->callout = $viewer->process($data);
                     } catch (Exception $ex) {
                         SS_Log::log($ex->getMessage(), SS_Log::DEBUG);
@@ -350,7 +348,7 @@ class MandrillEmail extends Email
                 }
                 if ($this->sidebar) {
                     try {
-                        $viewer        = new SSViewer_FromString($this->sidebar);
+                        $viewer = new SSViewer_FromString($this->sidebar);
                         $this->sidebar = $viewer->process($data);
                     } catch (Exception $ex) {
                         SS_Log::log($ex->getMessage(), SS_Log::DEBUG);
@@ -520,7 +518,7 @@ class MandrillEmail extends Email
     public static function getAvailablesTemplates()
     {
         $templates = self::config()->get('templates');
-        $arr       = array();
+        $arr = array();
         foreach ($templates as $t) {
             $arr[self::getPathForTemplate($t)] = $t;
         }
@@ -535,7 +533,7 @@ class MandrillEmail extends Email
      */
     public static function getPathForTemplate($templateName)
     {
-        return 'email/'.$templateName;
+        return 'email/' . $templateName;
     }
 
     /**
@@ -556,10 +554,9 @@ class MandrillEmail extends Email
     {
         $availableThemes = self::getAvailableThemes();
         if (!in_array($val, $availableThemes)) {
-            throw new Exception("Invalid theme, must be one of ".implode(',',
-                $availableThemes));
+            throw new Exception("Invalid theme, must be one of " . implode(',', $availableThemes));
         }
-        $conf        = self::config()->themes[$val];
+        $conf = self::config()->themes[$val];
         $this->theme = $val;
         $this->setThemeOptions($conf);
     }
@@ -607,11 +604,10 @@ class MandrillEmail extends Email
      * @param bool $image
      * @param bool $sidebar
      */
-    public function setSampleContent($callout = true, $image = true,
-                                     $sidebar = true)
+    public function setSampleContent($callout = true, $image = true, $sidebar = true)
     {
         $member = Member::currentUserID() ? Member::currentUser()->getTitle() : 'Anonymous Member';
-        $val    = '<h1>Hi, '.$member.'</h1>
+        $val = '<h1>Hi, ' . $member . '</h1>
                             <p class="lead">Phasellus dictum sapien a neque luctus cursus. Pellentesque sem dolor, fringilla et pharetra vitae.</p>
                             <p>Phasellus dictum sapien a neque luctus cursus. Pellentesque sem dolor, fringilla et pharetra vitae. consequat vel lacus. Sed iaculis pulvinar ligula, ornare fringilla ante viverra et. In hac habitasse platea dictumst. Donec vel orci mi, eu congue justo. Integer eget odio est, eget malesuada lorem. Aenean sed tellus dui, vitae viverra risus. Nullam massa sapien, pulvinar eleifend fringilla id, convallis eget nisi. Mauris a sagittis dui. Pellentesque non lacinia mi. Fusce sit amet libero sit amet erat venenatis sollicitudin vitae vel eros. Cras nunc sapien, interdum sit amet porttitor ut, congue quis urna.</p>
                        ';
@@ -673,7 +669,7 @@ class MandrillEmail extends Email
     public function getToMember()
     {
         if (!$this->to_member && $this->to) {
-            $email  = MandrillMailer::get_email_from_rfc_email($this->to);
+            $email = MandrillMailer::get_email_from_rfc_email($this->to);
             $member = Member::get()->filter(array('Email' => $email))->first();
             if ($member) {
                 $this->setToMember($member);
@@ -697,6 +693,38 @@ class MandrillEmail extends Email
     }
 
     /**
+     * Set email subject. If subject is set by email template, prevent changes
+     *
+     * @param string $val
+     * @return boolean
+     */
+    public function setSubject($val)
+    {
+        if ($this->userDefinedSubject) {
+            return false;
+        }
+        return parent::setSubject($val);
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getUserDefinedSubject()
+    {
+        return $this->userDefinedSubject;
+    }
+
+    /**
+     * @param boolean $userDefinedSubject
+     * @return Email
+     */
+    public function setUserDefinedSubject($userDefinedSubject)
+    {
+        $this->userDefinedSubject = $userDefinedSubject;
+        return $this;
+    }
+
+    /**
      * Send to admin
      *
      * @return Email
@@ -704,7 +732,7 @@ class MandrillEmail extends Email
     public function setToAdmin()
     {
         $email = Email::config()->admin_email;
-        $sc    = SiteConfig::current_site_config();
+        $sc = SiteConfig::current_site_config();
         if ($sc->DefaultToEmail) {
             $email = $sc->DefaultToEmail;
         } elseif ($sc->ContactEmail) {
@@ -721,7 +749,7 @@ class MandrillEmail extends Email
      */
     public function setToMember(Member $member)
     {
-        $this->locale    = $member->Locale;
+        $this->locale = $member->Locale;
         $this->to_member = $member;
 
         $this->populateTemplate(array('Member' => $member));
@@ -750,7 +778,7 @@ class MandrillEmail extends Email
     public function getFromMember()
     {
         if (!$this->from_member && $this->from) {
-            $email  = MandrillMailer::get_email_from_rfc_email($this->from);
+            $email = MandrillMailer::get_email_from_rfc_email($this->from);
             $member = Member::get()->filter(array('Email' => $email))->first();
             if ($member) {
                 $this->setFromMember($member);
@@ -767,7 +795,7 @@ class MandrillEmail extends Email
      */
     public function setFromMember(Member $member)
     {
-        $this->from_member         = $member;
+        $this->from_member = $member;
         $this->parseVariables_done = false;
         return $this->setFrom($member->Email);
     }
@@ -803,7 +831,7 @@ class MandrillEmail extends Email
      */
     public function setApiParam($key, $value)
     {
-        $params       = $this->getApiParams();
+        $params = $this->getApiParams();
         $params[$key] = $value;
         $this->setApiParams($params);
     }
@@ -841,7 +869,7 @@ class MandrillEmail extends Email
      */
     public function setMetadatas($values)
     {
-        $params             = $this->getApiParams();
+        $params = $this->getApiParams();
         $params['metadata'] = $values;
         $this->setApiParams($params);
     }
@@ -862,7 +890,7 @@ class MandrillEmail extends Email
         $found = false;
         foreach ($params['recipient_metadata'] as &$rcp) {
             if ($rcp['rcpt'] == $recipient) {
-                $found         = true;
+                $found = true;
                 $rcp['values'] = $values;
             }
         }
@@ -896,11 +924,9 @@ class MandrillEmail extends Email
     public static function rewriteURLs($html)
     {
         if (isset($_SERVER['REQUEST_URI'])) {
-            $html = str_replace('$CurrentPageURL', $_SERVER['REQUEST_URI'],
-                $html);
+            $html = str_replace('$CurrentPageURL', $_SERVER['REQUEST_URI'], $html);
         }
-        return HTTP::urlRewriter($html,
-                function ($url) {
+        return HTTP::urlRewriter($html, function ($url) {
                 //no need to rewrite, if uri has a protocol (determined here by existence of reserved URI character ":")
                 if (preg_match('/^\w+:/', $url)) {
                     return $url;

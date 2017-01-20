@@ -7,12 +7,13 @@
  */
 class EmailTemplatesAdmin extends ModelAdmin
 {
-    private static $managed_models  = array(
+
+    private static $managed_models = array(
         'EmailTemplate',
     );
-    private static $url_segment     = 'emails';
-    private static $menu_title      = 'Emails';
-    private static $menu_icon       = 'mandrill/images/mail.png';
+    private static $url_segment = 'emails';
+    private static $menu_title = 'Emails';
+    private static $menu_icon = 'mandrill/images/mail.png';
     private static $allowed_actions = array(
         'ImportForm',
         'SearchForm',
@@ -30,8 +31,7 @@ class EmailTemplatesAdmin extends ModelAdmin
         $context = parent::getSearchContext();
 
         $categories = EmailTemplate::get()->column('Category');
-        $context->getFields()->replaceField('q[Category]',
-            $dd = new DropdownField('q[Category]', 'Category', ArrayLib::valuekey($categories)));
+        $context->getFields()->replaceField('q[Category]', $dd = new DropdownField('q[Category]', 'Category', ArrayLib::valuekey($categories)));
         $dd->setEmptyString('');
 
         return $context;
@@ -58,8 +58,7 @@ class EmailTemplatesAdmin extends ModelAdmin
 
     public function doSendTestEmail()
     {
-        $template = EmailTemplate::get()->byID(filter_input(INPUT_POST,
-                'EmailTemplateID'));
+        $template = EmailTemplate::get()->byID(filter_input(INPUT_POST, 'EmailTemplateID'));
         if (!$template) {
             throw new Exception("Template is not found");
         }
@@ -72,8 +71,8 @@ class EmailTemplatesAdmin extends ModelAdmin
         $res = $email->send();
 
         if ($res) {
-            return 'Test email sent to '.$emailAddr;
+            return 'Test email sent to ' . $emailAddr;
         }
-        return 'Failed to send test to '.$emailAddr;
+        return 'Failed to send test to ' . $emailAddr;
     }
 }

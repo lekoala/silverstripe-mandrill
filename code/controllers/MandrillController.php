@@ -7,17 +7,18 @@
  */
 class MandrillController extends Controller
 {
-    const EVENT_SEND        = 'send';
+
+    const EVENT_SEND = 'send';
     const EVENT_HARD_BOUNCE = 'hard_bounce';
     const EVENT_SOFT_BOUNCE = 'soft_bounce';
-    const EVENT_OPEN        = 'open';
-    const EVENT_CLICK       = 'click';
-    const EVENT_SPAM        = 'spam';
-    const EVENT_UNSUB       = 'unsub';
-    const EVENT_REJECT      = 'reject';
-    const EVENT_INBOUND     = 'inbound';
-    const EVENT_WHITELIST   = 'whitelist';
-    const EVENT_BLACKLIST   = 'blacklist';
+    const EVENT_OPEN = 'open';
+    const EVENT_CLICK = 'click';
+    const EVENT_SPAM = 'spam';
+    const EVENT_UNSUB = 'unsub';
+    const EVENT_REJECT = 'reject';
+    const EVENT_INBOUND = 'inbound';
+    const EVENT_WHITELIST = 'whitelist';
+    const EVENT_BLACKLIST = 'blacklist';
 
     private static $allowed_actions = array(
         'incoming',

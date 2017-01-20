@@ -7,6 +7,7 @@
  */
 class MandrillClick extends ViewableData
 {
+
     protected $ts;
     protected $ip;
     protected $location;
@@ -28,7 +29,7 @@ class MandrillClick extends ViewableData
         if (!$this->ip) {
             return '';
         }
-        return '<a href="http://www.infosniper.net/index.php?ip_address='.$this->ip.'" target="_blank">'.$this->ip.'</a>';
+        return '<a href="http://www.infosniper.net/index.php?ip_address=' . $this->ip . '" target="_blank">' . $this->ip . '</a>';
     }
 
     /**
