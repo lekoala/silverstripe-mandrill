@@ -691,6 +691,9 @@ class MandrillMailer extends Mailer
             $this->last_error = $ret;
             SS_Log::log("Failed to send $failed emails", SS_Log::DEBUG);
             foreach ($reasons as $reason) {
+                if ($reason == 'unsigned') {
+                    $reason .= ' - senders domain ' . $fromEmail . ' is not properly configured';
+                }
                 SS_Log::log("Failed to send because: $reason", SS_Log::DEBUG);
             }
             return false;
