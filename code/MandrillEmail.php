@@ -16,6 +16,8 @@
 class MandrillEmail extends Email
 {
 
+    private static $required_objects_throw_exceptions = false;
+
     /**
      * @var ViewableData
      */
@@ -111,7 +113,7 @@ class MandrillEmail extends Email
                 if ($reqName == 'SiteConfig' && !$this->templateData()->$reqName) {
                     $this->templateData()->$reqName = SiteConfig::current_site_config();
                 }
-                if (!$this->templateData()->$reqName) {
+                if (!$this->templateData()->$reqName && self::$required_objects_throw_exceptions) {
                     throw new Exception('Required object ' . $reqName . ' of class ' . $reqClass . ' is not defined in template data');
                 }
             }
