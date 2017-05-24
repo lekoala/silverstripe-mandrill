@@ -932,7 +932,6 @@ class MandrillEmail extends Email
             }
             $absUrl = preg_replace('/\/\/[^\/]+\//', '//' . $link . '/', $absUrl);
             $absUrl = preg_replace('/http(s)?:\/\//', $protocol, $absUrl);
-            d($absUrl);
         }
 
         return $absUrl;
