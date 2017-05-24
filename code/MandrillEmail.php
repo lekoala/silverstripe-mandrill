@@ -917,7 +917,25 @@ class MandrillEmail extends Email
         if (empty($url)) {
             return Director::baseURL();
         }
-        return Director::absoluteURL($url, $relativeToSiteBase);
+        $absUrl = Director::absoluteURL($url, $relativeToSiteBase);
+
+        // If we use subsite, absolute url may not use the proper url
+        if (class_exists('Subsite') && Subsite::currentSubsiteID()) {
+            $subsite = Subsite::currentSubsite();
+            if ($subsite->hasMethod('getPrimarySubsiteDomain')) {
+                $domain = $subsite->getPrimarySubsiteDomain();
+                $link = $subsite->domain();
+                $protocol = $domain->getFullProtocol();
+            } else {
+                $protocol = Director::protocol();
+                $link = $subsite->domain();
+            }
+            $absUrl = preg_replace('/\/\/[^\/]+\//', '//' . $link . '/', $absUrl);
+            $absUrl = preg_replace('/http(s)?:\/\//', $protocol, $absUrl);
+            d($absUrl);
+        }
+
+        return $absUrl;
     }
 
     /**
