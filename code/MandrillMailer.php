@@ -584,9 +584,10 @@ class MandrillMailer extends Mailer
      * @param  string $from the email address the message is from.
      * @param  string $subject subject of the email.
      * @param  array $customheaders custom headers to add to the request.
+     * @param  array $attachFiles Single dimension array of absolute paths to files
      * @return bool success indicates result to sending the message to mantrill.
      */
-    public function sendTemplate($templateName, $globalMergeVars, $to, $from, $subject, $customheaders)
+    public function sendTemplate($templateName, $globalMergeVars, $to, $from, $subject, $customheaders, $attachFiles = array())
     {
         // Process recipients
         $to_array = array();
@@ -639,6 +640,16 @@ class MandrillMailer extends Mailer
             }
 
             $params['global_merge_vars'] = $mergeVars;
+        }
+
+        if ($attachFiles) {
+            $attachments = array();
+
+            foreach($attachFiles as $file) {
+                $attachments[] = $this->encodeFileForEmail($file);
+            }
+
+            $params['attachments'] = $attachments;
         }
 
         // Inject additional params into message

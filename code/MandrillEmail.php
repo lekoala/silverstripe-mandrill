@@ -166,12 +166,14 @@ class MandrillEmail extends Email
     /**
      * Basic functionality to allow sending of emails using templates up in Mandrill by using the
      * sendTemplate function of the Messages class in the mailer.
-     * @param  string templateName the name of the template in mandril.
-     * @param  array globalMergeVars
+     * @param  string $templateName the name of the template in mandril.
+     * @param  array $globalMergeVars
      * @param  string $messageID Optional message ID so the message can be identified in bounces etc.
+     * @param  array $attachFiles Single dimension array of absolute paths to files
      * @return bool Success result of the sending operation.
+     * @throws Exception
      */
-    public function sendTemplate($templateName, $globalMergeVars = null, $messageID = null)
+    public function sendTemplate($templateName, $globalMergeVars = null, $messageID = null, $attachFiles = array())
     {
         // @TODO allow non-global merge vars and possibly impliment other features of sendTemplate.
         // Do some checks that required things are set.
@@ -199,7 +201,7 @@ class MandrillEmail extends Email
 
         // Need to call the sendTemplate function in the mailer which in turn calls
         // the mandrill->messages->sendTemplate() to make the sendTemplate API call.
-        return self::mailer()->sendTemplate($templateName, $globalMergeVars, $this->to, $this->from, $this->subject, $this->customHeaders);
+        return self::mailer()->sendTemplate($templateName, $globalMergeVars, $this->to, $this->from, $this->subject, $this->customHeaders, $attachFiles);
     }
 
     /**
