@@ -60,22 +60,3 @@ MandrillEmail:
       btn_color: '#2ba6cb'
       btn_border_color: '#2284a1'
       btn_font_color: '#fff'
-EmailTemplate:
-  allow_configure_theme: false
-  allow_configure_template: false
-EmailImportTask:
-  ignored_modules: ['mandrill','cms','framework']
----
-Only:
-  classexists: 'Fluent'
----
-EmailTemplate:
-  extensions:
-    - FluentExtension
----
-Only:
-  classexists: 'Subsite'
----
-EmailTemplate:
-  extensions:
-    - EmailTemplateSubsiteExtension

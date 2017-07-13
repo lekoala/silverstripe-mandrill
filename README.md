@@ -33,12 +33,6 @@ for this.
 
 If needed, you can install SparkPost alongside this module.
 
-Standalone email templates
-==================
-
-For those who like the email templates but need another kind of email backend,
-I'm in the process of rewriting the Email Templates to a [standalone module] (https://github.com/lekoala/silverstripe-email-templates).
-
 Mandrillapp integration
 ==================
 
@@ -60,7 +54,7 @@ It comes with the following features:
 
 Emails templates use the Ink css framework.
 
-Site Config extensions
+SiteConfig extension
 ==================
 
 Most of the time, it is very useful to let the user configure himself the default
@@ -96,23 +90,7 @@ MandrillController provides 4 extensions points:
 Emails templates
 ==================
 
-Although Mandrill provides an API for email templates, it is mainly useful to save
-bandwith for your main email template (in our case, our BasicEmail.ss file).
-
-But this doesn't help you to create User editable emails, like Confirmation emails, etc.
-And then, there is also the problem of the variables that should be merged on the email (like $CurrentMember.FirstName).
-
-A basic solution is to simply create the HTML on your page and create your email from that content, but it doesn't
-provide you with one central place to manage all your email content.
-
-This is why this module comes with one easy to use EmailTemplateAdmin based on ModelAdmin.
-
-To help you migrate from existing setups, you have an ImportEmailTask thats imports all *.ss templates in the /email folder that
-end with Email in the name, like /email/myTestEmail.ss.
-The content is imported in the "Content" area, except if you specify ids for specific zones, like <div id="SideBar">My side bar content</div>
-
-NOTE: email templates could be split in a separate module in the near future once I've
-determined if it's possible to make it standalone.
+Email templates have been split to a [standalone module](https://github.com/lekoala/silverstripe-email-templates).
 
 Basic how-to guide
 ==================
@@ -132,21 +110,6 @@ etc we would then want to send the email.
 // The recipient, cc and bcc emails can be arrays of email addresses to include.
 // The 'Bounce' is the Silverstripe URL for handeling bounced emails
 $email = new MandrillEmail('from@outwebsite.com', 'recipient@email.com', 'Our Subject', 'The body of the email', 'BounceURL', 'AnyCCEmails@email.com', 'AnyBCCEmails@email.com');
-// Here we can set a template to use. This could be a custom email template you design or one of the included templates.
-$email->setTemplate('BoilerplateEmail');
-$email->send();
-```
-
-The other option for setting a template for your email is to use the built in template builder. First you define the email template through the 'Emails' tab in the CMS. We can select a base template to use and then define the layout of the email body. We should make a note of the 'code' for the email template once we have created it.
-
-Within the content area we have access to the currently logged in user, the site config options and the basic information passed through such as to, from, subject etc. This is really handy when your client might need to make small changes to the emails sent out.
-
-To create an email using this process within out form we could use the following code.
-
-```php
-// Send an email using the templating engine
-$email = EmailTemplate::getEmailByCode('template-code');
-$email->setToMember('to@email.com');
 $email->send();
 ```
 
