@@ -430,7 +430,7 @@
                                     </tbody>
                                 </table>
                                 <% end_if %>
-
+                            </table>
                         </td>
                     </tr>
                 </tbody>
