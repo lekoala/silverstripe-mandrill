@@ -16,7 +16,7 @@
                 -ms-text-size-adjust:100%;
             }
 
-            img{
+            table img{
                 width:100%;
                 height:auto;
                 border:none;
