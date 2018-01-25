@@ -285,7 +285,7 @@
 
                                             <table class="twelve columns">
                                                 <tr>
-                                                    <td style="font-family:Helvetica,Arial,sans-serif;font-size: 16px; color: #a7a7a7; width:390px; display:block; float:right; margin-left:auto; margin-right:auto; margin-top:40px; text-align:justify; line-height: 1.3;">
+                                                    <td style="font-family:Helvetica,Arial,sans-serif;font-size: 16px; color: #a7a7a7; width:580px; display:block; float:right; margin-left:auto; margin-right:auto; margin-top:40px; text-align:justify; line-height: 1.3;">
                                                         $Body
                                                     </td>
                                                     <td class="expander"></td>
