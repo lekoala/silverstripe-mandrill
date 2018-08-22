@@ -4,14 +4,12 @@ Use Mandrill in SilverStripe
 
 Define in your .env file the following constant
 
-    ```
 	MANDRILL_API_KEY='YOUR_API_KEY_HERE'
-    ```
 
 or by defining the api key in your config.yml
 
    ```yaml
-   MandrillMailer:
+   LeKoala\Mandrill\MandrillHelper::
      mandrill_api_key: 'key3goes9here'
    ```
 
@@ -26,7 +24,7 @@ You can also autoconfigure the module with the following constants in your .env 
 
 By defining the Api Key, the module will register a new mailer that will be used to send all emails.
 
-Mandrillapp integration
+Integration
 ==================
 
 This module create a new admin section that allows you to see results from
@@ -49,11 +47,6 @@ MandrillController provides 4 extensions points:
 - updateHandleSyncEvent
 - updateHandleInboundEvent
 - updateHandleMessageEvent
-
-Emails templates
-==================
-
-Email templates have been split to a [standalone module](https://github.com/lekoala/silverstripe-email-templates).
 
 Compatibility
 ==================
