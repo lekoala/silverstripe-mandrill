@@ -1,13 +1,22 @@
 ---
 Name: mandrill
 After:
-  - 'framework/*'
-  - 'cms/*'
+  - 'emailconfig'
 ---
-Director:
+# Do not automatically inject the transport if no key is set
+#SilverStripe\Core\Injector\Injector:
+#  Swift_Transport: LeKoala\Mandrill\MandrillSwiftTransport
+SilverStripe\Control\Director:
   rules:
-    'mandrill//$Action/$ID/$Name': 'MandrillController'
-MandrillMailer:
+    '__mandrill//$Action/$ID/$Name': 'LeKoala\Mandrill\MandrillController'
+LeKoala\Mandrill\MandrillController:
+  log_level : 4
+LeKoala\Mandrill\MandrillHelper:
+  api_key: ''
+  subaccount_id: ''
+  disable_sending : false
+  enable_logging : false
+  log_folder : 'silverstripe-cache/emails'
   default_params:
     preserve_recipients: false
     inline_css: true
@@ -15,48 +24,5 @@ MandrillMailer:
   global_tags: []
   use_google_analytics: true
   name_fallback: true
-MandrillAdmin:
+LeKoala\Mandrill\MandrillAdmin:
   cache_enabled: true
-MandrillEmail:
-  change_password_template: 'ChangePasswordEmail'
-  forgot_password_template: 'ForgotPasswordEmail'
-  default_theme: 'dark'
-  default_template: 'email/BasicEmail'
-  templates:
-    - BasicEmail
-    - BoilerplateEmail
-    - LogoEmail
-  themes:
-    dark:
-      header_color: '#333333'
-      header_font_color: '#ffffff'
-      footer_color: '#ebebeb'
-      footer_font_color: '#333333'
-      panel_color: '#ECF8FF'
-      panel_border_color: '#b9e5ff'
-      panel_font_color: '#000000'
-      btn_color: '#2ba6cb'
-      btn_border_color: '#2284a1'
-      btn_font_color: '#fff'
-    light:
-      header_color: '#eeeeee'
-      header_font_color: '#333333'
-      footer_color: '#ebebeb'
-      footer_font_color: '#333333'
-      panel_color: '#ECF8FF'
-      panel_border_color: '#b9e5ff'
-      panel_font_color: '#000000'
-      btn_color: '#2ba6cb'
-      btn_border_color: '#2284a1'
-      btn_font_color: '#fff'
-    blue:
-      header_color: '#eeeeee'
-      header_font_color: '#6c737b'
-      footer_color: '#ebebeb'
-      footer_font_color: '#333333'
-      panel_color: '#00afcb'
-      panel_border_color: '#008ea5'
-      panel_font_color: '#ffffff'
-      btn_color: '#2ba6cb'
-      btn_border_color: '#2284a1'
-      btn_font_color: '#fff'

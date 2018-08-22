@@ -1,4 +1,7 @@
 <?php
+
+use Composer\CaBundle\CaBundle;
+
 /**
  * This is a customised version of the mandrill api sdk available at
  * @https://bitbucket.org/mailchimp/mandrill-api-php/
@@ -25,29 +28,89 @@ require_once 'Mandrill/Metadata.php';
 require_once 'Mandrill/Exceptions.php';
 
 /**
- * @property Mandrill_Templates $templates
- * @property Mandrill_Exports $exports
- * @property Mandrill_Users $users
- * @property Mandrill_Rejects $rejects
- * @property Mandrill_Inbound $inbound
- * @property Mandrill_Tags $tags
- * @property Mandrill_Messages $messages
- * @property Mandrill_Whitelists $whitelists
- * @property Mandrill_Ips $ips
- * @property Mandrill_Internal $internal
- * @property Mandrill_Subaccounts $subaccounts
- * @property Mandrill_Urls $urls
- * @property Mandrill_Webhooks $webhooks
- * @property Mandrill_Senders $senders
- * @property Mandrill_Metadata $metadata
+ * A mandrill api client
  */
 class Mandrill
 {
-
+    /**
+     * @var string
+     */
     public $apikey;
+    /**
+     * @var resource
+     */
     public $ch;
+    /**
+     * @var string
+     */
     public $root = 'https://mandrillapp.com/api/1.0';
+    /**
+     * @var boolean
+     */
     public $debug = false;
+    /**
+     * @var Mandrill_Templates
+     */
+    public $templates;
+    /**
+     * @var Mandrill_Exports
+     */
+    public $exports;
+    /**
+     * @var Mandrill_Users
+     */
+    public $users;
+    /**
+     * @var Mandrill_Rejects
+     */
+    public $rejects;
+    /**
+     * @var Mandrill_Inbound
+     */
+    public $inbound;
+    /**
+     * @var Mandrill_Tags
+     */
+    public $tags;
+    /**
+     * @var Mandrill_Messages
+     */
+    public $messages;
+    /**
+     * @var Mandrill_Whitelists
+     */
+    public $whitelists;
+    /**
+     * @var Mandrill_Ips
+     */
+    public $ips;
+    /**
+     * @var Mandrill_Internal
+     */
+    public $internal;
+    /**
+     * @var Mandrill_Subaccounts
+     */
+    public $subaccounts;
+    /**
+     * @var Mandrill_Urls
+     */
+    public $urls;
+    /**
+     * @var Mandrill_Webhooks
+     */
+    public $webhooks;
+    /**
+     * @var Mandrill_Senders
+     */
+    public $senders;
+    /**
+     * @var Mandrill_Metadata
+     */
+    public $metadata;
+    /**
+     * @var array
+     */
     public static $error_map = array(
         "ValidationError" => "Mandrill_ValidationError",
         "Invalid_Key" => "Mandrill_Invalid_Key",
@@ -96,15 +159,16 @@ class Mandrill
         $this->ch = curl_init();
         curl_setopt($this->ch, CURLOPT_USERAGENT, 'Mandrill-PHP/1.0.54');
         curl_setopt($this->ch, CURLOPT_POST, true);
+        // We use our own follow, see function curl_exec_follow
 //        curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($this->ch, CURLOPT_HEADER, false);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 30);
         curl_setopt($this->ch, CURLOPT_TIMEOUT, 600);
 
-        //fix ca cert permissions
+        // fix ca cert permissions
         if (strlen(ini_get('curl.cainfo')) === 0) {
-            curl_setopt($this->ch, CURLOPT_CAINFO, __DIR__ . "/cacert.pem");
+            curl_setopt($this->ch, CURLOPT_CAINFO, CaBundle::getBundledCaBundlePath());
         }
 
         $this->root = rtrim($this->root, '/') . '/';

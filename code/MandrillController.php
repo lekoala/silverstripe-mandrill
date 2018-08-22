@@ -1,13 +1,22 @@
 <?php
+namespace LeKoala\Mandrill;
+
+use Psr\Log\LoggerInterface;
+use SilverStripe\Control\Director;
+use SilverStripe\Core\Environment;
+use SilverStripe\Control\Controller;
+use SilverStripe\Security\Permission;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\Email\Mailer;
+use SilverStripe\Core\Injector\Injector;
 
 /**
- * MandrillController - provide extensions points for handling mandrill webhooks
+ * Provide extensions points for handling the webhook
  *
- * @author lekoala
+ * @author LeKoala <thomas@lekoala.be>
  */
 class MandrillController extends Controller
 {
-
     const EVENT_SEND = 'send';
     const EVENT_HARD_BOUNCE = 'hard_bounce';
     const EVENT_SOFT_BOUNCE = 'soft_bounce';
@@ -20,18 +29,34 @@ class MandrillController extends Controller
     const EVENT_WHITELIST = 'whitelist';
     const EVENT_BLACKLIST = 'blacklist';
 
-    private static $allowed_actions = array(
+    protected $eventsCount = 0;
+    protected $skipCount = 0;
+    private static $allowed_actions = [
         'incoming',
-    );
+    ];
+
+    /**
+     * Inject public dependencies into the controller
+     *
+     * @var array
+     */
+    private static $dependencies = [
+        'logger' => '%$Psr\Log\LoggerInterface',
+    ];
+
+    /**
+     * @var Psr\Log\LoggerInterface
+     */
+    public $logger;
 
     /**
      * Handle incoming webhook
      *
      * @link http://help.mandrill.com/entries/21738186-introduction-to-webhooks
      * @link http://help.mandrill.com/entries/22092308-What-is-the-format-of-inbound-email-webhooks-
-     * @param SS_HTTPRequest $req
+     * @param HTTPRequest $req
      */
-    public function incoming(SS_HTTPRequest $req)
+    public function incoming(HTTPRequest $req)
     {
         $json = $req->postVar('mandrill_events');
 
@@ -66,10 +91,10 @@ class MandrillController extends Controller
                 case self::EVENT_INBOUND:
                 case self::EVENT_OPEN:
                 case self::EVENT_REJECT:
-                case self::EVENT_SEND;
-                case self::EVENT_SOFT_BOUNCE;
+                case self::EVENT_SEND:
+                case self::EVENT_SOFT_BOUNCE:
                 case self::EVENT_SPAM:
-                case self::EVENT_UNSUB;
+                case self::EVENT_UNSUB:
                     $this->handleMessageEvent($ev);
                     break;
             }
@@ -95,5 +120,15 @@ class MandrillController extends Controller
     protected function handleMessageEvent($e)
     {
         $this->extend('updateHandleMessageEvent', $e);
+    }
+
+    /**
+     * Get logger
+     *
+     * @return Psr\SimpleCache\CacheInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
     }
 }
