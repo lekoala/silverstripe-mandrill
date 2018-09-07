@@ -40,7 +40,7 @@ for you.
 
 By default, MandrillController will do nothing. Feel free to add your own
 extensions to MandrillController to define your own rules, like "Send an
-email to the admin when a receive a spam complaint".
+email to the admin when we receive a spam complaint".
 
 MandrillController provides 4 extensions points:
 - updateHandleAnyEvent
