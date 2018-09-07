@@ -181,9 +181,7 @@ class MandrillSwiftTransport implements Swift_Transport
             $logContent .= 'Recipients : ' . print_r($message->getTo(), true) . "\n";
         }
         $logContent .= 'Results:' . "\n";
-        foreach ($results as $resultKey => $resultValue) {
-            $logContent .= '  ' . $resultKey . ': ' . $resultValue . "\n";
-        }
+        $logContent .= print_r($results, true) . "\n";
         $logContent .= '</pre>';
 
         $logFolder = MandrillHelper::getLogFolder();
