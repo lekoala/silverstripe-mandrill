@@ -57,7 +57,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
 
     private static $menu_title = "Mandrill";
     private static $url_segment = "mandrill";
-    private static $menu_icon = "mandrill/images/icon.png";
+    private static $menu_icon = "lekoala/silverstripe-mandrill:images/icon.png";
     private static $url_rule = '/$Action/$ID/$OtherID';
     private static $allowed_actions = array(
         "settings",
