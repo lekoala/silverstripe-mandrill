@@ -13,9 +13,6 @@ SilverStripe Mandrill module
 [![Monthly Downloads](https://poser.pugx.org/lekoala/silverstripe-mandrill/d/monthly)](https://packagist.org/packages/lekoala/silverstripe-mandrill)
 [![Daily Downloads](https://poser.pugx.org/lekoala/silverstripe-mandrill/d/daily)](https://packagist.org/packages/lekoala/silverstripe-mandrill)
 
-[![Dependency Status](https://www.versioneye.com/php/lekoala:silverstripe-mandrill/badge.svg)](https://www.versioneye.com/php/lekoala:silverstripe-mandrill)
-[![Reference Status](https://www.versioneye.com/php/lekoala:silverstripe-mandrill/reference_badge.svg?style=flat)](https://www.versioneye.com/php/lekoala:silverstripe-mandrill/references)
-
 ![codecov.io](https://codecov.io/github/lekoala/silverstripe-mandrill/branch.svg?branch=master)
 
 Use Mandrill in SilverStripe
