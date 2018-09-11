@@ -1,14 +1,13 @@
 <?php
 namespace LeKoala\Mandrill\Test;
 
-use SilverStripe\Dev\TestMailer;
-use SilverStripe\Core\Environment;
-use SilverStripe\Dev\SapphireTest;
 use LeKoala\Mandrill\MandrillHelper;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\Email\Mailer;
-use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Control\Email\SwiftMailer;
+use SilverStripe\Core\Environment;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Dev\SapphireTest;
 
 /**
  * Test for Mandrill
@@ -53,7 +52,7 @@ class MandrillTest extends SapphireTest
             $this->markTestIncomplete("You must define tests environement variable: MANDRILL_TEST_TO, MANDRILL_TEST_FROM");
         }
 
-        $inst = MandrillHelper::registerTransport();
+        MandrillHelper::registerTransport();
 
         $email = new Email();
         $email->setTo($test_to);

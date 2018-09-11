@@ -9,7 +9,7 @@ Define in your .env file the following constant
 or by defining the api key in your config.yml
 
    ```yaml
-   LeKoala\Mandrill\MandrillHelper::
+   LeKoala\Mandrill\MandrillHelper:
      mandrill_api_key: 'key3goes9here'
    ```
 
@@ -21,6 +21,10 @@ You can also autoconfigure the module with the following constants in your .env 
 	MANDRILL_ENABLE_LOGGING=true
     # Will disable sending (useful in development)
 	MANDRILL_SENDING_DISABLED=true
+	# Set app domain explicitly
+	MANDRILL_DOMAIN="mysite.co.nz"
+	# Also recommended to specify an explicit from
+	SS_SEND_ALL_EMAILS_FROM="noreply@mysite.co.nz"
 
 By defining the Api Key, the module will register a new mailer that will be used to send all emails.
 

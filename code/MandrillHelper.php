@@ -1,17 +1,17 @@
 <?php
+
 namespace LeKoala\Mandrill;
 
-use Mandrill;
 use Exception;
+use Mandrill;
 use SilverStripe\Control\Director;
-use SilverStripe\Core\Environment;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\Email\Mailer;
-use SilverStripe\SiteConfig\SiteConfig;
-use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Control\Email\SwiftMailer;
-use LeKoala\Mandrill\MandrillSwiftTransport;
+use SilverStripe\Core\Config\Configurable;
+use SilverStripe\Core\Environment;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\SiteConfig\SiteConfig;
 
 /**
  * This configurable class helps decoupling the api client from SilverStripe
@@ -28,32 +28,56 @@ class MandrillHelper
     protected static $client;
 
     /**
-     * Get the mailer instance
+     * Use this to set the app domain registered in mandrill.
+     * Ignored if MANDRILL_DOMAIN is set.
      *
-     * @return SilverStripe\Control\Email\SwiftMailer
+     * @config
+     * @var string
      */
-    public static function getMailer()
-    {
-        return Injector::inst()->get(Mailer::class);
-    }
+    private static $domain = null;
+
 
     /**
-     * Get the api client instance
-     * @return Mandrill
+     * Use this to set the app domain via a siteconfig field. Ignored if $domain is set.
      *
-     * @throws Exception
+     * @config
+     * @var string
      */
-    public static function getClient()
-    {
-        if (!self::$client) {
-            $key = self::config()->api_key;
-            if (empty($key)) {
-                throw new Exception("api_key is not configured for " . __class__);
-            }
-            self::$client = new Mandrill($key);
-        }
-        return self::$client;
-    }
+    private static $siteconfig_domain = null;
+
+    /**
+     * Use this to set the logging folder. E.g. _logs/emails. Will be appended to BASE_PATH
+     * so must be relative to this.
+     *
+     * @config
+     * @var string
+     */
+    private static $log_folder = null;
+
+    /**
+     * Set to true to enable logging. Set to true if MANDRILL_ENABLE_LOGGING env is set.
+     *
+     * @config
+     * @var bool
+     */
+    private static $enable_logging = false;
+
+    /**
+     * Used to set the mandrill API key if MANDRILL_API_KEY isn't set
+     *
+     * @config
+     * @var string
+     */
+    private static $api_key = null;
+
+    /**
+     * Set to true if sending should be disabled. E.g. for testing.
+     * MANDRILL_SENDING_DISABLED env will overwrite this if set.
+     *
+     * @config
+     * @var bool
+     */
+    private static $disable_sending = false;
 
     /**
      * Get the log folder and create it if necessary
@@ -62,46 +86,58 @@ class MandrillHelper
      */
     public static function getLogFolder()
     {
-        $logFolder = BASE_PATH . '/' . self::config()->log_folder;
+        $folder = self::config()->log_folder;
+        if (empty($folder)) {
+            return null;
+        }
+
+        $logFolder = BASE_PATH . '/' . $folder;
         if (!is_dir($logFolder)) {
             mkdir($logFolder, 0755, true);
         }
         return $logFolder;
     }
 
-
     /**
      * Process environment variable to configure this module
      *
      * @return void
+     * @throws Exception
      */
     public static function init()
     {
-        // Regular api key used for sending emails (including subaccount support)
-        $api_key = Environment::getEnv('MANDRILL_API_KEY');
-        if ($api_key) {
-            self::config()->api_key = $api_key;
-        }
-
-        $sending_disabled = Environment::getEnv('MANDRILL_SENDING_DISABLED');
-        if ($sending_disabled) {
-            self::config()->disable_sending = $sending_disabled;
-        }
-        $enable_logging = Environment::getEnv('MANDRILL_ENABLE_LOGGING');
-        if ($enable_logging) {
-            self::config()->enable_logging = $enable_logging;
-        }
-
         // We have a key, we can register the transport
-        if (self::config()->api_key) {
+        $apiKey = static::getAPIKey();
+        if ($apiKey) {
             self::registerTransport();
         }
     }
 
     /**
+     * Get api key if enabled
+     *
+     * @return string|null
+     */
+    public static function getAPIKey()
+    {
+        // Regular api key used for sending emails (including subaccount support)
+        $apiKey = Environment::getEnv('MANDRILL_API_KEY');
+        if ($apiKey) {
+            return $apiKey;
+        }
+
+        $apiKey = self::config()->get('api_key');
+        if ($apiKey) {
+            return $apiKey;
+        }
+
+        return null;
+    }
+
+    /**
      * Register the transport with the client
      *
-     * @return SilverStripe\Control\Email\SwiftMailer The updated swift mailer
+     * @return SwiftMailer The updated swift mailer
      * @throws Exception
      */
     public static function registerTransport()
@@ -117,6 +153,84 @@ class MandrillHelper
         return $mailer;
     }
 
+    /**
+     * Get the api client instance
+     * @return Mandrill
+     *
+     * @throws Exception
+     */
+    public static function getClient()
+    {
+        if (!self::$client) {
+            $key = static::getAPIKey();
+            if (empty($key)) {
+                throw new Exception("api_key is not configured for " . __class__);
+            }
+            self::$client = new Mandrill($key);
+        }
+        return self::$client;
+    }
+
+    /**
+     * Get the mailer instance
+     *
+     * @return SwiftMailer
+     */
+    public static function getMailer()
+    {
+        return Injector::inst()->get(Mailer::class);
+    }
+
+    /**
+     * Get domain configured for this application
+     *
+     * @return bool|string
+     */
+    public static function getDomain()
+    {
+        // Use env var
+        $domain = Environment::getEnv('MANDRILL_DOMAIN');
+        if ($domain) {
+            return $domain;
+        }
+
+        // Use configured domain
+        $domain = self::config()->domain;
+        if ($domain) {
+            return $domain;
+        }
+
+        // Look in siteconfig for default sender
+        $config = SiteConfig::current_site_config();
+        $config_field = self::config()->siteconfig_domain;
+        if ($config_field && !empty($config->$config_field)) {
+            return $config->$config_field;
+        }
+
+        // Guess from email
+        $domain = static::getDomainFromEmail();
+        if ($domain) {
+            return $domain;
+        }
+
+        // Guess from host
+        return static::getDomainFromHost();
+    }
+
+    /**
+     * Get domain from admin email
+     *
+     * @return bool|string
+     */
+    public static function getDomainFromEmail()
+    {
+        $email = static::resolveDefaultFromEmail(null, false);
+        if ($email) {
+            $domain = substr(strrchr($email, "@"), 1);
+            return $domain;
+        }
+        return false;
+    }
 
     /**
      * Resolve default send from address
@@ -157,6 +271,44 @@ class MandrillHelper
     }
 
     /**
+     * Create a sensible default address based on domain name
+     *
+     * @return string
+     */
+    public static function createDefaultEmail()
+    {
+        $fulldom = Director::absoluteBaseURL();
+        $host = parse_url($fulldom, PHP_URL_HOST);
+        if (!$host) {
+            $host = 'localhost';
+        }
+        $dom = str_replace('www.', '', $host);
+
+        return 'postmaster@' . $dom;
+    }
+
+    /**
+     * Get domain name from current host
+     *
+     * @return bool|string
+     */
+    public static function getDomainFromHost()
+    {
+        $base = Environment::getEnv('SS_BASE_URL');
+        if (!$base) {
+            $base = Director::protocolAndHost();
+        }
+        $host = parse_url($base, PHP_URL_HOST);
+        $hostParts = explode('.', $host);
+        $parts = count($hostParts);
+        if ($parts < 2) {
+            return false;
+        }
+        $domain = $hostParts[$parts - 2] . "." . $hostParts[$parts - 1];
+        return $domain;
+    }
+
+    /**
      * Resolve default send to address
      *
      * @param string $to
@@ -187,19 +339,37 @@ class MandrillHelper
     }
 
     /**
-     * Create a sensible default address based on domain name
+     * Is logging enabled?
      *
-     * @return string
+     * @return bool
      */
-    public static function createDefaultEmail()
+    public static function getLoggingEnabled()
     {
-        $fulldom = Director::absoluteBaseURL();
-        $host = parse_url($fulldom, PHP_URL_HOST);
-        if (!$host) {
-            $host = 'localhost';
+        if (Environment::getEnv('MANDRILL_ENABLE_LOGGING')) {
+            return true;
         }
-        $dom = str_replace('www.', '', $host);
 
-        return 'postmaster@' . $dom;
+        if (self::config()->get('enable_logging')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Is sending enabled?
+     *
+     * @return bool
+     */
+    public static function getSendingEnabled()
+    {
+        $disabled = Environment::getEnv('MANDRILL_SENDING_DISABLED');
+        if ($disabled) {
+            return false;
+        }
+        if (self::config()->get('disable_sending')) {
+            return false;
+        }
+        return true;
     }
 }

@@ -1,4 +1,5 @@
 ---
+Name: mandrill-cache
 After:
   - '#corecache'
 ---

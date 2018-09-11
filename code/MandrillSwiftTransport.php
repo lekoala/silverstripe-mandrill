@@ -1,20 +1,26 @@
 <?php
+
 namespace LeKoala\Mandrill;
 
-use Mandrill;
 use Exception;
-use \Swift_MimePart;
-use ReflectionClass;
-use \Swift_Transport;
-use \Swift_Attachment;
-use \Swift_Mime_Message;
-use \Swift_Events_SendEvent;
+use Mandrill;
 use Psr\Log\LoggerInterface;
-use \Swift_Events_EventListener;
-use \Swift_Events_EventDispatcher;
-use SilverStripe\Control\Director;
+use ReflectionClass;
+use ReflectionException;
 use SilverStripe\Assets\FileNameFilter;
+use SilverStripe\Control\Director;
 use SilverStripe\Core\Injector\Injector;
+use Swift_Attachment;
+use Swift_Events_EventListener;
+use Swift_Events_SendEvent;
+use Swift_Events_SimpleEventDispatcher;
+use Swift_Mime_Header;
+use Swift_Mime_Headers_OpenDKIMHeader;
+use Swift_Mime_Headers_UnstructuredHeader;
+use Swift_Mime_Message;
+use Swift_MimePart;
+use Swift_Transport;
+use Swift_Transport_SimpleMailInvoker;
 
 /**
  * A Mandrill transport for Swift Mailer using our custom client
@@ -95,6 +101,8 @@ class MandrillSwiftTransport implements Swift_Transport
      * @param Swift_Mime_Message $message
      * @param null $failedRecipients
      * @return int Number of messages sent
+     * @throws ReflectionException
+     * @throws Exception
      */
     public function send(Swift_Mime_Message $message, &$failedRecipients = null)
     {
@@ -107,7 +115,8 @@ class MandrillSwiftTransport implements Swift_Transport
         }
 
         $sendCount = 0;
-        $disableSending = $message->getHeaders()->has('X-SendingDisabled') || MandrillHelper::config()->disable_sending;
+        $disableSending = $message->getHeaders()->has('X-SendingDisabled')
+            || !MandrillHelper::getSendingEnabled();
 
         $mandrillMessage = $this->getMandrillMessage($message);
         $client = $this->client;
@@ -128,7 +137,7 @@ class MandrillSwiftTransport implements Swift_Transport
         }
         $this->resultApi = $result;
 
-        if (MandrillHelper::config()->enable_logging) {
+        if (MandrillHelper::getLoggingEnabled()) {
             $this->logMessageContent($message, $result);
         }
 
@@ -158,10 +167,20 @@ class MandrillSwiftTransport implements Swift_Transport
      *
      * @param Swift_Mime_Message $message
      * @param array $results Results from the api
-     * @return void
+     * @throws Exception
      */
     protected function logMessageContent(Swift_Mime_Message $message, $results = [])
     {
+        // Folder not set
+        $logFolder = MandrillHelper::getLogFolder();
+        if (!$logFolder) {
+            return;
+        }
+        // Logging disabled
+        if (!MandrillHelper::getLoggingEnabled()) {
+            return;
+        }
+
         $subject = $message->getSubject();
         $body = $message->getBody();
         $contentType = $this->getMessagePrimaryContentType($message);
@@ -174,6 +193,7 @@ class MandrillSwiftTransport implements Swift_Transport
         $logContent .= 'Subject : ' . $subject . "\n";
         $logContent .= 'From : ' . print_r($message->getFrom(), true) . "\n";
         $logContent .= 'Headers:' . "\n";
+        /** @var Swift_Mime_Header $header */
         foreach ($message->getHeaders()->getAll() as $header) {
             $logContent .= '  ' . $header->getFieldName() . ': ' . $header->getFieldBody() . "\n";
         }
@@ -183,8 +203,6 @@ class MandrillSwiftTransport implements Swift_Transport
         $logContent .= 'Results:' . "\n";
         $logContent .= print_r($results, true) . "\n";
         $logContent .= '</pre>';
-
-        $logFolder = MandrillHelper::getLogFolder();
 
         // Generate filename
         $filter = new FileNameFilter();
@@ -252,6 +270,7 @@ class MandrillSwiftTransport implements Swift_Transport
     /**
      * @param Swift_Mime_Message $message
      * @return string
+     * @throws ReflectionException
      */
     protected function getMessagePrimaryContentType(Swift_Mime_Message $message)
     {
@@ -279,7 +298,7 @@ class MandrillSwiftTransport implements Swift_Transport
      *
      * @param Swift_Mime_Message $message
      * @return array Mandrill Send Message
-     * @throws \Swift_SwiftException
+     * @throws ReflectionException
      */
     public function getMandrillMessage(Swift_Mime_Message $message)
     {
@@ -369,6 +388,7 @@ class MandrillSwiftTransport implements Swift_Transport
         if (count($images) > 0) {
             $mandrillMessage['images'] = $images;
         }
+        /** @var Swift_Mime_Header|Swift_Mime_Headers_OpenDKIMHeader|Swift_Mime_Headers_UnstructuredHeader $header */
         foreach ($message->getHeaders()->getAll() as $header) {
             if ($header->getFieldType() === \Swift_Mime_Header::TYPE_TEXT) {
                 switch ($header->getFieldName()) {
