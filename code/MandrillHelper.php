@@ -363,8 +363,8 @@ class MandrillHelper
      */
     public static function getSendingEnabled()
     {
-        $enabled = Environment::getEnv('MANDRILL_SENDING_DISABLED');
-        if (!$enabled) {
+        $disabled = Environment::getEnv('MANDRILL_SENDING_DISABLED');
+        if ($disabled) {
             return false;
         }
         if (self::config()->get('disable_sending')) {
