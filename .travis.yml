@@ -9,9 +9,11 @@ cache:
   directories:
     - $HOME/.composer/cache/files
 
+# The api key is just a test key
 env:
   global:
     - COMPOSER_ROOT_VERSION=4.0.x-dev
+    - MANDRILL_API_KEY=pDqjxhMOJEZ7rqrMba107A
 
 matrix:
   include:

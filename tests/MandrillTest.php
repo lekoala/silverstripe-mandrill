@@ -49,7 +49,7 @@ class MandrillTest extends SapphireTest
         $test_to = Environment::getEnv('MANDRILL_TEST_TO');
         $test_from = Environment::getEnv('MANDRILL_TEST_FROM');
         if (!$test_from || !$test_to) {
-            $this->markTestIncomplete("You must define tests environement variable: MANDRILL_TEST_TO, MANDRILL_TEST_FROM");
+            $this->markTestSkipped("You must define tests environement variable: MANDRILL_TEST_TO, MANDRILL_TEST_FROM");
         }
 
         MandrillHelper::registerTransport();
