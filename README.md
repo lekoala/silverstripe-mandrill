@@ -1,5 +1,23 @@
 SilverStripe Mandrill module
 ==================
+[![Build Status](https://travis-ci.org/lekoala/silverstripe-mandrill.svg?branch=master)](https://travis-ci.org/lekoala/silverstripe-mandrill)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/lekoala/silverstripe-mandrill/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/lekoala/silverstripe-mandrill/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/lekoala/silverstripe-mandrill/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/lekoala/silverstripe-mandrill/?branch=master)
+[![Build Status](https://scrutinizer-ci.com/g/lekoala/silverstripe-mandrill/badges/build.png?b=master)](https://scrutinizer-ci.com/g/lekoala/silverstripe-mandrill/build-status/master)
+[![codecov.io](https://codecov.io/github/lekoala/silverstripe-mandrill/coverage.svg?branch=master)](https://codecov.io/github/lekoala/silverstripe-mandrill?branch=master)
+
+[![Latest Stable Version](https://poser.pugx.org/lekoala/silverstripe-mandrill/version)](https://packagist.org/packages/lekoala/silverstripe-mandrill)
+[![Latest Unstable Version](https://poser.pugx.org/lekoala/silverstripe-mandrill/v/unstable)](//packagist.org/packages/lekoala/silverstripe-mandrill)
+[![Total Downloads](https://poser.pugx.org/lekoala/silverstripe-mandrill/downloads)](https://packagist.org/packages/lekoala/silverstripe-mandrill)
+[![License](https://poser.pugx.org/lekoala/silverstripe-mandrill/license)](https://packagist.org/packages/lekoala/silverstripe-mandrill)
+[![Monthly Downloads](https://poser.pugx.org/lekoala/silverstripe-mandrill/d/monthly)](https://packagist.org/packages/lekoala/silverstripe-mandrill)
+[![Daily Downloads](https://poser.pugx.org/lekoala/silverstripe-mandrill/d/daily)](https://packagist.org/packages/lekoala/silverstripe-mandrill)
+
+[![Dependency Status](https://www.versioneye.com/php/lekoala:silverstripe-mandrill/badge.svg)](https://www.versioneye.com/php/lekoala:silverstripe-mandrill)
+[![Reference Status](https://www.versioneye.com/php/lekoala:silverstripe-mandrill/reference_badge.svg?style=flat)](https://www.versioneye.com/php/lekoala:silverstripe-mandrill/references)
+
+![codecov.io](https://codecov.io/github/lekoala/silverstripe-mandrill/branch.svg?branch=master)
+
 Use Mandrill in SilverStripe
 
 Define in your .env file the following constant
