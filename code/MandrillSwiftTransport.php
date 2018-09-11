@@ -1,4 +1,5 @@
 <?php
+
 namespace LeKoala\Mandrill;
 
 use Exception;
@@ -114,7 +115,8 @@ class MandrillSwiftTransport implements Swift_Transport
         }
 
         $sendCount = 0;
-        $disableSending = $message->getHeaders()->has('X-SendingDisabled') || MandrillHelper::config()->disable_sending;
+        $disableSending = $message->getHeaders()->has('X-SendingDisabled')
+            || !MandrillHelper::getSendingEnabled();
 
         $mandrillMessage = $this->getMandrillMessage($message);
         $client = $this->client;
@@ -135,7 +137,7 @@ class MandrillSwiftTransport implements Swift_Transport
         }
         $this->resultApi = $result;
 
-        if (MandrillHelper::config()->enable_logging) {
+        if (MandrillHelper::getLoggingEnabled()) {
             $this->logMessageContent($message, $result);
         }
 
@@ -169,6 +171,16 @@ class MandrillSwiftTransport implements Swift_Transport
      */
     protected function logMessageContent(Swift_Mime_Message $message, $results = [])
     {
+        // Folder not set
+        $logFolder = MandrillHelper::getLogFolder();
+        if ($logFolder) {
+            return;
+        }
+        // Logging disabled
+        if (!MandrillHelper::getLoggingEnabled()) {
+            return;
+        }
+
         $subject = $message->getSubject();
         $body = $message->getBody();
         $contentType = $this->getMessagePrimaryContentType($message);
@@ -191,8 +203,6 @@ class MandrillSwiftTransport implements Swift_Transport
         $logContent .= 'Results:' . "\n";
         $logContent .= print_r($results, true) . "\n";
         $logContent .= '</pre>';
-
-        $logFolder = MandrillHelper::getLogFolder();
 
         // Generate filename
         $filter = new FileNameFilter();

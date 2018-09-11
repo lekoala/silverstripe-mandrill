@@ -10,7 +10,6 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\Email\SwiftMailer;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\Session;
-use SilverStripe\Core\Environment;
 use SilverStripe\Forms\CompositeField;
 use SilverStripe\Forms\DateField;
 use SilverStripe\Forms\DropdownField;
@@ -826,53 +825,13 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     }
 
     /**
-     * Get domain name from current host
-     *
-     * @return boolean|string
-     */
-    public function getDomainFromHost()
-    {
-        $base = Environment::getEnv('SS_BASE_URL');
-        if (!$base) {
-            $base = Director::protocolAndHost();
-        }
-        $host = parse_url($base, PHP_URL_HOST);
-        $hostParts = explode('.', $host);
-        $parts = count($hostParts);
-        if ($parts < 2) {
-            return false;
-        }
-        $domain = $hostParts[$parts - 2] . "." . $hostParts[$parts - 1];
-        return $domain;
-    }
-
-    /**
-     * Get domain from admin email
-     *
-     * @return boolean|string
-     */
-    public function getDomainFromEmail()
-    {
-        $email = MandrillHelper::resolveDefaultFromEmail(null, false);
-        if ($email) {
-            $domain = substr(strrchr($email, "@"), 1);
-            return $domain;
-        }
-        return false;
-    }
-
-    /**
      * Get domain
      *
      * @return boolean|string
      */
     public function getDomain()
     {
-        $domain = $this->getDomainFromEmail();
-        if (!$domain) {
-            return $this->getDomainFromHost();
-        }
-        return $domain;
+        return MandrillHelper::getDomain();
     }
 
     /**
