@@ -1,6 +1,6 @@
 language: php
 
-dist: trusty
+dist: precise
 
 cache:
   directories:
