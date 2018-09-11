@@ -23,6 +23,8 @@ You can also autoconfigure the module with the following constants in your .env 
 	MANDRILL_SENDING_DISABLED=true
 	# Set app domain explicitly
 	MANDRILL_DOMAIN="mysite.co.nz"
+	# Also recommended to specify an explicit from
+	SS_SEND_ALL_EMAILS_FROM="noreply@mysite.co.nz"
 
 By defining the Api Key, the module will register a new mailer that will be used to send all emails.
 
