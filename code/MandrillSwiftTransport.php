@@ -173,7 +173,7 @@ class MandrillSwiftTransport implements Swift_Transport
     {
         // Folder not set
         $logFolder = MandrillHelper::getLogFolder();
-        if ($logFolder) {
+        if (!$logFolder) {
             return;
         }
         // Logging disabled
