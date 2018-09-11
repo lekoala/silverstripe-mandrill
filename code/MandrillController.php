@@ -2,13 +2,9 @@
 namespace LeKoala\Mandrill;
 
 use Psr\Log\LoggerInterface;
-use SilverStripe\Control\Director;
-use SilverStripe\Core\Environment;
 use SilverStripe\Control\Controller;
-use SilverStripe\Security\Permission;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Control\Email\Mailer;
-use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Control\HTTPResponse;
 
 /**
  * Provide extensions points for handling the webhook
@@ -45,7 +41,7 @@ class MandrillController extends Controller
     ];
 
     /**
-     * @var Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     public $logger;
 
@@ -55,6 +51,7 @@ class MandrillController extends Controller
      * @link http://help.mandrill.com/entries/21738186-introduction-to-webhooks
      * @link http://help.mandrill.com/entries/22092308-What-is-the-format-of-inbound-email-webhooks-
      * @param HTTPRequest $req
+     * @return HTTPResponse
      */
     public function incoming(HTTPRequest $req)
     {
@@ -88,7 +85,6 @@ class MandrillController extends Controller
                 // Message type
                 case self::EVENT_CLICK:
                 case self::EVENT_HARD_BOUNCE:
-                case self::EVENT_INBOUND:
                 case self::EVENT_OPEN:
                 case self::EVENT_REJECT:
                 case self::EVENT_SEND:
@@ -125,7 +121,7 @@ class MandrillController extends Controller
     /**
      * Get logger
      *
-     * @return Psr\SimpleCache\CacheInterface
+     * @return LoggerInterface
      */
     public function getLogger()
     {

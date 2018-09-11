@@ -1,44 +1,43 @@
 <?php
 namespace LeKoala\Mandrill;
 
-use \Exception;
-use SilverStripe\Forms\Tab;
+use Exception;
+use Psr\Log\LoggerInterface;
+use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
+use SilverStripe\Admin\LeftAndMain;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\Email\SwiftMailer;
+use SilverStripe\Control\HTTPResponse;
+use SilverStripe\Control\Session;
+use SilverStripe\Core\Environment;
+use SilverStripe\Forms\CompositeField;
+use SilverStripe\Forms\DateField;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
+use SilverStripe\Forms\FormAction;
+use SilverStripe\Forms\FormField;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldConfig;
+use SilverStripe\Forms\GridField\GridFieldDataColumns;
+use SilverStripe\Forms\GridField\GridFieldDetailForm;
+use SilverStripe\Forms\GridField\GridFieldFooter;
+use SilverStripe\Forms\GridField\GridFieldSortableHeader;
+use SilverStripe\Forms\GridField\GridFieldToolbarHeader;
+use SilverStripe\Forms\HiddenField;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TabSet;
+use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\ArrayLib;
 use SilverStripe\ORM\ArrayList;
-use SilverStripe\View\ArrayData;
-use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\TextField;
-use SilverStripe\Forms\DateField;
-use SilverStripe\Control\Session;
-use SilverStripe\Control\Director;
-use SilverStripe\Forms\FormAction;
-use SilverStripe\Core\Environment;
-use SilverStripe\Forms\HiddenField;
-use SilverStripe\View\ViewableData;
-use SilverStripe\Security\Security;
-use SilverStripe\Admin\LeftAndMain;
-use SilverStripe\Forms\LiteralField;
 use SilverStripe\Security\Permission;
-use SilverStripe\Forms\DropdownField;
-use SilverStripe\Control\Email\Email;
-use SilverStripe\Control\Email\Mailer;
-use LeKoala\Mandrill\MandrillHelper;
-use SilverStripe\Forms\CompositeField;
-use SilverStripe\SiteConfig\SiteConfig;
-use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Forms\GridField\GridField;
-use SilverStripe\Control\Email\SwiftMailer;
 use SilverStripe\Security\PermissionProvider;
-use LeKoala\Mandrill\MandrillSwiftTransport;
-use SilverStripe\Forms\GridField\GridFieldConfig;
-use SilverStripe\Forms\GridField\GridFieldFooter;
-use SilverStripe\Forms\GridField\GridFieldDetailForm;
+use SilverStripe\Security\Security;
+use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\View\ArrayData;
 use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
-use SilverStripe\Forms\GridField\GridFieldDataColumns;
-use SilverStripe\Forms\GridField\GridFieldToolbarHeader;
-use SilverStripe\Forms\GridField\GridFieldSortableHeader;
 
 /**
  * Mandrill admin section
@@ -87,12 +86,12 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     ];
 
     /**
-     * @var Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     public $logger;
 
     /**
-     * @var Psr\SimpleCache\CacheInterface
+     * @var CacheInterface
      */
     public $cache;
 
@@ -125,15 +124,17 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
 
     /**
      * Returns a GridField of messages
-     * @return CMSForm
+     *
+     * @param int $id
+     * @param FieldList $fields
+     * @return Form
+     * @throws InvalidArgumentException
      */
     public function getEditForm($id = null, $fields = null)
     {
         if (!$id) {
             $id = $this->currentPageID();
         }
-
-        $form = parent::getEditForm($id);
 
         $record = $this->getRecord($id);
 
@@ -163,6 +164,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
                 $messageListConfig
             )->addExtraClass("messages_grid");
 
+            /** @var GridFieldDataColumns $columns */
             $columns = $messageListConfig->getComponentByType(GridFieldDataColumns::class);
             $columns->setDisplayFields(array(
                 'date' => _t('MandrillAdmin.MessageDate', 'Date'),
@@ -194,9 +196,9 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             }
 
             if ($validator) {
-                $messageListConfig
-                    ->getComponentByType(GridFieldDetailForm::class)
-                    ->setValidator($validator);
+                /** @var GridFieldDetailForm $detailForm */
+                $detailForm = $messageListConfig->getComponentByType(GridFieldDetailForm::class);
+                $detailForm->setValidator($validator);
             }
         }
 
@@ -244,9 +246,6 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             $messagesTab->addExtraClass('ui-state-active');
         }
 
-        $actions = new FieldList();
-
-
         // Build replacement form
         $form = Form::create(
             $this,
@@ -267,7 +266,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     /**
      * Get logger
      *
-     * @return  Psr\Log\LoggerInterface
+     * @return  LoggerInterface
      */
     public function getLogger()
     {
@@ -277,7 +276,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     /**
      * Get the cache
      *
-     * @return Psr\SimpleCache\CacheInterface
+     * @return CacheInterface
      */
     public function getCache()
     {
@@ -303,6 +302,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
      * @param array $params Params must be set in the right order!
      * @param int $expireInSeconds
      * @return array
+     * @throws InvalidArgumentException
      */
     protected function getCachedData($method, $params, $expireInSeconds = 60)
     {
@@ -367,11 +367,6 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
 
     public function SearchFields()
     {
-        $disabled_filters = $this->config()->disabled_search_filters;
-        if (!$disabled_filters) {
-            $disabled_filters = [];
-        }
-
         $fields = new CompositeField();
         $fields->push($from = new DateField('params[date_from]', _t('MandrillAdmin.DATEFROM', 'From'), $this->getParam('date_from', date('Y-m-d', strtotime('-30 days')))));
         $fields->push($to = new DateField('params[date_to]', _t('MandrillAdmin.DATETO', 'To'), $to = $this->getParam('date_to')));
@@ -435,6 +430,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
      *
      * @link https://mandrillapp.com/api/docs/messages.JSON.html#method=search
      * @return ArrayList|string
+     * @throws InvalidArgumentException
      */
     public function Messages()
     {
@@ -558,9 +554,10 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     }
 
     /**
-     * Check if webhook is installed
+     * Check if webhook is installed. Returns the webhook details if installed.
      *
-     * @return array
+     * @return bool|array
+     * @throws InvalidArgumentException
      */
     public function WebhookInstalled()
     {
@@ -580,7 +577,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
 
     /**
      * Hook details for template
-     * @return \ArrayData
+     * @return ArrayData|null
+     * @throws InvalidArgumentException
      */
     public function WebhookDetails()
     {
@@ -588,12 +586,14 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         if ($el) {
             return new ArrayData($el);
         }
+        return null;
     }
 
     /**
      * Get content of the tab
      *
      * @return FormField
+     * @throws InvalidArgumentException
      */
     public function WebhookTab()
     {
@@ -637,6 +637,10 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         return $fields;
     }
 
+    /**
+     * @return HTTPResponse
+     * @throws Exception
+     */
     public function doInstallHook()
     {
         if (!$this->CanConfigureApi()) {
@@ -682,6 +686,13 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         return $fields;
     }
 
+    /**
+     * @param array $data
+     * @param Form $form
+     * @return HTTPResponse
+     * @throws Exception
+     * @throws InvalidArgumentException
+     */
     public function doUninstallHook($data, Form $form)
     {
         if (!$this->CanConfigureApi()) {
@@ -706,10 +717,12 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     /**
      * Check if sending domain is installed
      *
-     * @return array
+     * @return array|bool
+     * @throws InvalidArgumentException
      */
     public function SendingDomainInstalled()
     {
+        // @todo - Use $client or remove?
         $client = MandrillHelper::getClient();
 
         $domains = $this->getCachedData('senders.domains', [$this->getDomain()], 60 * self::SENDINGDOMAIN_CACHE_MINUTES);
@@ -731,7 +744,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     /**
      * Trigger request to check if sending domain is verified
      *
-     * @return array
+     * @return array|bool
+     * @throws Exception
      */
     public function VerifySendingDomain()
     {
@@ -751,6 +765,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
      * Get content of the tab
      *
      * @return FormField
+     * @throws InvalidArgumentException
      */
     public function DomainTab()
     {
@@ -863,8 +878,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     /**
      * Install domain form
      *
-     * @param CompositeField $fieldsd
-     * @return FormField
+     * @param CompositeField $fields
      */
     public function InstallDomainForm(CompositeField $fields)
     {
@@ -880,6 +894,10 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         )));
     }
 
+    /**
+     * @return HTTPResponse
+     * @throws Exception
+     */
     public function doInstallDomain()
     {
         if (!$this->CanConfigureApi()) {
@@ -907,8 +925,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     /**
      * Uninstall domain form
      *
-     * @param CompositeField $fieldsd
-     * @return FormField
+     * @param CompositeField $fields
+     * @throws InvalidArgumentException
      */
     public function UninstallDomainForm(CompositeField $fields)
     {
@@ -934,6 +952,13 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         )));
     }
 
+    /**
+     * @param array $data
+     * @param Form $form
+     * @return HTTPResponse
+     * @throws Exception
+     * @throws InvalidArgumentException
+     */
     public function doUninstallDomain($data, Form $form)
     {
         if (!$this->CanConfigureApi()) {

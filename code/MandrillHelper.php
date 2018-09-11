@@ -1,17 +1,16 @@
 <?php
 namespace LeKoala\Mandrill;
 
-use Mandrill;
 use Exception;
+use Mandrill;
 use SilverStripe\Control\Director;
-use SilverStripe\Core\Environment;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\Email\Mailer;
-use SilverStripe\SiteConfig\SiteConfig;
-use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Control\Email\SwiftMailer;
-use LeKoala\Mandrill\MandrillSwiftTransport;
+use SilverStripe\Core\Config\Configurable;
+use SilverStripe\Core\Environment;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\SiteConfig\SiteConfig;
 
 /**
  * This configurable class helps decoupling the api client from SilverStripe
@@ -30,7 +29,7 @@ class MandrillHelper
     /**
      * Get the mailer instance
      *
-     * @return SilverStripe\Control\Email\SwiftMailer
+     * @return SwiftMailer
      */
     public static function getMailer()
     {
@@ -74,6 +73,7 @@ class MandrillHelper
      * Process environment variable to configure this module
      *
      * @return void
+     * @throws Exception
      */
     public static function init()
     {
@@ -101,7 +101,7 @@ class MandrillHelper
     /**
      * Register the transport with the client
      *
-     * @return SilverStripe\Control\Email\SwiftMailer The updated swift mailer
+     * @return SwiftMailer The updated swift mailer
      * @throws Exception
      */
     public static function registerTransport()
