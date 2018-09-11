@@ -367,7 +367,7 @@ class MandrillHelper
         if (!$enabled) {
             return false;
         }
-        if (!self::config()->get('disable_sending')) {
+        if (self::config()->get('disable_sending')) {
             return false;
         }
         return true;
