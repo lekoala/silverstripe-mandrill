@@ -379,8 +379,7 @@ class MandrillSwiftTransport implements Swift_Transport
             'from_name' => $fromAddresses[$fromEmails[0]],
             'to' => $to,
             'headers' => $headers,
-            'tags' => $tags,
-            'inline_css' => null
+            'tags' => $tags
         );
 
         // Merge the default parameters
