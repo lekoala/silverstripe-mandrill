@@ -382,6 +382,13 @@ class MandrillSwiftTransport implements Swift_Transport
             'tags' => $tags,
             'inline_css' => null
         );
+
+        // Merge the default parameters
+        $mandrillMessage = array_merge(
+            MandrillHelper::config()->default_params,
+            $mandrillMessage
+        );
+
         if (count($attachments) > 0) {
             $mandrillMessage['attachments'] = $attachments;
         }
