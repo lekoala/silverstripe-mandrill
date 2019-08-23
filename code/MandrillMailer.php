@@ -88,8 +88,8 @@ class MandrillMailer extends Mailer
         }
 
         // Use custom classes
-        Object::useCustomClass('Member_ChangePasswordEmail', 'Mandrill_ChangePasswordEmail');
-        Object::useCustomClass('Member_ForgotPasswordEmail', 'Mandrill_ForgotPasswordEmail');
+        SS_Object::useCustomClass('Member_ChangePasswordEmail', 'Mandrill_ChangePasswordEmail');
+        SS_Object::useCustomClass('Member_ForgotPasswordEmail', 'Mandrill_ForgotPasswordEmail');
     }
 
     /**
