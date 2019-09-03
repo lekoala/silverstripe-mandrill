@@ -308,7 +308,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         $enabled = $this->getCacheEnabled();
         if ($enabled) {
             $cache = $this->getCache();
-            $key = md5(serialize($params));
+            $key = $method . md5(serialize($params));
             $cacheResult = $cache->get($key);
         }
         if ($enabled && $cacheResult) {
