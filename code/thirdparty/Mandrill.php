@@ -160,7 +160,7 @@ class Mandrill
         curl_setopt($this->ch, CURLOPT_USERAGENT, 'Mandrill-PHP/1.0.54');
         curl_setopt($this->ch, CURLOPT_POST, true);
         // We use our own follow, see function curl_exec_follow
-//        curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, true);
+        //        curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($this->ch, CURLOPT_HEADER, false);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 30);
@@ -207,7 +207,7 @@ class Mandrill
         if (ini_get('open_basedir') == '' && ini_get('safe_mode') == 'Off') {
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, $mr > 0);
             curl_setopt($ch, CURLOPT_MAXREDIRS, $mr);
-//			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         } else {
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
 
@@ -282,7 +282,7 @@ class Mandrill
             curl_setopt($ch, CURLOPT_STDERR, $curl_buffer);
         }
 
-//        $response_body = curl_exec($ch);
+        //        $response_body = curl_exec($ch);
         $response_body = self::curl_exec_follow($ch);
         $info = curl_getinfo($ch);
         $time = microtime(true) - $start;
