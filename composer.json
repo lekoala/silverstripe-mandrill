@@ -17,8 +17,8 @@
         "issues": "https://github.com/lekoala/silverstripe-mandrill/issues"
     },
     "require": {
-        "php": ">=5.6",
-        "silverstripe/framework": "^4.0",
+        "php": ">=7.2",
+        "silverstripe/framework": "^4.9",
         "composer/ca-bundle": "^1.1",
         "silverstripe/vendor-plugin": "^1.3"
     },

@@ -17,7 +17,7 @@ use Swift_Events_SimpleEventDispatcher;
 use Swift_Mime_Header;
 use Swift_Mime_Headers_OpenDKIMHeader;
 use Swift_Mime_Headers_UnstructuredHeader;
-use Swift_Mime_Message;
+use Swift_Mime_SimpleMessage;
 use Swift_MimePart;
 use Swift_Transport;
 use Swift_Transport_SimpleMailInvoker;
@@ -98,13 +98,21 @@ class MandrillSwiftTransport implements Swift_Transport
     }
 
     /**
-     * @param Swift_Mime_Message $message
-     * @param null $failedRecipients
+     * {@inheritdoc}
+     */
+    public function ping()
+    {
+        return true;
+    }
+
+    /**
+     * @param Swift_Mime_SimpleMessage $message
+     * @param string[] $failedRecipients
      * @return int Number of messages sent
      * @throws ReflectionException
      * @throws Exception
      */
-    public function send(Swift_Mime_Message $message, &$failedRecipients = null)
+    public function send(Swift_Mime_SimpleMessage $message, &$failedRecipients = null)
     {
         $this->resultApi = null;
         if ($event = $this->eventDispatcher->createSendEvent($this, $message)) {
@@ -165,11 +173,11 @@ class MandrillSwiftTransport implements Swift_Transport
     /**
      * Log message content
      *
-     * @param Swift_Mime_Message $message
+     * @param Swift_Mime_SimpleMessage $message
      * @param array $results Results from the api
      * @throws Exception
      */
-    protected function logMessageContent(Swift_Mime_Message $message, $results = [])
+    protected function logMessageContent(Swift_Mime_SimpleMessage $message, $results = [])
     {
         // Folder not set
         $logFolder = MandrillHelper::getLogFolder();
@@ -268,11 +276,11 @@ class MandrillSwiftTransport implements Swift_Transport
     }
 
     /**
-     * @param Swift_Mime_Message $message
+     * @param Swift_Mime_SimpleMessage $message
      * @return string
      * @throws ReflectionException
      */
-    protected function getMessagePrimaryContentType(Swift_Mime_Message $message)
+    protected function getMessagePrimaryContentType(Swift_Mime_SimpleMessage $message)
     {
         $contentType = $message->getContentType();
 
@@ -280,7 +288,7 @@ class MandrillSwiftTransport implements Swift_Transport
             return $contentType;
         }
 
-        // SwiftMailer hides the content type set in the constructor of Swift_Mime_Message as soon
+        // SwiftMailer hides the content type set in the constructor of Swift_Mime_SimpleMessage as soon
         // as you add another part to the message. We need to access the protected property
         // _userContentType to get the original type.
         $messageRef = new ReflectionClass($message);
@@ -296,11 +304,11 @@ class MandrillSwiftTransport implements Swift_Transport
     /**
      * https://mandrillapp.com/api/docs/messages.php.html#method-send
      *
-     * @param Swift_Mime_Message $message
+     * @param Swift_Mime_SimpleMessage $message
      * @return array Mandrill Send Message
      * @throws ReflectionException
      */
-    public function getMandrillMessage(Swift_Mime_Message $message)
+    public function getMandrillMessage(Swift_Mime_SimpleMessage $message)
     {
         $contentType = $this->getMessagePrimaryContentType($message);
         $fromAddresses = $message->getFrom();
@@ -394,26 +402,31 @@ class MandrillSwiftTransport implements Swift_Transport
         if (count($images) > 0) {
             $mandrillMessage['images'] = $images;
         }
-        /** @var Swift_Mime_Header|Swift_Mime_Headers_OpenDKIMHeader|Swift_Mime_Headers_UnstructuredHeader $header */
+        /** @var Swift_Mime_Headers_OpenDKIMHeader|Swift_Mime_Headers_UnstructuredHeader $header */
         foreach ($message->getHeaders()->getAll() as $header) {
             if ($header->getFieldType() === \Swift_Mime_Header::TYPE_TEXT) {
+                if (method_exists($header, "getValue")) {
+                    $headerValue = $header->getValue();
+                } else {
+                    $headerValue = $header->toString();
+                }
                 switch ($header->getFieldName()) {
                     case 'List-Unsubscribe':
-                        $headers['List-Unsubscribe'] = $header->getValue();
+                        $headers['List-Unsubscribe'] = $headerValue;
                         $mandrillMessage['headers'] = $headers;
                         break;
                     case 'X-MC-InlineCSS':
-                        $mandrillMessage['inline_css'] = $header->getValue();
+                        $mandrillMessage['inline_css'] = $headerValue;
                         break;
                     case 'X-MC-Tags':
-                        $tags = $header->getValue();
+                        $tags = $headerValue;
                         if (!is_array($tags)) {
                             $tags = explode(',', $tags);
                         }
                         $mandrillMessage['tags'] = $tags;
                         break;
                     case 'X-MC-Autotext':
-                        $autoText = $header->getValue();
+                        $autoText = $headerValue;
                         if (in_array($autoText, array('true', 'on', 'yes', 'y', true), true)) {
                             $mandrillMessage['auto_text'] = true;
                         }
@@ -422,17 +435,17 @@ class MandrillSwiftTransport implements Swift_Transport
                         }
                         break;
                     case 'X-MC-GoogleAnalytics':
-                        $analyticsDomains = explode(',', $header->getValue());
+                        $analyticsDomains = explode(',', $headerValue);
                         if (is_array($analyticsDomains)) {
                             $mandrillMessage['google_analytics_domains'] = $analyticsDomains;
                         }
                         break;
                     case 'X-MC-GoogleAnalyticsCampaign':
-                        $mandrillMessage['google_analytics_campaign'] = $header->getValue();
+                        $mandrillMessage['google_analytics_campaign'] = $headerValue;
                         break;
                     default:
                         if (strncmp($header->getFieldName(), 'X-', 2) === 0) {
-                            $headers[$header->getFieldName()] = $header->getValue();
+                            $headers[$header->getFieldName()] = $headerValue;
                             $mandrillMessage['headers'] = $headers;
                         }
                         break;

@@ -37,7 +37,7 @@ class Mandrill
      */
     public $apikey;
     /**
-     * @var resource
+     * @var resource|CurlHandle
      */
     public $ch;
     /**
@@ -196,7 +196,7 @@ class Mandrill
      * This method is used in the call method in Mandrill.php instead of the original curl_exec
      *
      * @link http://slopjong.de/2012/03/31/curl-follow-locations-with-safe_mode-enabled-or-open_basedir-set/
-     * @param resource $ch
+     * @param resource|CurlHandle $ch
      * @param int $maxredirect
      * @return boolean
      */

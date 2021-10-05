@@ -1,4 +1,5 @@
 <?php
+
 namespace LeKoala\Mandrill;
 
 use Psr\Log\LoggerInterface;
@@ -73,16 +74,16 @@ class MandrillController extends Controller
 
             $event = $ev->event;
             switch ($event) {
-                // Sync type
+                    // Sync type
                 case self::EVENT_BLACKLIST:
                 case self::EVENT_WHITELIST:
                     $this->handleSyncEvent($ev);
                     break;
-                // Inbound type
+                    // Inbound type
                 case self::EVENT_INBOUND:
                     $this->handleInboundEvent($ev);
                     break;
-                // Message type
+                    // Message type
                 case self::EVENT_CLICK:
                 case self::EVENT_HARD_BOUNCE:
                 case self::EVENT_OPEN:

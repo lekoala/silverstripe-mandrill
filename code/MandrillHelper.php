@@ -12,6 +12,7 @@ use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\SiteConfig\SiteConfig;
+use Swift_Mailer;
 
 /**
  * This configurable class helps decoupling the api client from SilverStripe
@@ -148,7 +149,7 @@ class MandrillHelper
             throw new Exception("Mailer must be an instance of " . SwiftMailer::class . " instead of " . get_class($mailer));
         }
         $transport = new MandrillSwiftTransport($client);
-        $newSwiftMailer = $mailer->getSwiftMailer()->newInstance($transport);
+        $newSwiftMailer = new Swift_Mailer($transport);
         $mailer->setSwiftMailer($newSwiftMailer);
         return $mailer;
     }
@@ -179,6 +180,18 @@ class MandrillHelper
     public static function getMailer()
     {
         return Injector::inst()->get(Mailer::class);
+    }
+
+    /**
+     * @return array
+     */
+    public static function listValidDomains()
+    {
+        $list = self::config()->valid_domains;
+        if (!$list) {
+            $list = [];
+        }
+        return $list;
     }
 
     /**

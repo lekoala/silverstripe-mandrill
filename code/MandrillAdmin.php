@@ -1,4 +1,5 @@
 <?php
+
 namespace LeKoala\Mandrill;
 
 use Exception;
@@ -7,6 +8,7 @@ use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use SilverStripe\Admin\LeftAndMain;
 use SilverStripe\Control\Director;
+use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\Email\SwiftMailer;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\Session;
@@ -31,6 +33,7 @@ use SilverStripe\Forms\TabSet;
 use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\ArrayLib;
 use SilverStripe\ORM\ArrayList;
+use SilverStripe\Security\DefaultAdminService;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\PermissionProvider;
 use SilverStripe\Security\Security;
@@ -65,7 +68,8 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         "InstallHookForm",
         "doInstallHook",
         "UninstallHookForm",
-        "doUninstallHook"
+        "doUninstallHook",
+        "send_test",
     );
     private static $cache_enabled = true;
 
@@ -111,6 +115,25 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     public function settings($request)
     {
         return parent::index($request);
+    }
+
+    public function send_test($request)
+    {
+        if (!$this->CanConfigureApi()) {
+            return $this->httpError(404);
+        }
+        $service = DefaultAdminService::create();
+        $to = $request->getVar('to');
+        if (!$to) {
+            $to = $service->findOrCreateDefaultAdmin()->Email;
+        }
+        $email = Email::create();
+        $email->setSubject("Test email");
+        $email->setBody("Test " . date('Y-m-d H:i:s'));
+        $email->setTo($to);
+
+        $result = $email->send();
+        var_dump($result);
     }
 
     /**
@@ -287,6 +310,9 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
      */
     public function getCacheEnabled()
     {
+        if (isset($_GET['disable_cache'])) {
+            return false;
+        }
         $v = $this->config()->cache_enabled;
         if ($v === null) {
             $v = self::$cache_enabled;
@@ -371,7 +397,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         $fields->push($to = new DateField('params[date_to]', _t('MandrillAdmin.DATETO', 'To'), $to = $this->getParam('date_to')));
         $fields->push($queryField = new TextField('params[query]', _t('Mandrill.QUERY', 'Query'), $this->getParam('query')));
         $queryField->setAttribute('placeholder', 'full_email:joe@domain.* AND sender:me@company.com OR subject:welcome');
-        $queryField->setDescription(_t('Mandrill.QUERYDESC', 'For more information about query syntax, please visit <a target="_blank" href="https://mandrill.zendesk.com/hc/en-us/articles/205583137-How-do-I-search-my-outbound-activity-in-Mandrill-">Mandrill Support</a>'));
+        $queryField->setDescription(_t('Mandrill.QUERYDESC', 'For more information about query syntax, please visit <a target="_blank" href="https://mailchimp.com/developer/transactional/docs/activity-reports/#search-outbound-activity">Mandrill Support</a>'));
         $fields->push(new DropdownField('params[limit]', _t('MandrillAdmin.PERPAGE', 'Number of results'), array(
             100 => 100,
             500 => 500,
@@ -385,6 +411,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
 
         // This is a ugly hack to allow embedding a form into another form
         $fields->push($doSearch = new FormAction('doSearch', _t('MandrillAdmin.DOSEARCH', 'Search')));
+        $doSearch->addExtraClass("btn btn-primary");
         $doSearch->setAttribute('onclick', "jQuery('#Form_SearchForm').append(jQuery('#Form_EditForm input,#Form_EditForm select').clone()).submit();");
 
         return $fields;
@@ -435,16 +462,18 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     {
         $params = $this->getParams();
 
+        // We need the parameters in order to be sent to the api
         $orderedParams = [];
-        $orderedParams['query'] = isset($params['query']) ? $params['query'] : null;
+        $orderedParams['query'] = isset($params['query']) ? $params['query'] : '*';
         $orderedParams['date_from'] = isset($params['date_from']) ? $params['date_from'] : null;
         $orderedParams['date_to'] = isset($params['date_to']) ? $params['date_to'] : null;
         $orderedParams['tags'] = isset($params['tags']) ? $params['tags'] : null;
         $orderedParams['senders'] = isset($params['senders']) ? $params['senders'] : null;
-        $orderedParams['api_keys'] = isset($params['api_keys']) ? $params['api_keys'] : null;
+        $orderedParams['api_keys'] = isset($params['api_keys']) ? $params['api_keys'] : [MandrillHelper::getAPIKey()];
         $orderedParams['limit'] = isset($params['limit']) ? $params['limit'] : null;
 
         $messages = $this->getCachedData('messages.search', $orderedParams, 60 * self::MESSAGE_CACHE_MINUTES);
+
         if ($messages === false) {
             if ($this->lastException) {
                 return $this->lastException->getMessage();
@@ -652,11 +681,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         $description = SiteConfig::current_site_config()->Title;
 
         try {
-            if (defined('SS_DEFAULT_ADMIN_USERNAME') && SS_DEFAULT_ADMIN_USERNAME) {
-                $client->createSimpleWebhook($description, $url, null, true, ['username' => SS_DEFAULT_ADMIN_USERNAME, 'password' => SS_DEFAULT_ADMIN_PASSWORD]);
-            } else {
-                $client->createSimpleWebhook($description, $url);
-            }
+            $client->webhooks->add($url, $description);
             $this->getCache()->clear();
         } catch (Exception $ex) {
             $this->getLogger()->debug($ex);
@@ -703,7 +728,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         try {
             $el = $this->WebhookInstalled();
             if ($el && !empty($el['id'])) {
-                $client->deleteWebhook($el['id']);
+                $client->webhooks->delete($el['id']);
             }
             $this->getCache()->clear();
         } catch (Exception $ex) {
@@ -752,7 +777,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
 
         $host = $this->getDomain();
 
-        $verification = $client->verifySendingDomain($host);
+        $verification = $client->senders->verifyDomain($host, 'postmaster@' . $host);
 
         if (empty($verification)) {
             return false;
@@ -772,6 +797,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         $defaultDomainInfos = null;
 
         $domains = $this->getCachedData('senders.domains', [], 60 * self::SENDINGDOMAIN_CACHE_MINUTES);
+        $validDomains = MandrillHelper::listValidDomains();
 
         $fields = new CompositeField();
 
@@ -779,6 +805,9 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         $list = new ArrayList();
         if ($domains) {
             foreach ($domains as $domain) {
+                if (!empty($validDomains) && !in_array($domain['domain'], $validDomains)) {
+                    continue;
+                }
                 $list->push(new ArrayData([
                     'Domain' => $domain['domain'],
                     'SPF' => $domain['spf']['valid'],
@@ -872,7 +901,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         }
 
         try {
-            $client->createSimpleSendingDomain($domain);
+            $client->senders->addDomain($domain);
             $this->getCache()->clear();
         } catch (Exception $ex) {
             $this->getLogger()->debug($ex);
@@ -909,39 +938,5 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
             _t('MandrillAdmin.DOUNINSTALLDOMAIN', 'Uninstall domain'),
             true
         )));
-    }
-
-    /**
-     * @param array $data
-     * @param Form $form
-     * @return HTTPResponse
-     * @throws Exception
-     * @throws InvalidArgumentException
-     */
-    public function doUninstallDomain($data, Form $form)
-    {
-        if (!$this->CanConfigureApi()) {
-            return $this->redirectBack();
-        }
-
-        $client = MandrillHelper::getClient();
-
-        $domain = $this->getDomain();
-
-        if (!$domain) {
-            return $this->redirectBack();
-        }
-
-        try {
-            $el = $this->SendingDomainInstalled();
-            if ($el) {
-                $client->deleteSendingDomain($domain);
-            }
-            $this->getCache()->clear();
-        } catch (Exception $ex) {
-            $this->getLogger()->debug($ex);
-        }
-
-        return $this->redirectBack();
     }
 }

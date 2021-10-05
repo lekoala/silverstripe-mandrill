@@ -24,5 +24,6 @@ LeKoala\Mandrill\MandrillHelper:
   global_tags: []
   use_google_analytics: true
   name_fallback: true
+  valid_domains: []
 LeKoala\Mandrill\MandrillAdmin:
   cache_enabled: true
