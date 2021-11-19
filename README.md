@@ -85,7 +85,7 @@ LeKoala\Mandrill\MandrillController:
 
 via .env file
 ```
-MANDRILL_WEB_HOOK_KEY=YOUR_KEY
+MANDRILL_WEBHOOK_KEY=YOUR_KEY
 ```
 
 # Swift Mailer 6
