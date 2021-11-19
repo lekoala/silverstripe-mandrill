@@ -66,6 +66,28 @@ MandrillController provides 4 extensions points:
 -   updateHandleInboundEvent
 -   updateHandleMessageEvent
 
+It's recommended that you ensure requests are coming from Mailchimp Transactional rather than an imitator.
+Webhook authentication is disabled by default but you can enable webhook authentication through the config layer like so:
+
+```
+LeKoala\Mandrill\MandrillController:
+  webhook_auth_enabled: true
+```
+
+You'll need your webhook authentication key which you can view and reset from the (Webhooks)[https://mandrillapp.com/settings/webhooks] page in your account.
+Add your key using the config layer or `.env` file.
+
+via config
+```
+LeKoala\Mandrill\MandrillController:
+  webhook_key: YOUR_KEY
+```
+
+via .env file
+```
+MANDRILL_WEB_HOOK_KEY=YOUR_KEY
+```
+
 # Swift Mailer 6
 
 Swift Mailer 6 introduced quite a lot of breaking changes, make sure you are not using any of those:
