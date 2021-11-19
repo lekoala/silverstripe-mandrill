@@ -143,7 +143,7 @@ class MandrillController extends Controller
      * generates signature to verify request is from mailchimp.
      * see https://mailchimp.com/developer/transactional/guides/track-respond-activity-webhooks/#authenticating-webhook-requests
      *
-     * @param Array @postVars
+     * @param Array $postVars
      * @return string
      */
     protected function generateSignature(array $postVars)
