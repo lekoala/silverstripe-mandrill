@@ -68,7 +68,7 @@ class MandrillController extends Controller
         $response->setStatusCode(200);
         $response->setBody('');
 
-        //make sure the generated signature matches the X-Mandrill-Signature header if webook auth is enabled
+        //make sure the generated signature matches the X-Mandrill-Signature header
         if (self::config()->webhook_auth_enabled && $generatedSignature !== $mandrillSignature) {
             return $response;
         }
