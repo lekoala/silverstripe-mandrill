@@ -152,15 +152,15 @@ class MandrillController extends Controller
         $data = MandrillAdmin::create()->singleton()->WebhookUrl();
         $key = Environment::getEnv('MANDRILL_WEBHOOK_KEY');
 
+        if (self::config()->webhook_key) {
+            $key = self::config()->webhook_key;
+        }
+
         foreach ($postVars as $key => $value) {
             $data .= $key;
             $data .= $value;
         }
 
-        if (self::config()->webhook_key) {
-            $key = self::config()->webhook_key;
-        }
-
-        return base64_encode(hash_hmac('sha1', $data, Environment::getEnv('MANDRILL_WEBHOOK_KEY'), true));
+        return base64_encode(hash_hmac('sha1', $data, $key, true));
     }
 }
