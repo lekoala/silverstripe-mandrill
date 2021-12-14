@@ -140,6 +140,22 @@ class MandrillController extends Controller
     }
 
     /**
+     * returns the webhook key
+     *
+     * @return string
+     */
+    public function getWebHookKey()
+    {
+        $key = Environment::getEnv('MANDRILL_WEBHOOK_KEY');
+
+        if (self::config()->webhook_key) {
+            $key = self::config()->webhook_key;
+        }
+
+        return $key;
+    }
+
+    /**
      * generates signature to verify request is from mailchimp.
      * see https://mailchimp.com/developer/transactional/guides/track-respond-activity-webhooks/#authenticating-webhook-requests
      *
@@ -150,17 +166,13 @@ class MandrillController extends Controller
     {
         ksort($postVars);
         $data = MandrillAdmin::create()->singleton()->WebhookUrl();
-        $key = Environment::getEnv('MANDRILL_WEBHOOK_KEY');
-
-        if (self::config()->webhook_key) {
-            $key = self::config()->webhook_key;
-        }
+        $webHookKey = $this->getWebHookKey();
 
         foreach ($postVars as $key => $value) {
             $data .= $key;
             $data .= $value;
         }
 
-        return base64_encode(hash_hmac('sha1', $data, $key, true));
+        return base64_encode(hash_hmac('sha1', $data, $webHookKey, true));
     }
 }
