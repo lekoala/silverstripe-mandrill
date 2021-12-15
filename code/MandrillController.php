@@ -6,6 +6,7 @@ use Psr\Log\LoggerInterface;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
+use SilverStripe\Core\Environment;
 
 /**
  * Provide extensions points for handling the webhook
@@ -32,6 +33,8 @@ class MandrillController extends Controller
         'incoming',
     ];
 
+    private static $webhook_auth_enabled = false;
+
     /**
      * Inject public dependencies into the controller
      *
@@ -56,12 +59,19 @@ class MandrillController extends Controller
      */
     public function incoming(HTTPRequest $req)
     {
+        $generatedSignature = $this->generateSignature($req->postVars());
+        $mandrillSignature = $req->getHeader('X-Mandrill-Signature');
         $json = $req->postVar('mandrill_events');
 
         // By default, return a valid response
         $response = $this->getResponse();
         $response->setStatusCode(200);
         $response->setBody('');
+
+        //make sure the generated signature matches the X-Mandrill-Signature header
+        if (self::config()->webhook_auth_enabled && $generatedSignature !== $mandrillSignature) {
+            return $response;
+        }
 
         if (!$json) {
             return $response;
@@ -74,16 +84,16 @@ class MandrillController extends Controller
 
             $event = $ev->event;
             switch ($event) {
-                    // Sync type
+                // Sync type
                 case self::EVENT_BLACKLIST:
                 case self::EVENT_WHITELIST:
                     $this->handleSyncEvent($ev);
                     break;
-                    // Inbound type
+                // Inbound type
                 case self::EVENT_INBOUND:
                     $this->handleInboundEvent($ev);
                     break;
-                    // Message type
+                // Message type
                 case self::EVENT_CLICK:
                 case self::EVENT_HARD_BOUNCE:
                 case self::EVENT_OPEN:
@@ -127,5 +137,42 @@ class MandrillController extends Controller
     public function getLogger()
     {
         return $this->logger;
+    }
+
+    /**
+     * returns the webhook key
+     *
+     * @return string
+     */
+    public function getWebHookKey()
+    {
+        $key = Environment::getEnv('MANDRILL_WEBHOOK_KEY');
+
+        if (self::config()->webhook_key) {
+            $key = self::config()->webhook_key;
+        }
+
+        return $key;
+    }
+
+    /**
+     * generates signature to verify request is from mailchimp.
+     * see https://mailchimp.com/developer/transactional/guides/track-respond-activity-webhooks/#authenticating-webhook-requests
+     *
+     * @param Array $postVars
+     * @return string
+     */
+    protected function generateSignature(array $postVars)
+    {
+        ksort($postVars);
+        $data = MandrillAdmin::create()->singleton()->WebhookUrl();
+        $webHookKey = $this->getWebHookKey();
+
+        foreach ($postVars as $key => $value) {
+            $data .= $key;
+            $data .= $value;
+        }
+
+        return base64_encode(hash_hmac('sha1', $data, $webHookKey, true));
     }
 }
