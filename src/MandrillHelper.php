@@ -146,9 +146,6 @@ class MandrillHelper
     {
         $client = self::getClient();
         $mailer = self::getMailer();
-        if (!$mailer instanceof Mailer) {
-            throw new Exception("Mailer must be an instance of " . Mailer::class . " instead of " . get_class($mailer));
-        }
         $transport = new MandrillApiTransport($client);
         $mailer = new Mailer($transport);
         Injector::inst()->registerService($mailer, MailerInterface::class);

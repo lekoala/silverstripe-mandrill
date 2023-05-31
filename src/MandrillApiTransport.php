@@ -9,7 +9,6 @@ use Symfony\Component\Mime\Email;
 use SilverStripe\Control\Director;
 use Symfony\Component\Mailer\Envelope;
 use SilverStripe\Assets\FileNameFilter;
-use Symfony\Component\HttpClient\Response\CurlResponse;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Header\TagHeader;
@@ -18,10 +17,7 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 use Symfony\Component\Mime\Header\UnstructuredHeader;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\Mailer\Transport\AbstractApiTransport;
-use Symfony\Component\Mailer\Exception\HttpTransportException;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 /**
  * We create our own class
@@ -42,7 +38,7 @@ class MandrillApiTransport extends AbstractApiTransport
 
     private $apiResult;
 
-    public function __construct(Mandrill $apiClient = null, HttpClientInterface $client = null, EventDispatcherInterface $dispatcher = null, LoggerInterface $logger = null)
+    public function __construct(Mandrill $apiClient, HttpClientInterface $client = null, EventDispatcherInterface $dispatcher = null, LoggerInterface $logger = null)
     {
         $this->apiClient = $apiClient;
 

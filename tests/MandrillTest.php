@@ -25,10 +25,6 @@ class MandrillTest extends SapphireTest
         parent::setUp();
 
         $this->testMailer = Injector::inst()->get(MailerInterface::class);
-
-        // Ensure we have the right mailer
-        $mailer = new Mailer(new MandrillApiTransport());
-        Injector::inst()->registerService($mailer, MailerInterface::class);
     }
 
     protected function tearDown(): void
