@@ -42,7 +42,7 @@ class MandrillApiTransport extends AbstractApiTransport
 
     private $apiResult;
 
-    public function __construct(Mandrill $apiClient, HttpClientInterface $client = null, EventDispatcherInterface $dispatcher = null, LoggerInterface $logger = null)
+    public function __construct(Mandrill $apiClient = null, HttpClientInterface $client = null, EventDispatcherInterface $dispatcher = null, LoggerInterface $logger = null)
     {
         $this->apiClient = $apiClient;
 
