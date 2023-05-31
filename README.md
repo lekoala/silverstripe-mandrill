@@ -88,26 +88,17 @@ via .env file
 MANDRILL_WEBHOOK_KEY=YOUR_KEY
 ```
 
-# Swift Mailer 6
+# Migration from Swift Mailer
 
-Swift Mailer 6 introduced quite a lot of breaking changes, make sure you are not using any of those:
+SilverStripe 5 replaced swift mailer by symfony/mailer
 
-* added Swift_Transport::ping()
-* removed Swift_Mime_HeaderFactory, Swift_Mime_HeaderSet, Swift_Mime_Message, Swift_Mime_MimeEntity,
-and Swift_Mime_ParameterizedHeader interfaces
-* removed Swift_MailTransport and Swift_Transport_MailTransport
-* removed Swift_Encoding
-* removed the Swift_Transport_MailInvoker interface and Swift_Transport_SimpleMailInvoker class
-* removed the Swift_SignedMessage class
-* removed newInstance() methods everywhere
-* methods operating on Date header now use DateTimeImmutable object instead of Unix timestamp;
-Swift_Mime_Headers_DateHeader::getTimestamp()/setTimestamp() renamed to getDateTime()/setDateTime()
-* bumped minimum version to PHP 7.0
-* removed Swift_Validate and replaced by egulias/email-validator
+Make sure to read the docs
+https://docs.silverstripe.org/en/5/developer_guides/email/
+https://symfony.com/doc/current/mailer.html
 
 # Compatibility
 
-Tested with SilverStripe 4.9+
+Tested with SilverStripe 5+
 
 # Maintainer
 

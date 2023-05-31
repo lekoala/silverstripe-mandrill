@@ -40,6 +40,8 @@ use SilverStripe\Security\Security;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\View\ArrayData;
 use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mailer\Transport\AbstractApiTransport;
 
 /**
  * Mandrill admin section
@@ -105,11 +107,6 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
         if (isset($_GET['refresh'])) {
             $this->getCache()->clear();
         }
-    }
-
-    public function index($request)
-    {
-        return parent::index($request);
     }
 
     public function settings($request)
@@ -500,7 +497,7 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
      */
     public function providePermissions()
     {
-        $title = _t("MandrillAdmin.MENUTITLE", LeftAndMain::menu_title_for_class('Mandrill'));
+        $title = _t("MandrillAdmin.MENUTITLE", LeftAndMain::menu_title('Mandrill'));
         return [
             "CMS_ACCESS_Mandrill" => [
                 'name' => _t('MandrillAdmin.ACCESS', "Access to '{title}' section", ['title' => $title]),
@@ -561,12 +558,9 @@ class MandrillAdmin extends LeftAndMain implements PermissionProvider
     public function canView($member = null)
     {
         $mailer = MandrillHelper::getMailer();
+        $transport = MandrillHelper::getTransportFromMailer($mailer);
         // Another custom mailer has been set
-        if (!$mailer instanceof SwiftMailer) {
-            return false;
-        }
-        // Doesn't use the proper transport
-        if (!$mailer->getSwiftMailer()->getTransport() instanceof MandrillSwiftTransport) {
+        if (!($transport instanceof MandrillApiTransport)) {
             return false;
         }
         return Permission::check("CMS_ACCESS_Mandrill", 'any', $member);

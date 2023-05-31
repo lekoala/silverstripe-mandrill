@@ -2,4 +2,6 @@
 
 use LeKoala\Mandrill\MandrillHelper;
 
-MandrillHelper::init();
+if (class_exists(MandrillHelper::class)) {
+    MandrillHelper::init();
+}

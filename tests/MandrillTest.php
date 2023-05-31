@@ -1,13 +1,15 @@
 <?php
+
 namespace LeKoala\Mandrill\Test;
 
+use LeKoala\Mandrill\MandrillApiTransport;
+use SilverStripe\Core\Environment;
+use SilverStripe\Dev\SapphireTest;
 use LeKoala\Mandrill\MandrillHelper;
 use SilverStripe\Control\Email\Email;
-use SilverStripe\Control\Email\Mailer;
-use SilverStripe\Control\Email\SwiftMailer;
-use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Dev\SapphireTest;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\MailerInterface;
 
 /**
  * Test for Mandrill
@@ -18,19 +20,18 @@ class MandrillTest extends SapphireTest
 {
     protected $testMailer;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
-        $this->testMailer = Injector::inst()->get(Mailer::class);
+        $this->testMailer = Injector::inst()->get(MailerInterface::class);
 
         // Ensure we have the right mailer
-        $mailer = new SwiftMailer();
-        $swiftMailer = new \Swift_Mailer(new \Swift_MailTransport());
-        $mailer->setSwiftMailer($swiftMailer);
-        Injector::inst()->registerService($mailer, Mailer::class);
+        $mailer = new Mailer(new MandrillApiTransport(MandrillHelper::getClient()));
+        Injector::inst()->registerService($mailer, MailerInterface::class);
     }
-    protected function tearDown()
+
+    protected function tearDown(): void
     {
         parent::tearDown();
 
@@ -41,7 +42,9 @@ class MandrillTest extends SapphireTest
     {
         $inst = MandrillHelper::registerTransport();
         $mailer = MandrillHelper::getMailer();
-        $this->assertTrue($inst === $mailer);
+        $instClass = get_class($inst);
+        $instMailer = get_class($mailer);
+        $this->assertEquals($instClass, $instMailer);
     }
 
     public function testSending()
@@ -52,15 +55,23 @@ class MandrillTest extends SapphireTest
             $this->markTestSkipped("You must define tests environement variable: MANDRILL_TEST_TO, MANDRILL_TEST_FROM");
         }
 
-        MandrillHelper::registerTransport();
+        $mailer = MandrillHelper::registerTransport();
 
         $email = new Email();
         $email->setTo($test_to);
         $email->setSubject('Test email');
         $email->setBody("Body of my email");
         $email->setFrom($test_from);
-        $sent = $email->send();
 
-        $this->assertTrue(!!$sent);
+        // This is async, therefore it does not return anything anymore
+        $email->send();
+
+        $transport = MandrillHelper::getTransportFromMailer($mailer);
+        $result = $transport->getApiResult();
+
+        $firstMail = $result[0] ?? [];
+
+        $this->assertEquals($test_to, $firstMail['email']);
+        $this->assertEquals("sent", $firstMail['status']);
     }
 }

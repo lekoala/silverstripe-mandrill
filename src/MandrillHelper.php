@@ -2,17 +2,18 @@
 
 namespace LeKoala\Mandrill;
 
-use Exception;
 use Mandrill;
+use Exception;
+use ReflectionObject;
 use SilverStripe\Control\Director;
-use SilverStripe\Control\Email\Email;
-use SilverStripe\Control\Email\Mailer;
-use SilverStripe\Control\Email\SwiftMailer;
-use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Environment;
-use SilverStripe\Core\Injector\Injector;
+use Symfony\Component\Mailer\Mailer;
+use SilverStripe\Control\Email\Email;
 use SilverStripe\SiteConfig\SiteConfig;
-use Swift_Mailer;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Core\Config\Configurable;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mailer\Transport\AbstractTransport;
 
 /**
  * This configurable class helps decoupling the api client from SilverStripe
@@ -138,19 +139,19 @@ class MandrillHelper
     /**
      * Register the transport with the client
      *
-     * @return SwiftMailer The updated swift mailer
+     * @return MandrillApiTransport The updated mailer
      * @throws Exception
      */
     public static function registerTransport()
     {
         $client = self::getClient();
         $mailer = self::getMailer();
-        if (!$mailer instanceof SwiftMailer) {
-            throw new Exception("Mailer must be an instance of " . SwiftMailer::class . " instead of " . get_class($mailer));
+        if (!$mailer instanceof Mailer) {
+            throw new Exception("Mailer must be an instance of " . Mailer::class . " instead of " . get_class($mailer));
         }
-        $transport = new MandrillSwiftTransport($client);
-        $newSwiftMailer = new Swift_Mailer($transport);
-        $mailer->setSwiftMailer($newSwiftMailer);
+        $transport = new MandrillApiTransport($client);
+        $mailer = new Mailer($transport);
+        Injector::inst()->registerService($mailer, MailerInterface::class);
         return $mailer;
     }
 
@@ -173,13 +174,25 @@ class MandrillHelper
     }
 
     /**
+     * @param MailerInterface $mailer
+     * @return AbstractTransport|MandrillApiTransport
+     */
+    public static function getTransportFromMailer($mailer)
+    {
+        $r = new ReflectionObject($mailer);
+        $p = $r->getProperty('transport');
+        $p->setAccessible(true);
+        return $p->getValue($mailer);
+    }
+
+    /**
      * Get the mailer instance
      *
-     * @return SwiftMailer
+     * @return MailerInterface
      */
     public static function getMailer()
     {
-        return Injector::inst()->get(Mailer::class);
+        return Injector::inst()->get(MailerInterface::class);
     }
 
     /**
