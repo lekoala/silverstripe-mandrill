@@ -21,5 +21,8 @@
         <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
         <exclude name="Generic.Files.LineLength.TooLong" />
         <exclude name="PEAR.Functions.ValidDefaultValue.NotAtEnd" />
+        <!-- specific for this module -->
+        <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace" />
+        <exclude name="Generic.Files.OneClassPerFile" />
     </rule>
 </ruleset>
