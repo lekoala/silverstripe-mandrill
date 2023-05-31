@@ -1,6 +1,6 @@
 # SilverStripe Mandrill module
 
-[![Build Status](https://travis-ci.org/lekoala/silverstripe-mandrill.svg?branch=master)](https://travis-ci.org/lekoala/silverstripe-mandrill)
+![Build Status](https://github.com/lekoala/silverstripe-mandrill/actions/workflows/ci.yml/badge.svg)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/lekoala/silverstripe-mandrill/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/lekoala/silverstripe-mandrill/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/lekoala/silverstripe-mandrill/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/lekoala/silverstripe-mandrill/?branch=master)
 [![Build Status](https://scrutinizer-ci.com/g/lekoala/silverstripe-mandrill/badges/build.png?b=master)](https://scrutinizer-ci.com/g/lekoala/silverstripe-mandrill/build-status/master)
