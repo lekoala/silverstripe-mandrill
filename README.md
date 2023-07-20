@@ -96,6 +96,8 @@ Make sure to read the docs
 https://docs.silverstripe.org/en/5/developer_guides/email/
 https://symfony.com/doc/current/mailer.html
 
+For SS4 version, check branch 3 and v4 releases
+
 # Compatibility
 
 Tested with SilverStripe 5+
