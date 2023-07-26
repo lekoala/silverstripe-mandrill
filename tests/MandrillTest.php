@@ -6,6 +6,7 @@ use LeKoala\Mandrill\MandrillApiTransport;
 use SilverStripe\Core\Environment;
 use SilverStripe\Dev\SapphireTest;
 use LeKoala\Mandrill\MandrillHelper;
+use Mandrill;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Core\Injector\Injector;
 use Symfony\Component\Mailer\Mailer;
@@ -19,10 +20,17 @@ use Symfony\Component\Mailer\MailerInterface;
 class MandrillTest extends SapphireTest
 {
     protected $testMailer;
+    protected $isDummy = false;
 
     protected function setUp(): void
     {
         parent::setUp();
+
+        // add dummy api key
+        if (!MandrillHelper::getAPIKey()) {
+            $this->isDummy = true;
+            Environment::setEnv('MANDRILL_API_KEY', 'dummy');
+        }
 
         $this->testMailer = Injector::inst()->get(MailerInterface::class);
     }
@@ -36,10 +44,6 @@ class MandrillTest extends SapphireTest
 
     public function testSetup()
     {
-        if (!MandrillHelper::getApiKey()) {
-            return $this->markTestIncomplete("No api key set for test");
-        }
-
         $inst = MandrillHelper::registerTransport();
         $mailer = MandrillHelper::getMailer();
         $instClass = get_class($inst);
@@ -58,7 +62,7 @@ class MandrillTest extends SapphireTest
         $email->setSubject('Test email');
         $email->setBody("Body of my email");
 
-        if (!$test_from || !$test_to) {
+        if (!$test_from || !$test_to || $this->isDummy) {
             $test_to = "example@localhost";
             $test_from =  "sender@localhost";
             // don't try to send it for real
