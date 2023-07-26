@@ -36,6 +36,10 @@ class MandrillTest extends SapphireTest
 
     public function testSetup()
     {
+        if (!MandrillHelper::getApiKey()) {
+            return $this->markTestIncomplete("No api key set for test");
+        }
+
         $inst = MandrillHelper::registerTransport();
         $mailer = MandrillHelper::getMailer();
         $instClass = get_class($inst);
@@ -47,16 +51,20 @@ class MandrillTest extends SapphireTest
     {
         $test_to = Environment::getEnv('MANDRILL_TEST_TO');
         $test_from = Environment::getEnv('MANDRILL_TEST_FROM');
-        if (!$test_from || !$test_to) {
-            $this->markTestSkipped("You must define tests environement variable: MANDRILL_TEST_TO, MANDRILL_TEST_FROM");
-        }
 
         $mailer = MandrillHelper::registerTransport();
 
         $email = new Email();
-        $email->setTo($test_to);
         $email->setSubject('Test email');
         $email->setBody("Body of my email");
+
+        if (!$test_from || !$test_to) {
+            $test_to = "example@localhost";
+            $test_from =  "sender@localhost";
+            // don't try to send it for real
+            $email->getHeaders()->addTextHeader('X-SendingDisabled', "true");
+        }
+        $email->setTo($test_to);
         $email->setFrom($test_from);
 
         // This is async, therefore it does not return anything anymore
