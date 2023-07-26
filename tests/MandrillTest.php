@@ -31,7 +31,7 @@ class MandrillTest extends SapphireTest
     {
         parent::tearDown();
 
-        Injector::inst()->registerService($this->testMailer, Mailer::class);
+        Injector::inst()->registerService($this->testMailer, MailerInterface::class);
     }
 
     public function testSetup()
