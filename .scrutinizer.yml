@@ -1,5 +1,12 @@
 inherit: true
 
+build:
+  image: default-bionic
+  nodes:
+    analysis:
+      tests:
+        override: [php-scrutinizer-run]
+
 checks:
   php:
     code_rating: true
