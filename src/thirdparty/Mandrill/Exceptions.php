@@ -1,5 +1,5 @@
 <?php
-
+// @codingStandardsIgnoreStart
 class Mandrill_Error extends Exception
 {
 
@@ -241,3 +241,4 @@ class Mandrill_Unknown_MetadataField extends Mandrill_Error
 {
 
 }
+// @codingStandardsIgnoreEnd

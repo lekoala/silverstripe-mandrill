@@ -25,4 +25,8 @@
         <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace" />
         <exclude name="Generic.Files.OneClassPerFile" />
     </rule>
+
+    <rule ref="PSR1.Classes.ClassDeclaration.MultipleClasses">
+        <severity>0</severity>
+    </rule>
 </ruleset>
