@@ -251,6 +251,9 @@ class MandrillApiTransport extends AbstractApiTransport
         $contentType = $message->getHtmlBody() !== null ? "text/html" : "text";
 
         $logContent = $body;
+        if (is_object($logContent)) {
+            $logContent = $logContent->toString();
+        }
 
         // Append some extra information at the end
         $logContent .= '<hr><pre>Debug infos:' . "\n\n";
