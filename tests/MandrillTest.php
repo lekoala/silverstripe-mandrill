@@ -51,6 +51,37 @@ class MandrillTest extends SapphireTest
         $this->assertEquals($instClass, $instMailer);
     }
 
+    public function testSendAllTo(): void
+    {
+        $sendAllTo = Environment::getEnv('SS_SEND_ALL_EMAILS_TO');
+
+        $mailer = MandrillHelper::registerTransport();
+
+        $email = new Email();
+        $email->setSubject('Test email');
+        $email->setBody("Body of my email");
+        $email->getHeaders()->addTextHeader('X-SendingDisabled', "true");
+        $email->setTo("sendfrom@test.local");
+
+        // This is async, therefore it does not return anything anymore
+        $email->send();
+
+        $transport = MandrillHelper::getTransportFromMailer($mailer);
+        $result = $transport->getApiResult()[0];
+
+        $this->assertEquals($sendAllTo, $result["email"]);
+
+        Environment::setEnv("SS_SEND_ALL_EMAILS_TO", "sendall@test.local");
+
+        $email->send();
+        $result = $transport->getApiResult()[0];
+
+        $this->assertEquals("sendall@test.local", $result["email"]);
+
+        // reset env
+        Environment::setEnv("SS_SEND_ALL_EMAILS_TO", $sendAllTo);
+    }
+
     public function testSending()
     {
         $test_to = Environment::getEnv('MANDRILL_TEST_TO');

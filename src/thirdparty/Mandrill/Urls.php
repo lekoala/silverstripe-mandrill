@@ -2,6 +2,7 @@
 
 class Mandrill_Urls
 {
+    protected $master;
 
     public function __construct(Mandrill $master)
     {

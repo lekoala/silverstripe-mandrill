@@ -2,6 +2,7 @@
 
 class Mandrill_Inbound
 {
+    protected $master;
 
     public function __construct(Mandrill $master)
     {

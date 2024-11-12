@@ -2,6 +2,7 @@
 
 class Mandrill_Users
 {
+    protected $master;
 
     public function __construct(Mandrill $master)
     {

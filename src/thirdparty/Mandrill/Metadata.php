@@ -2,6 +2,7 @@
 
 class Mandrill_Metadata
 {
+    protected $master;
 
     public function __construct(Mandrill $master)
     {

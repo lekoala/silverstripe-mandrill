@@ -2,6 +2,7 @@
 
 class Mandrill_Webhooks
 {
+    protected $master;
 
     public function __construct(Mandrill $master)
     {

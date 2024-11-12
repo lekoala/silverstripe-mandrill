@@ -14,6 +14,7 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Config\Configurable;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * This configurable class helps decoupling the api client from SilverStripe
@@ -146,7 +147,14 @@ class MandrillHelper
     {
         $client = self::getClient();
         $mailer = self::getMailer();
-        $transport = new MandrillApiTransport($client);
+        // Make sure MailerSubscriber is registered
+        try {
+            $dispatcher = Injector::inst()->get(EventDispatcherInterface::class . '.mailer');
+        } catch (Exception $e) {
+            // It may not be set
+            $dispatcher = null;
+        }
+        $transport = new MandrillApiTransport($client, null, $dispatcher);
         $mailer = new Mailer($transport);
         Injector::inst()->registerService($mailer, MailerInterface::class);
         return $mailer;
