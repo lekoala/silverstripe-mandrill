@@ -2,8 +2,6 @@
 
 class Mandrill_Senders
 {
-    protected $master;
-
     private $master;
 
     public function __construct(Mandrill $master)

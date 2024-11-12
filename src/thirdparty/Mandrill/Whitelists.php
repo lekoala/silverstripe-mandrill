@@ -2,8 +2,6 @@
 
 class Mandrill_Whitelists
 {
-    protected $master;
-
     private $master;
 
     public function __construct(Mandrill $master)

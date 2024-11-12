@@ -2,8 +2,6 @@
 
 class Mandrill_Rejects
 {
-    protected $master;
-
     private $master;
 
     public function __construct(Mandrill $master)
